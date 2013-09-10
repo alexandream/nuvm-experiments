@@ -1,0 +1,16 @@
+
+09-09-2013 19:36 == Future versions.
+
+01) Running a module with a single primitive -- No arguments;
+02) Running a module with a procedure that calls one or more primitives with a
+    single argument;
+03) Fixnums, flonums and booleans;
+04) Conditional and unconditional relative-offset jumps;
+05) Calling primitives with more than one argument;
+06) Strings and symbols (interned strings);
+07) Bundles and their resolvers;
+08) Module loading and special treatment for module running;
+09) Calling procedures inside procedures (non-primitive);
+10) Binding upvals (sort of by-value closures) to functions;
+11) Tail-calls;
+12) Multiple-return function call;

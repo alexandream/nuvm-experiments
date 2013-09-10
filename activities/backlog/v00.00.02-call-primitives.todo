@@ -1,0 +1,73 @@
+Target Version:
+  v00.00.02
+
+Target Description:
+  This version builds on the previous version by creating interpreted
+  procedures and changing the module-running routine to run a simple
+  interpreted procedure that relays work to the primitive we used
+  before.
+  
+  An interpreted procedure (from now on referred simply as a
+  procedure), is composed of a reference to the module in which it is
+  defined, a reference to where in that module is its entry-point and
+  the number of local registers (also known as a function's locals) it
+  needs. They are also, for now, restricted to only receiving one
+  argument and returning one result.
+  
+  The evaluator now starts resembling a real machine. It uses an
+  internal counter (code pointer) to track which instruction it is running.
+  With the code pointer it goes on with the following loop, called the
+  "fetch-run loop":
+    1) fetch the instruction (from the current module) at the index
+       pointed by the code pointer;
+    2) execute the instruction fetched in step (1);
+    3) calculate the change needed to be made on code pointer;
+    4) update code pointer;
+    5) go back to step (1);
+
+  This loop ends when the instruction executed in step (2) is a return
+  instruction: in that case, the evaluator copies the value received
+  by the return instruction as its result and stop executing.
+
+  We also start having instructions that our evaluator is capable of
+  handling, so far those are: 
+    1) global-ref: it takes the index of a local and of a global, then
+                   copies the current value in the global to the
+                   local.
+    2) global-set: it takes the index of a global and of a local, then
+                   copies the current value in the local to the
+                   global.
+    3) sva-call: standing for Single-Value-and-Argument call. It takes
+                 a local containing a primitive (proc), a local
+                 containing an argument (arg) and the local in which
+                 the result must be stored (result). With that, it
+                 calls the proc and stores its returned value in
+                 result.
+    4) return: it takes the index of a local where it will find the
+               value it is supposed to return to the evaluator. After
+               the execution of return the evaluator must stop the
+               fetch-run loop.
+  
+  With this we're able to write a, still very idiotic, simple program:
+  The whole program consists of loading a global that holds a
+  primitive, then we can call that procedure.
+
+  This adds the following elements to our previous machine: 
+    1) modules now have a code segment that holds instructions;
+    2) a representation for instructions on the virtual machine;
+    3) a representation and object type for procedures;
+    4) (1) and (3) creates some changes in the builder of modules, to
+       allow for creation of instructions inside a module;
+    5) the "fetch-run loop" on the evaluator;
+    6) four instructions for the evaluator (global-ref, global-set,
+    sva-call and return);
+
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Lorem ipsum dolor sit amet
+  - Consectetur adipiscing elit
+  - Nullam consequat imperdiet nulla
+
