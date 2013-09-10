@@ -7,7 +7,8 @@ RUN_SUITE=                                         \
 	${CC} -o runner $(subst -, ,$(2)) ${LIBS};     \
 	./runner "$(1)"
 
-all: clean
+all: clean\
+	 Value_Representation
 
 runner.o: runner.c
 	@${CC} -c runner.c -o runner.o ${CFLAGS}
@@ -19,7 +20,7 @@ cases/%.o: cases/%.c
 clean:
 	@rm cases/*.o runner.o runner -f
 
-#Dummy: runner.o\
-#       cases/dummy.o
-#	@$(call RUN_SUITE,$@,$^)
+Value_Representation: runner.o\
+					  cases/value.o
+	@$(call RUN_SUITE,$@,$^)
 

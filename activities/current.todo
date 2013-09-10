@@ -32,8 +32,8 @@ Activity start:  xxxx-xx-xx xx:xx
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create a representation for values in the VM (nuvm_value_t).
-  - Check endianess and alignment properties on nuvm_value_t.
+  o Create a representation for values in the VM (nuvm_value_t).
+  o Check encoding/decoding pointer values.
   - Create nuvm_module_builder_t: A Module Builder can add registers and
     build a module using those registers.
   - Create nuvm_module_t: A module is a collection of registers with an
