@@ -40,8 +40,8 @@ Target Tasks:
     "entry-point" which indexes a register to be used on load.
   x Check that all registers are properly initialized on a module
     create from a module builder.
-  - Create the representation for a type (nuvm_type_info_t).
-  - Create a registry for types so we can register each type created
+  x Create the representation for a type (nuvm_type_info_t).
+  x Create a registry for types so we can register each type created
     (represented by a nuvm_type_info_t) with its name.
   - Create nuvm_primitive_t: A Primitive Procedure Object Type that
     holds a reference to a function implemented in C; is called
