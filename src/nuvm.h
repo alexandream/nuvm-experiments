@@ -5,8 +5,10 @@
 
 extern const uint8_t nuvm_version[];
 
-void nuvm_init();
 void* nuvm_alloc_unmanaged(size_t size);
+void* nuvm_alloc(size_t size);
+void nuvm_free(void* ptr);
+void nuvm_init();
 
 #endif
 

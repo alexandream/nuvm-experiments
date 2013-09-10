@@ -32,13 +32,13 @@ Activity start:  xxxx-xx-xx xx:xx
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  o Create a representation for values in the VM (nuvm_value_t).
-  o Check encoding/decoding pointer values.
-  - Create nuvm_module_builder_t: A Module Builder can add registers and
+  x Create a representation for values in the VM (nuvm_value_t).
+  x Check encoding/decoding pointer values.
+  x Create nuvm_module_builder_t: A Module Builder can add registers and
     build a module using those registers.
-  - Create nuvm_module_t: A module is a collection of registers with an
+  x Create nuvm_module_t: A module is a collection of registers with an
     "entry-point" which indexes a register to be used on load.
-  - Check that all registers are properly initialized on a module
+  x Check that all registers are properly initialized on a module
     create from a module builder.
   - Create the representation for a type (nuvm_type_info_t).
   - Create a registry for types so we can register each type created

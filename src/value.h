@@ -5,6 +5,7 @@
 
 
 typedef union nuvm_value_t {
+	uint64_t contents;
 	void*    pointer;
 } nuvm_value_t;
 
@@ -26,4 +27,8 @@ void* nuvm_unwrap_pointer(nuvm_value_t value) {
 	return value.pointer;
 }
 
+static inline
+bool nuvm_is_equal(nuvm_value_t v1, nuvm_value_t v2) {
+	return v1.contents == v2.contents;
+}
 #endif

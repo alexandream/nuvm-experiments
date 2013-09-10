@@ -21,6 +21,7 @@ clean:
 	@rm cases/*.o runner.o runner -f
 
 Value_Representation: runner.o\
-					  cases/value.o
+					  cases/value.o\
+					  cases/module.o
 	@$(call RUN_SUITE,$@,$^)
 
