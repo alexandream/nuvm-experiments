@@ -1,0 +1,28 @@
+#ifndef __NUVM__INSTRUCTION_H__
+#define __NUVM__INSTRUCTION_H__
+
+#include "util/common.h"
+
+extern const uint8_t OP_GLOBAL_REF,
+                     OP_GLOBAL_SET,
+                     OP_SVA_CALL,
+                     OP_RETURN;
+
+// FIXME [0001]: Assumed alignment and endianess.
+typedef union nuvm_instruction_t {
+	uint32_t contents;
+	struct {
+		uint8_t arg3;
+		uint8_t arg2;
+		uint8_t arg1;
+		uint8_t opcode;
+	}; 
+} nuvm_instruction_t;
+
+
+nuvm_instruction_t nuvm_op_global_ref(uint8_t local, uint16_t global);
+nuvm_instruction_t nuvm_op_global_set(uint16_t global, uint8_t local);
+nuvm_instruction_t nuvm_op_sva_call(uint8_t prim, uint8_t out, uint8_t arg);
+nuvm_instruction_t nuvm_op_return(uint8_t result);
+#endif
+

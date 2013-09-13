@@ -67,11 +67,11 @@ Activity start:  2013-09-12 23:26
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Representation for Instructions in the machine;
+  x Representation for Instructions in the machine;
   - Add a code segment on modules;
   - Add the ability to build modules with code segments on module builder;
   - Representation for user defined procedures (with locals);
-  - Create opcodes and encoders/decoders for instructions (global-ref,
+  x Create opcodes and encoders for instructions (global-ref,
     global-set, sva-call, return)
   - Create the execution behaviour of the instructions;
   - Add the fetch-run loop to the evaluator;
