@@ -15,6 +15,7 @@ BEGIN_TEST(test_module_builder) {
 
 	nuvm_module_builder_push_register(builder, vnull);
 	uint16_t ibuilder = nuvm_module_builder_push_register(builder, vbuilder);
+	nuvm_module_builder_push_instruction(builder, nuvm_op_return(0));
 
 	nuvm_module_t* mod = nuvm_module_builder_build(builder, ibuilder);
 	

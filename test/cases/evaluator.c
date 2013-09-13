@@ -19,6 +19,7 @@ BEGIN_TEST(test_evaluator_runs_simple_func) {
 	
 	nuvm_module_builder_t* builder = nuvm_new_module_builder();
 	uint32_t entry = nuvm_module_builder_push_register(builder, load_val);
+	nuvm_module_builder_push_instruction(builder, nuvm_op_return(0));
 
 	nuvm_module_t* mod = nuvm_module_builder_build(builder, entry);
 	nuvm_destroy_module_builder(builder);
