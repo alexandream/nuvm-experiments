@@ -48,7 +48,7 @@ Target Description:
                the execution of return the evaluator must stop the
                fetch-run loop.
   
-  With this we're able to write a, still very idiotic, simple program:
+  With this we're able to write a, still very idiotic, simple program: 
   The whole program consists of loading a global that holds a
   primitive, then we can call that procedure.
 
@@ -63,11 +63,17 @@ Target Description:
     sva-call and return);
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-09-12 23:26
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Lorem ipsum dolor sit amet
-  - Consectetur adipiscing elit
-  - Nullam consequat imperdiet nulla
+  - Representation for Instructions in the machine;
+  - Add a code segment on modules;
+  - Add the ability to build modules with code segments on module builder;
+  - Representation for user defined procedures (with locals);
+  - Create opcodes and encoders/decoders for instructions (global-ref,
+    global-set, sva-call, return)
+  - Create the execution behaviour of the instructions;
+  - Add the fetch-run loop to the evaluator;
+ 
 
