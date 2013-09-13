@@ -8,7 +8,8 @@ RUN_SUITE=                                         \
 	./runner "$(1)"
 
 all: clean\
-	 Value_Representation
+	 Value_Representation\
+	 Behaviour
 
 runner.o: runner.c
 	@${CC} -c runner.c -o runner.o ${CFLAGS}
@@ -24,5 +25,9 @@ Value_Representation: runner.o\
 					  cases/value.o\
 					  cases/module.o\
 					  cases/primitive.o
+	@$(call RUN_SUITE,$@,$^)
+
+Behaviour: runner.o\
+	       cases/evaluator.o
 	@$(call RUN_SUITE,$@,$^)
 

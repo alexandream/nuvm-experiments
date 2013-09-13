@@ -51,5 +51,5 @@ Target Tasks:
     function when called.
   x Check that upon creation a nuvm_primitive_t retains the extra data.
   x Check that upon call a nuvm_primitive_t returns the correct value.
-  - Create a nuvm_evaluator_t that represents our evaluator. It must be able to
+  x Create a nuvm_evaluator_t that represents our evaluator. It must be able to
     run a given module and return its results.
