@@ -7,7 +7,7 @@ OBJ_FILES=\
 	$(patsubst src/%.c, build/%.o, $(SOURCE_FILES))
 
 all: $(OBJ_FILES)
-	@ar rcs build/libnuvm.a build/*.o #build/types/*.o
+	@ar rcs build/libnuvm.a build/*.o build/types/*.o
 
 #replicate_build_structure:
 #	echo `find src/ -type d | sed 's/^src/build/' | xargs mkdir -p`

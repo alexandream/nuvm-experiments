@@ -22,6 +22,7 @@ clean:
 
 Value_Representation: runner.o\
 					  cases/value.o\
-					  cases/module.o
+					  cases/module.o\
+					  cases/primitive.o
 	@$(call RUN_SUITE,$@,$^)
 
