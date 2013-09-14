@@ -9,10 +9,10 @@ uint32_t NUVM_PRIMITIVE_T_TYPE();
 
 typedef struct nuvm_primitive_t nuvm_primitive_t;
 
-typedef nuvm_value_t(*nuvm_native_function_t)(void*);
+typedef nuvm_value_t(*nuvm_native_function_t)(void*, nuvm_value_t);
 
 nuvm_primitive_t* nuvm_new_primitive(nuvm_native_function_t, void*);
-nuvm_value_t nuvm_primitive_call(nuvm_primitive_t* self);
+nuvm_value_t nuvm_primitive_call(nuvm_primitive_t* self, nuvm_value_t arg);
 
 void nuvm_primitive_t_init();
 size_t nuvm_primitive_t_size();

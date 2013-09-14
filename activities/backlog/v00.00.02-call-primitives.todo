@@ -73,6 +73,7 @@ Target Tasks:
   x Representation for user defined procedures (with locals);
   x Create opcodes and encoders for instructions (global-ref,
     global-set, sva-call, return)
+  x Update primitives to accept one argument;
   - Create the execution behaviour of the instructions;
   - Add the fetch-run loop to the evaluator;
  

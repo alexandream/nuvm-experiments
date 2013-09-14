@@ -22,8 +22,8 @@ static nuvm_type_info_t _type_info;
 
 // Function implementations.
 
-nuvm_value_t nuvm_primitive_call(nuvm_primitive_t* self) {
-	return self->function(self->custom_data);
+nuvm_value_t nuvm_primitive_call(nuvm_primitive_t* self, nuvm_value_t arg) {
+	return self->function(self->custom_data, arg);
 }
 
 void nuvm_primitive_t_init() {

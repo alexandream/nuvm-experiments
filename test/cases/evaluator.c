@@ -7,7 +7,7 @@
 #include "nuvm.h"
 
 static
-nuvm_value_t return_input(void* input) {
+nuvm_value_t return_input(void* input, nuvm_value_t dummy) {
 	return nuvm_wrap_pointer(input);
 }
 
