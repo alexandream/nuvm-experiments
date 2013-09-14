@@ -70,7 +70,7 @@ Target Tasks:
   x Representation for Instructions in the machine;
   x Add a code segment on modules;
   x Add the ability to build modules with code segments on module builder;
-  - Representation for user defined procedures (with locals);
+  x Representation for user defined procedures (with locals);
   x Create opcodes and encoders for instructions (global-ref,
     global-set, sva-call, return)
   - Create the execution behaviour of the instructions;

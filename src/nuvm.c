@@ -2,6 +2,9 @@
 
 #include "nuvm.h"
 
+#include "types/primitive.h"
+#include "types/procedure.h"
+
 const uint8_t nuvm_version[] = { 0, 0, 1 };
 
 // FIXME: This should be a real managed allocator for our garbage collection
@@ -19,6 +22,7 @@ void nuvm_free(void* ptr) {
 }
 
 void nuvm_init() {
-	/* do nothing so far. */
+	nuvm_primitive_t_init();
+	nuvm_procedure_t_init();
 }
 
