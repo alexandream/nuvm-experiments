@@ -26,11 +26,17 @@ Target Description:
   7) logical not function for booleans;
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-09-15 23:08
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Lorem ipsum dolor sit amet
-  - Consectetur adipiscing elit
-  - Nullam consequat imperdiet nulla
-
+  - Fields and tags for fixnums on nuvm_value_t;
+  - Create the two singleton pointer values for boolean (true and false);
+  - Fields and tags for flonums on nuvm_value_t;
+  - Primitive "successor", flonum and fixnum;
+  - Primitive "predecessor", flonum and fixnum;
+  - Primitive "negate", flonum and fixnum;
+  - Primitive "is_positive" for fixnums and flonums;
+  - Primitive "is_negative" for fixnums and flonums;
+  - Primitive "is_zero" for fixnums and flonums;
+  - Primitive "not" for booleans; 
