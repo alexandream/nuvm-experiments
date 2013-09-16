@@ -44,6 +44,8 @@ _set_global(nuvm_evaluator_t*, uint16_t, nuvm_value_t);
 static inline nuvm_value_t
 _get_global(nuvm_evaluator_t*, uint16_t);
 
+static inline void
+_do_step(nuvm_evaluator_t*, bool*, nuvm_value_t*);
 
 // Function implementations.
 nuvm_evaluator_t* nuvm_new_evaluator() {
@@ -60,12 +62,50 @@ void nuvm_destroy_evaluator(nuvm_evaluator_t* self) {
 nuvm_value_t nuvm_evaluator_run_module(nuvm_evaluator_t* self,
                                        nuvm_module_t* module) {
 	nuvm_value_t entry_point = nuvm_module_load_entry_point(module);
-	assert(nuvm_typeof(entry_point) == NUVM_PRIMITIVE_T_TYPE());
-	nuvm_primitive_t* primitive =
-		(nuvm_primitive_t*) nuvm_unwrap_pointer(entry_point);
-	return nuvm_primitive_call(primitive, entry_point);
+	assert(nuvm_typeof(entry_point) == NUVM_PROCEDURE_T_TYPE());
+	nuvm_procedure_t* proc =
+		(nuvm_procedure_t*) nuvm_unwrap_pointer(entry_point);
+
+	self->current_proc = proc;
+	self->current_module = nuvm_procedure_get_module(proc);
+	self->code_pointer = nuvm_procedure_get_entry_point(proc);
+	
+	nuvm_value_t result;
+	bool halt = false;
+	while (! halt) {
+		_do_step(self, &halt, &result);
+	}
+	return result;
 }
 
+static void
+_do_step(nuvm_evaluator_t* self,
+         bool* halt,
+         nuvm_value_t* result) {
+	uint32_t next_instruction;
+	
+	nuvm_instruction_t inst =
+		nuvm_module_fetch(self->current_module, self->code_pointer);
+
+	switch(inst.opcode) {
+		case OP_GLOBAL_REF:
+			next_instruction = _op_global_ref(self, inst);
+			break;
+		case OP_GLOBAL_SET:
+			next_instruction = _op_global_set(self, inst);
+			break;
+		case OP_SVA_CALL:
+			next_instruction = _op_sva_call(self, inst);
+			break;
+		case OP_RETURN:
+			next_instruction = _op_return(self, inst, halt, result);
+			break;
+		default:
+			assert(false);
+	}
+
+	self->code_pointer = next_instruction;
+}
 
 // Static function implementations.
 static void

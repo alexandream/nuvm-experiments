@@ -93,9 +93,11 @@ void nuvm_destroy_module_builder(nuvm_module_builder_t* self) {
 	code_stack_t_destroy(&self->instructions);
 }
 
-uint32_t nuvm_module_builder_push_register(nuvm_module_builder_t* self,
+uint16_t nuvm_module_builder_push_register(nuvm_module_builder_t* self,
                                        nuvm_value_t value) {
-	return register_stack_t_push(&self->registers, value);
+	uint32_t index = register_stack_t_push(&self->registers, value);
+	assert(index < 0xFFFF);
+	return (uint16_t) index;
 }
 
 uint32_t nuvm_module_builder_push_instruction(nuvm_module_builder_t* self,

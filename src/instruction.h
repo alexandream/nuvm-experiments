@@ -3,10 +3,10 @@
 
 #include "util/common.h"
 
-extern const uint8_t OP_GLOBAL_REF,
-                     OP_GLOBAL_SET,
-                     OP_SVA_CALL,
-                     OP_RETURN;
+#define OP_GLOBAL_REF 0x00
+#define OP_GLOBAL_SET 0x01
+#define OP_SVA_CALL   0x02
+#define OP_RETURN     0x03
 
 // FIXME [0001]: Assumed alignment and endianess.
 typedef union nuvm_instruction_t {

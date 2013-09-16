@@ -28,7 +28,7 @@ nuvm_module_builder_t* nuvm_new_module_builder();
 
 void nuvm_destroy_module_builder();
 
-uint32_t nuvm_module_builder_push_register(nuvm_module_builder_t* builder,
+uint16_t nuvm_module_builder_push_register(nuvm_module_builder_t* builder,
                                            nuvm_value_t value);
 
 uint32_t nuvm_module_builder_push_instruction(nuvm_module_builder_t* builder,

@@ -64,7 +64,7 @@ Target Description:
 
 
 Activity start:  2013-09-12 23:26
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-09-14 22:52
 
 Target Tasks: 
   x Representation for Instructions in the machine;
@@ -75,6 +75,6 @@ Target Tasks:
     global-set, sva-call, return)
   x Update primitives to accept one argument;
   x Create the execution behaviour of the instructions;
-  - Add the fetch-run loop to the evaluator;
+  x Add the fetch-run loop to the evaluator;
  
 

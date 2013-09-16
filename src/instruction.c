@@ -3,12 +3,6 @@
 
 #include "instruction.h"
 
-const uint8_t OP_GLOBAL_REF = 0x00,
-              OP_GLOBAL_SET = 0x01,
-              OP_SVA_CALL   = 0x02,
-              OP_RETURN     = 0x03;
-
-
 static inline
 nuvm_instruction_t _make_instruction(uint8_t opcode,
                                      uint8_t arg1,
