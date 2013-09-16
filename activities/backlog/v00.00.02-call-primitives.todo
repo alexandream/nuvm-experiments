@@ -74,7 +74,7 @@ Target Tasks:
   x Create opcodes and encoders for instructions (global-ref,
     global-set, sva-call, return)
   x Update primitives to accept one argument;
-  - Create the execution behaviour of the instructions;
+  x Create the execution behaviour of the instructions;
   - Add the fetch-run loop to the evaluator;
  
 
