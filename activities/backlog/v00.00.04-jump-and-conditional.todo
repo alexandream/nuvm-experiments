@@ -28,14 +28,14 @@ Target Description:
      pointer.
   
   The second and third instructions introduced are _jump-if_ and
-  _jump-unless_. Those receive a local and a 16bits unsigned integer as 
-  arguments and use it as an offset just like _jump_, but jumping only
-  in case the value stored in the local is, respectively, different
-  from boolean false or equal to boolean false.
-
-  These instructions are encoded much like _jump_, only the unsigned
-  integer it keeps as argument is subtracted of half of the maximum
-  magnitude of a 16 bits unsigned integer (that is: 32767 or 0x7FFF).
+  _jump-unless_. Those receive a local and a 16bits signed integer as 
+  arguments and use the integer as an offset just like _jump_, but
+  jumping only in case the value stored in the local is, respectively,
+  different from boolean false or equal to boolean false.
+  
+  Note that, while _jump_ uses a biased signed integer that has to be
+  decoded, _jump-if_ and _jump-unless_ both receive its argument already
+  signed, so there's no need for further decoding.
 
   For now the machine has no instruction able to jump the entirety of
   the available code segment for the module (which can use address of
@@ -64,7 +64,13 @@ Activity start:  2013-09-17 01:43
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Lorem ipsum dolor sit amet
-  - Consectetur adipiscing elit
-  - Nullam consequat imperdiet nulla
+  - Adjust Evaluator to be more testable;
+  - Create instruction encoder for jump;
+  - Create instruction encoder for jump-if;
+  - Create instruction encoder for jump-unless;
+  - Create instruction behaviour for jump;
+  - Create instruction behaviour for jump-if;
+  - Create instruction behaviour for jump-unless;
+  - Add instructions to fetch-run-loop;
+  - Create sample test program (integer adder);
 
