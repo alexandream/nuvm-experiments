@@ -22,6 +22,7 @@ void nuvm_free(void* ptr) {
 }
 
 void nuvm_init() {
+	nuvm_value_t_init();
 	nuvm_primitive_t_init();
 	nuvm_procedure_t_init();
 }

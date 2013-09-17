@@ -2,6 +2,8 @@
 #define __NUVM__NUVM_H__
 
 #include "util/common.h"
+#include "value.h"
+
 
 extern const uint8_t nuvm_version[];
 
