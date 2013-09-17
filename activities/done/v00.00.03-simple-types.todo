@@ -27,16 +27,16 @@ Target Description:
 
 
 Activity start:  2013-09-15 23:08
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-09-17 01:40
 
 Target Tasks: 
   x Fields and tags for fixnums on nuvm_value_t;
-  - Create the two singleton pointer values for boolean (true and false);
+  x Create the two singleton pointer values for boolean (true and false);
   x Fields and tags for flonums on nuvm_value_t;
-  - Primitive "successor", flonum and fixnum;
-  - Primitive "predecessor", flonum and fixnum;
-  - Primitive "negate", flonum and fixnum;
-  - Primitive "is_positive" for fixnums and flonums;
-  - Primitive "is_negative" for fixnums and flonums;
-  - Primitive "is_zero" for fixnums and flonums;
-  - Primitive "not" for booleans; 
+  x Primitive "successor", flonum and fixnum;
+  x Primitive "predecessor", flonum and fixnum;
+  x Primitive "negate", flonum and fixnum;
+  x Primitive "is_positive" for fixnums and flonums;
+  x Primitive "is_negative" for fixnums and flonums;
+  x Primitive "is_zero" for fixnums and flonums;
+  x Primitive "not" for booleans; 
