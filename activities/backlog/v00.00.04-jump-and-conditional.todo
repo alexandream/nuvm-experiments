@@ -67,9 +67,9 @@ Target Tasks:
   x Create instruction encoder for jump;
   x Create instruction encoder for jump-if;
   x Create instruction encoder for jump-unless;
-  - Create instruction behaviour for jump;
-  - Create instruction behaviour for jump-if;
-  - Create instruction behaviour for jump-unless;
-  - Add instructions to fetch-run-loop;
+  x Create instruction behaviour for jump;
+  x Create instruction behaviour for jump-if;
+  x Create instruction behaviour for jump-unless;
+  x Add instructions to fetch-run-loop;
   - Create sample test program (integer adder);
 

@@ -35,6 +35,12 @@ _op_return(nuvm_evaluator_t*, nuvm_instruction_t, bool*, nuvm_value_t*);
 static inline uint32_t
 _op_jump(nuvm_evaluator_t*, nuvm_instruction_t);
 
+static inline uint32_t
+_op_jump_if(nuvm_evaluator_t* self, nuvm_instruction_t inst);
+
+static inline uint32_t
+_op_jump_unless(nuvm_evaluator_t* self, nuvm_instruction_t inst);
+
 static inline void
 _set_local(nuvm_evaluator_t*, uint8_t, nuvm_value_t);
 
@@ -100,10 +106,20 @@ bool nuvm_evaluator_step(nuvm_evaluator_t* self, nuvm_value_t* result) {
 		case OP_RETURN:
 			next_instruction = _op_return(self, inst, &halt, result);
 			break;
+		case OP_JUMP:
+			next_instruction = _op_jump(self, inst);
+			break;
+		case OP_JUMP_IF:
+			next_instruction = _op_jump_if(self, inst);
+			break;
+		case OP_JUMP_UNLESS:
+			next_instruction = _op_jump_unless(self, inst);
+			break;
 		default:
 			assert(false);
 	}
-
+	// FIXME: Not checking the valid range for code_pointer. This could go
+	// horribly wrong with malicious code, or even accidents.
 	self->code_pointer = next_instruction;
 	return halt;
 }
@@ -172,8 +188,40 @@ uint32_t _op_return(nuvm_evaluator_t* self,
 
 static inline uint32_t
 _op_jump(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
-
+	int32_t offset;
+	nuvm_decode_op_jump(inst, &offset);
+	return self->code_pointer + offset;
 }
+
+static inline uint32_t
+_op_jump_if(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
+	uint8_t lcondition;
+	int16_t offset;
+	nuvm_decode_op_jump_if(inst, &lcondition, &offset);
+	uint32_t next_inst = self->code_pointer + 1;
+
+	if (!nuvm_is_equal(_get_local(self, lcondition), NUVM_FALSE)) {
+		next_inst = self->code_pointer + offset;
+	}
+
+	return next_inst;
+}
+
+static inline uint32_t
+_op_jump_unless(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
+	uint8_t lcondition;
+	int16_t offset;
+	nuvm_decode_op_jump_unless(inst, &lcondition, &offset);
+	uint32_t next_inst = self->code_pointer + 1;
+
+	if (nuvm_is_equal(_get_local(self, lcondition), NUVM_FALSE)) {
+		next_inst = self->code_pointer + offset;
+	}
+
+	return next_inst;
+}
+
+
 static inline
 void _set_local(nuvm_evaluator_t* self, uint8_t index, nuvm_value_t val) {
 	nuvm_procedure_set_local(self->current_proc, index, val);
