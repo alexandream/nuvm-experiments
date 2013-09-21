@@ -36,7 +36,9 @@ BEGIN_TEST(test_evaluator_runs_simple_func) {
 	nuvm_module_store_register(mod, ientry, nuvm_wrap_pointer(proc));
 	nuvm_evaluator_t* eval = nuvm_new_evaluator();
 	
-	nuvm_value_t ret = nuvm_evaluator_run_module(eval, mod);
+	nuvm_evaluator_setup(eval, mod);
+
+	nuvm_value_t ret = nuvm_evaluator_run(eval);
 	nuvm_destroy_module(mod);
 	nuvm_destroy_evaluator(eval);
 
@@ -68,8 +70,9 @@ BEGIN_TEST(test_evaluator_runs_primitive_func) {
 	nuvm_procedure_t* proc = nuvm_new_procedure(mod, 0, 2);
 	nuvm_module_store_register(mod, ientry, nuvm_wrap_pointer(proc));
 	nuvm_evaluator_t* eval = nuvm_new_evaluator();
-	
-	nuvm_value_t ret = nuvm_evaluator_run_module(eval, mod);
+	nuvm_evaluator_setup(eval, mod);
+
+	nuvm_value_t ret = nuvm_evaluator_run(eval);
 	nuvm_destroy_module(mod);
 	nuvm_destroy_evaluator(eval);
 

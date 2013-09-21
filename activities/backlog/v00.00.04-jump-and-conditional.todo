@@ -21,9 +21,8 @@ Target Description:
   
   And it works by following the strategy below: 
   1) decode the real offset. This is a signed integer obtained by
-     subtracting half of the possible maximum magnitude of a 24 bit
-     unsigned integer (specifically: 8388607, or 0x7FFFFF) from its
-     argument;
+     decoding the 24 bits signed integer and extending signal bit
+     to the left as necessary;
   2) the real offset computed in (1) is then added to the current code
      pointer.
   
@@ -64,10 +63,10 @@ Activity start:  2013-09-17 01:43
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Adjust Evaluator to be more testable;
-  - Create instruction encoder for jump;
-  - Create instruction encoder for jump-if;
-  - Create instruction encoder for jump-unless;
+  x Adjust Evaluator to be more testable;
+  x Create instruction encoder for jump;
+  x Create instruction encoder for jump-if;
+  x Create instruction encoder for jump-unless;
   - Create instruction behaviour for jump;
   - Create instruction behaviour for jump-if;
   - Create instruction behaviour for jump-unless;
