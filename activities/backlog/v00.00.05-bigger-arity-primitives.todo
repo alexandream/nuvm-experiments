@@ -47,11 +47,13 @@ Target Description:
   2) a new instruction that gives us room calling primitives with more
      than one argument;
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-09-23 17:33
 Activity finish: xxxx-xx-xx xx:xx
 
-Target Tasks: 
-  - Lorem ipsum dolor sit amet
-  - Consectetur adipiscing elit
-  - Nullam consequat imperdiet nulla
-
+Target Tasks:
+  - Create encoder and decoder for op_call header;
+  - Create encoder and decoder for extra_args view;
+  - Create instruction behaviour for call;
+  - Add call to fetch-run-loop;
+  - Create primitives (add2, add4) for fixnums and flonums;
+  - Create primitives (and, or) for booleans;

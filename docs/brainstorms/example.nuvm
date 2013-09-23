@@ -1,0 +1,34 @@
+.entry_point _load;
+
+.register _inc $external "successor";
+.register _zerop $external "is_zero";
+.register _dec $external "predecessor";
+
+.register _input_a const 2;
+.register _input_b const 4;
+
+.register _load procedure {
+	.local inc;
+	.local zerop;
+	.local dec;
+	.local a;
+	.local b;
+	.local acc;
+	
+	global-ref inc _inc;
+	global-ref zerop _zerop;
+	global-ref dec _dec;
+
+	global-ref a _input_a;
+	global-ref b _input_b;
+	
+TEST:
+	sva-call acc zerop a;
+	jump-if acc @END;
+
+	sva-call a dec a;
+	sva-call b inc b;
+	jump @TEST;
+END:
+	return b;
+}

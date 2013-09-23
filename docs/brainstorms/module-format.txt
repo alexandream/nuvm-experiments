@@ -1,0 +1,53 @@
+23-09-2013 15:49 
+== What informations should a module have?
+
+- number of global registers it has;
+- number of instructions (size of code segment);
+- size of data segment in bytes (used to load values into global registers);
+- data segment contents;
+- global registers description;
+- code segment contents;
+
+
+== In which way are those informations formated:
+
+- Magic Number:
+  4 bytes encoding the string "NUVM" in UTF-8 (0x4E 0x55 0x56 0x4D);
+
+- Target Description:
+  4 bytes. 1st reserved for future flags (right now simply 0x00). The next 3
+  bytes encode the value of nuvm_version for the target virtual machine
+  this module was built for (major, minor, revision);
+
+- Padding of Zeroes:
+  4 bytes having nothing but zeroes, reserved for future use;
+
+- Number of global registers (NGR):
+  2 Bytes encoding an unsigned 16 bits integer;
+
+- Number of uninitialized registers (NUR):
+  2 Bytes encoding an unsigned 16 bits integer, should be lesser-than or
+  equal-to NGR;
+
+- Size of Data Segment in blocks of 8 Bytes(DSS):
+  4 bytes encoding an unsigned 32 bits integer;
+
+- Size of Code Segment in Instructions (CSS):
+  4 bytes encoding an unsigned 32 bits integer;
+
+- Data Segment:
+  CSS blocks of 8 bytes, with whatever data is necessary for the initialization
+  of the uninitialized registers;
+
+- Uninitialized Register Descriptors:
+  NUR * 8 bytes elements describing the initialization for the register in
+  the position of this initializer. Initialization descriptors have the format
+  below:
+    - First byte define the type of initializer used;
+    - next 7 bytes are used for parameters and references to the Data Segment;
+
+- Initialized Registers:
+  (NGR - NUR) * 8 bytes elements describing the remaining registers that are
+  composed of immediate values requiring no further initialization;
+
+
