@@ -1,5 +1,5 @@
 LIBS=-L ../build/ -lnuvm `pkg-config --libs check`
-CFLAGS=-std=c11 `pkg-config --cflags check` -I ../src/ -g
+CFLAGS=-std=c11 `pkg-config --cflags check` -I ../src/ -g -Werror
 CC=clang
 
 RUN_SUITE=                                         \

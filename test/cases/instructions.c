@@ -100,7 +100,26 @@ BEGIN_TEST(op_jump_unless_encoding) {
 	_test_jump_unless_encode_decode(0x03, max);
 } END_TEST
 
+BEGIN_TEST(op_call_encoding) {
+	nuvm_instruction_t inst = nuvm_op_call(0x01, 0x02, 0x03);
+	fail_unless(inst.opcode == OP_CALL);
 
+	uint8_t prim, out, nargs;
+	nuvm_decode_op_call(inst, &out, &prim,  &nargs);
+	fail_unless(out  == 0x01);
+	fail_unless(prim == 0x02);
+	fail_unless(nargs  == 0x03);
+} END_TEST
+
+BEGIN_TEST(extra_arguments_encoding) {
+	nuvm_instruction_t inst = nuvm_pack_op_arguments(0x01, 0x02, 0x03, 0x04);
+	fail_unless(inst.extra.arg1 == 0x01);
+	fail_unless(inst.extra.arg2 == 0x02);
+	fail_unless(inst.extra.arg3 == 0x03);
+	fail_unless(inst.extra.arg4 == 0x04);
+} END_TEST
+
+// Auxiliary functions;
 void _test_jump_encode_decode(int32_t input) {
 	nuvm_instruction_t inst = nuvm_op_jump(input);
 	int32_t result;

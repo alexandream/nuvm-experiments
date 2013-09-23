@@ -114,3 +114,27 @@ void nuvm_decode_op_jump_unless(nuvm_instruction_t inst,
 	*condition = inst.arg1;
 	*offset = pack_8s_to_16(inst.arg2, inst.arg3);
 }
+
+nuvm_instruction_t nuvm_op_call(uint8_t out, uint8_t prim, uint8_t nargs) {
+	return _make_instruction(OP_CALL, out, prim, nargs);
+}
+void nuvm_decode_op_call(nuvm_instruction_t inst,
+                         uint8_t* out,
+                         uint8_t* prim,
+                         uint8_t* nargs) {
+	*out = inst.arg1;
+	*prim = inst.arg2;
+	*nargs = inst.arg3;
+}
+
+nuvm_instruction_t nuvm_pack_op_arguments(uint8_t arg1,
+                                          uint8_t arg2,
+                                          uint8_t arg3,
+                                          uint8_t arg4) {
+	nuvm_instruction_t result;
+	result.extra.arg1 = arg1;
+	result.extra.arg2 = arg2;
+	result.extra.arg3 = arg3;
+	result.extra.arg4 = arg4;
+	return result;
+}

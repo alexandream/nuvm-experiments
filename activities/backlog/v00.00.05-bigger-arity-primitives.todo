@@ -51,8 +51,8 @@ Activity start:  2013-09-23 17:33
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create encoder and decoder for op_call header;
-  - Create encoder and decoder for extra_args view;
+  x Create encoder and decoder for op_call header;
+  x Create encoder and decoder for extra_args view;
   - Create instruction behaviour for call;
   - Add call to fetch-run-loop;
   - Create primitives (add2, add4) for fixnums and flonums;
