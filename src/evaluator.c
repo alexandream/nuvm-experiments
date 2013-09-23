@@ -167,7 +167,7 @@ uint32_t _op_sva_call(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
 
 	nuvm_primitive_t* primitive =
 		(nuvm_primitive_t*) nuvm_unwrap_pointer(primitive_val);
-	nuvm_value_t result = nuvm_primitive_call(primitive, argument);
+	nuvm_value_t result = nuvm_primitive_call(primitive, &argument, 1);
 
 	_set_local(self, lresult, result);
 	return self->code_pointer + 1;

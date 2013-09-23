@@ -10,20 +10,20 @@ BEGIN_TEST(test_module_structure_sizes) {
 } END_TEST
 
 
-nuvm_value_t return_input(void* input, nuvm_value_t dummy) {
+nuvm_value_t return_input(void* input, nuvm_value_t* dummy, uint8_t x) {
 	return nuvm_wrap_pointer(input);
 }
 
 BEGIN_TEST(test_primitive_behaviour) {
 	nuvm_value_t nil = nuvm_wrap_pointer(NULL);
 	nuvm_primitive_t* primitive1 = nuvm_new_primitive(return_input, NULL);
-	nuvm_value_t result1 = nuvm_primitive_call(primitive1, nil);
+	nuvm_value_t result1 = nuvm_primitive_call(primitive1, &nil, 1);
 	
 	fail_if(!nuvm_is_pointer(result1));
 	fail_if(nuvm_unwrap_pointer(result1) != NULL);
 
 	nuvm_primitive_t* primitive2 = nuvm_new_primitive(return_input, primitive1);
-	nuvm_value_t result2 = nuvm_primitive_call(primitive2, nil);
+	nuvm_value_t result2 = nuvm_primitive_call(primitive2, &nil, 1);
 	
 	fail_if(!nuvm_is_pointer(result2));
 	fail_if(nuvm_unwrap_pointer(result2) != primitive1);
