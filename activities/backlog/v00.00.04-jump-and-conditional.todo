@@ -60,7 +60,7 @@ Target Description:
                   condition is equal to boolean false;
     
 Activity start:  2013-09-17 01:43
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-09-23 13:26
 
 Target Tasks: 
   x Adjust Evaluator to be more testable;
@@ -71,5 +71,5 @@ Target Tasks:
   x Create instruction behaviour for jump-if;
   x Create instruction behaviour for jump-unless;
   x Add instructions to fetch-run-loop;
-  - Create sample test program (integer adder);
+  x Create sample test program (integer adder);
 
