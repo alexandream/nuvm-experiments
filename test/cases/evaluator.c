@@ -1,7 +1,7 @@
 #define TEST_CASE_NAME "Evaluator"
 #include "../test-case.h"
 
-#include "evaluator.h"
+#include "evaluator.i.h"
 #include "module.i.h"
 #include "library.h"
 #include "types/primitive.h"
@@ -133,4 +133,82 @@ BEGIN_TEST(test_evaluator_runs_simple_adder) {
 
 	fail_unless(nuvm_is_fixnum(result));
 	fail_unless(nuvm_unwrap_fixnum(result) == 4);
+} END_TEST
+
+nuvm_evaluator_t* _build_test_evaluator(uint16_t nregisters,
+                                        uint32_t ninstructions,
+                                        uint8_t nlocals) {
+	nuvm_module_t* mod = nuvm_new_blank_module(nregisters +1, ninstructions +1);
+	nuvm_procedure_t* proc = nuvm_new_procedure(mod, 0, nlocals+1);
+
+	nuvm_instruction_t inst = nuvm_op_return(0);
+	for (uint32_t i = 0; i <= ninstructions; i++) {
+		code_segment_t_set(&mod->code_segment, i, inst);
+	}
+
+	nuvm_module_store_register(mod, nregisters, nuvm_wrap_pointer(proc));
+	mod->entry_point = nregisters;
+	nuvm_evaluator_t* eval = nuvm_new_evaluator();
+	nuvm_evaluator_setup(eval, mod);
+
+	return eval;
+}
+BEGIN_TEST(test_filling_of_zero_args) {
+	nuvm_evaluator_t* eval = _build_test_evaluator(0, 0, 0);
+	uint32_t n_blocks = _nuvm_evaluator_fill_call_args(eval, NULL, 0);
+	fail_unless(n_blocks == 0);
+} END_TEST
+
+BEGIN_TEST(test_filling_of_one_arg) {
+	nuvm_evaluator_t* eval = _build_test_evaluator(0, 2, 1);
+	nuvm_module_t* mod = eval->current_module;
+	nuvm_procedure_t* proc = eval->current_proc;
+	nuvm_procedure_set_local(proc, 0, nuvm_wrap_fixnum(-12345));
+	nuvm_instruction_t op_args = nuvm_pack_op_arguments(0, 1, 2, 3);
+	code_segment_t_set(&mod->code_segment, 1, op_args);
+
+	nuvm_value_t args[1];
+	uint32_t n_blocks = _nuvm_evaluator_fill_call_args(eval, args, 1);
+	fail_unless(nuvm_unwrap_fixnum(args[0]) == -12345);
+	fail_unless(n_blocks == 1);
+} END_TEST
+
+BEGIN_TEST(test_filling_multiple_blocks) {
+	nuvm_evaluator_t* eval = _build_test_evaluator(0, 4, 11);
+	nuvm_module_t* mod = eval->current_module;
+	nuvm_procedure_t* proc = eval->current_proc;
+
+	nuvm_procedure_set_local(proc, 0, nuvm_wrap_fixnum(-1));
+	nuvm_procedure_set_local(proc, 1, nuvm_wrap_fixnum(-2));
+	nuvm_procedure_set_local(proc, 2, nuvm_wrap_fixnum(-3));
+	nuvm_procedure_set_local(proc, 3, nuvm_wrap_fixnum(-4));
+	nuvm_procedure_set_local(proc, 4, nuvm_wrap_fixnum(-5));
+	nuvm_procedure_set_local(proc, 5, nuvm_wrap_fixnum(-6));
+	nuvm_procedure_set_local(proc, 6, nuvm_wrap_fixnum(-7));
+	nuvm_procedure_set_local(proc, 7, nuvm_wrap_fixnum(-8));
+	nuvm_procedure_set_local(proc, 8, nuvm_wrap_fixnum(-9));
+	nuvm_procedure_set_local(proc, 9, nuvm_wrap_fixnum(-10));
+	nuvm_procedure_set_local(proc, 10, nuvm_wrap_fixnum(-11));
+
+	nuvm_instruction_t op_args = nuvm_pack_op_arguments(0, 1, 2, 3);
+	code_segment_t_set(&mod->code_segment, 1, op_args);
+	op_args = nuvm_pack_op_arguments(4, 5, 6, 7);
+	code_segment_t_set(&mod->code_segment, 2, op_args);
+	op_args = nuvm_pack_op_arguments(8, 9, 10, 0);
+	code_segment_t_set(&mod->code_segment, 3, op_args);
+
+	nuvm_value_t args[11];
+	uint32_t n_blocks = _nuvm_evaluator_fill_call_args(eval, args, 11);
+	fail_unless(nuvm_unwrap_fixnum(args[0]) == -1);
+	fail_unless(nuvm_unwrap_fixnum(args[1]) == -2);
+	fail_unless(nuvm_unwrap_fixnum(args[2]) == -3);
+	fail_unless(nuvm_unwrap_fixnum(args[3]) == -4);
+	fail_unless(nuvm_unwrap_fixnum(args[4]) == -5);
+	fail_unless(nuvm_unwrap_fixnum(args[5]) == -6);
+	fail_unless(nuvm_unwrap_fixnum(args[6]) == -7);
+	fail_unless(nuvm_unwrap_fixnum(args[7]) == -8);
+	fail_unless(nuvm_unwrap_fixnum(args[8]) == -9);
+	fail_unless(nuvm_unwrap_fixnum(args[9]) == -10);
+	fail_unless(nuvm_unwrap_fixnum(args[10]) == -11);
+	fail_unless(n_blocks == 3);
 } END_TEST

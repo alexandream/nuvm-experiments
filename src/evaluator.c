@@ -2,19 +2,12 @@
 #include "util/converter.h"
 
 #include "types/primitive.h"
-#include "types/procedure.h"
 #include "module.h"
 
-#include "evaluator.h"
+#include "evaluator.i.h"
 #include "nuvm.h"
 
 #define STACK_SIZE 8192
-
-struct nuvm_evaluator_t {
-	nuvm_procedure_t* current_proc;
-	nuvm_module_t* current_module;
-	uint32_t code_pointer;
-};
 
 // Static prototypes.
 static void
@@ -40,6 +33,9 @@ _op_jump_if(nuvm_evaluator_t* self, nuvm_instruction_t inst);
 
 static inline uint32_t
 _op_jump_unless(nuvm_evaluator_t* self, nuvm_instruction_t inst);
+
+static inline uint32_t
+_op_call(nuvm_evaluator_t* self, nuvm_instruction_t inst);
 
 static inline void
 _set_local(nuvm_evaluator_t*, uint8_t, nuvm_value_t);
@@ -78,7 +74,7 @@ void nuvm_evaluator_setup(nuvm_evaluator_t* self, nuvm_module_t* module) {
 }
 
 nuvm_value_t nuvm_evaluator_run(nuvm_evaluator_t* self) {
-	
+
 	nuvm_value_t result;
 	bool halt = false;
 	while (! halt) {
@@ -114,6 +110,9 @@ bool nuvm_evaluator_step(nuvm_evaluator_t* self, nuvm_value_t* result) {
 			break;
 		case OP_JUMP_UNLESS:
 			next_instruction = _op_jump_unless(self, inst);
+			break;
+		case OP_CALL:
+			next_instruction = _op_call(self, inst);
 			break;
 		default:
 			assert(false);
@@ -160,7 +159,7 @@ uint32_t _op_sva_call(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
 
 	nuvm_decode_op_sva_call(inst, &lresult, &lprimitive, &largument);
 
-	nuvm_value_t primitive_val = _get_local(self, lprimitive); 
+	nuvm_value_t primitive_val = _get_local(self, lprimitive);
 	nuvm_value_t argument = _get_local(self, largument);
 
 	assert(nuvm_typeof(primitive_val) == NUVM_PRIMITIVE_T_TYPE());
@@ -221,7 +220,26 @@ _op_jump_unless(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
 	return next_inst;
 }
 
+static inline uint32_t
+_op_call(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
+	uint8_t loutput, lprimitive, num_args;
+	nuvm_decode_op_call(inst, &loutput, &lprimitive, &num_args);
 
+	nuvm_value_t primitive_val = _get_local(self, lprimitive);
+	assert(nuvm_typeof(primitive_val) == NUVM_PRIMITIVE_T_TYPE());
+
+	// The +1 guarantees we never try to create a zero-length array.
+	nuvm_value_t args[num_args+1];
+
+	uint32_t n_blocks = _nuvm_evaluator_fill_call_args(self, args, num_args);
+
+	nuvm_primitive_t* primitive =
+		(nuvm_primitive_t*) nuvm_unwrap_pointer(primitive_val);
+	nuvm_value_t result = nuvm_primitive_call(primitive, args, num_args);
+
+	_set_local(self, loutput, result);
+	return self->code_pointer + 1 + n_blocks;
+}
 static inline
 void _set_local(nuvm_evaluator_t* self, uint8_t index, nuvm_value_t val) {
 	nuvm_procedure_set_local(self->current_proc, index, val);
@@ -240,4 +258,40 @@ void _set_global(nuvm_evaluator_t* self, uint16_t index, nuvm_value_t val) {
 static inline
 nuvm_value_t _get_global(nuvm_evaluator_t* self, uint16_t index) {
 	return nuvm_module_load_register(self->current_module, index);
+}
+
+uint32_t _nuvm_evaluator_fill_call_args(nuvm_evaluator_t* self,
+                                       nuvm_value_t* args,
+                                       uint8_t num_args) {
+	nuvm_module_t* mod = self->current_module;
+	uint32_t base_cp = self->code_pointer + 1;
+	int n_blocks = 0;
+	if (num_args > 0) {
+		n_blocks = num_args/4;
+		int remaining_args = num_args % 4;
+		int i, j;
+		for (j = 0, i = 0; i < n_blocks; i ++, j += 4) {
+			nuvm_instruction_t arg_block = nuvm_module_fetch(mod, base_cp + i);
+			args[j+0] = _get_local(self, arg_block.extra.arg1);
+			args[j+1] = _get_local(self, arg_block.extra.arg2);
+			args[j+2] = _get_local(self, arg_block.extra.arg3);
+			args[j+3] = _get_local(self, arg_block.extra.arg4);
+		}
+		if (remaining_args > 0) {
+			n_blocks += 1;
+			nuvm_instruction_t arg_block = nuvm_module_fetch(mod, base_cp + i);
+			switch(remaining_args) {
+				case 3:
+					args[j+2] = _get_local(self, arg_block.extra.arg3);
+					// fall-through;
+				case 2:
+					args[j+1] = _get_local(self, arg_block.extra.arg2);
+					// fall-through;
+				case 1:
+					args[j+0] = _get_local(self, arg_block.extra.arg1);
+					break;
+			}
+		}
+	}
+	return n_blocks;
 }
