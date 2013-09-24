@@ -48,7 +48,7 @@ Target Description:
      than one argument;
 
 Activity start:  2013-09-23 17:33
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-09-24 01:40
 
 Target Tasks:
   x Create encoder and decoder for op_call header;
@@ -56,5 +56,5 @@ Target Tasks:
   x Update primitives to allow for more arguments;
   x Create instruction behaviour for call;
   x Add call to fetch-run-loop;
-  - Create variadic primitive (add) for fixnums and flonums;
-  - Create variadic primitives (and, or) for booleans;
+  x Create variadic primitive (add) for fixnums and flonums;
+  x Create variadic primitives (and, or) for booleans;
