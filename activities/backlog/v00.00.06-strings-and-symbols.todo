@@ -39,11 +39,17 @@ Target Description:
      values;
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-09-28 19:30
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Lorem ipsum dolor sit amet
-  - Consectetur adipiscing elit
-  - Nullam consequat imperdiet nulla
+  x Create a type and constructor for strings;
+  x Create string equality tester;
+  - Create a type and constructor for symbols;
+  - Create encoder and decoder for new-symbol instruction;
+  - Create behaviour for new-symbol instruction;
+  - Add new-symbol to fetch-run loop.
+  - Create primitive for string equality tester;
+  - Create primitive for string length accessor;
+  - Create primitive for is_same;
 
