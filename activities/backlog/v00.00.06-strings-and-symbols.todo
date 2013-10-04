@@ -45,10 +45,10 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   x Create a type and constructor for strings;
   x Create string equality tester;
-  - Create a type and constructor for symbols;
-  - Create encoder and decoder for new-symbol instruction;
-  - Create behaviour for new-symbol instruction;
-  - Add new-symbol to fetch-run loop.
+  x Create a type and constructor for symbols;
+  x Create encoder and decoder for new-symbol instruction;
+  x Create behaviour for new-symbol instruction;
+  x Add new-symbol to fetch-run loop.
   - Create primitive for string equality tester;
   - Create primitive for string length accessor;
   - Create primitive for is_same;

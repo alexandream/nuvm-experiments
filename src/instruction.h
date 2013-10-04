@@ -11,6 +11,7 @@
 #define OP_JUMP_IF     0x05
 #define OP_JUMP_UNLESS 0x06
 #define OP_CALL        0x07
+#define OP_NEW_SYMBOL  0x08
 
 // FIXME [0001]: Assumed alignment and endianess.
 typedef union nuvm_instruction_t {
@@ -58,5 +59,8 @@ void nuvm_decode_op_jump_unless(nuvm_instruction_t, uint8_t*, int16_t*);
 
 nuvm_instruction_t nuvm_op_call(uint8_t out, uint8_t prim, uint8_t nargs);
 void nuvm_decode_op_call(nuvm_instruction_t, uint8_t*, uint8_t*, uint8_t*);
+
+nuvm_instruction_t nuvm_op_new_symbol(uint8_t out, uint8_t input);
+void nuvm_decode_op_new_symbol(nuvm_instruction_t, uint8_t*, uint8_t*);
 #endif
 

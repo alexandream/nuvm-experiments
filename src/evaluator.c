@@ -2,6 +2,8 @@
 #include "util/converter.h"
 
 #include "types/primitive.h"
+#include "types/strings.h"
+#include "types/symbol.h"
 #include "module.h"
 
 #include "evaluator.i.h"
@@ -36,6 +38,9 @@ _op_jump_unless(nuvm_evaluator_t* self, nuvm_instruction_t inst);
 
 static inline uint32_t
 _op_call(nuvm_evaluator_t* self, nuvm_instruction_t inst);
+
+static inline uint32_t
+_op_new_symbol(nuvm_evaluator_t* self, nuvm_instruction_t inst);
 
 static inline void
 _set_local(nuvm_evaluator_t*, uint8_t, nuvm_value_t);
@@ -113,6 +118,9 @@ bool nuvm_evaluator_step(nuvm_evaluator_t* self, nuvm_value_t* result) {
 			break;
 		case OP_CALL:
 			next_instruction = _op_call(self, inst);
+			break;
+		case OP_NEW_SYMBOL:
+			next_instruction = _op_new_symbol(self, inst);
 			break;
 		default:
 			assert(false);
@@ -240,6 +248,24 @@ _op_call(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
 	_set_local(self, loutput, result);
 	return self->code_pointer + 1 + n_blocks;
 }
+
+static inline uint32_t
+_op_new_symbol(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
+	uint8_t loutput, lstring;
+	nuvm_decode_op_new_symbol(inst, &loutput, &lstring);
+
+	nuvm_value_t string_val = _get_local(self, lstring);
+	assert(nuvm_typeof(string_val) == NUVM_STRING_T_TYPE());
+
+	nuvm_string_t* string = nuvm_unwrap_pointer(string_val);
+
+	nuvm_symbol_t* symbol = nuvm_new_symbol(nuvm_string_get_repr(string));
+	nuvm_value_t result = nuvm_wrap_pointer(symbol);
+	_set_local(self, loutput, result);
+	return self->code_pointer + 1;
+}
+
+
 static inline
 void _set_local(nuvm_evaluator_t* self, uint8_t index, nuvm_value_t val) {
 	nuvm_procedure_set_local(self->current_proc, index, val);

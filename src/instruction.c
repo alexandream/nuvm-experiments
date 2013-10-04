@@ -127,6 +127,16 @@ void nuvm_decode_op_call(nuvm_instruction_t inst,
 	*nargs = inst.arg3;
 }
 
+
+nuvm_instruction_t nuvm_op_new_symbol(uint8_t out, uint8_t input) {
+	return _make_instruction(OP_NEW_SYMBOL, out, input, 0x00);
+}
+void nuvm_decode_op_new_symbol(nuvm_instruction_t inst,
+                               uint8_t* out,
+                               uint8_t* input) {
+	*out = inst.arg1;
+	*input = inst.arg2;
+}
 nuvm_instruction_t nuvm_pack_op_arguments(uint8_t arg1,
                                           uint8_t arg2,
                                           uint8_t arg3,

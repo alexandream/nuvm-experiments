@@ -4,7 +4,7 @@
 
 #include "types/primitive.h"
 #include "types/procedure.h"
-#include "types/string.h"
+#include "types/strings.h"
 #include "types/symbol.h"
 
 const uint8_t nuvm_version[] = { 0, 0, 6 };

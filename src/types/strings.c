@@ -30,6 +30,9 @@ nuvm_string_t* nuvm_new_string(const char* source) {
 	return self;
 }
 
+const char* nuvm_string_get_repr(nuvm_string_t* self) {
+	return self->string;
+}
 bool nuvm_string_is_equal(nuvm_string_t* a, nuvm_string_t* b) {
 	return (a->size == b->size && strcmp(a->string, b->string) == 0);
 }
