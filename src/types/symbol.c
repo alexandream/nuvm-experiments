@@ -1,4 +1,5 @@
 #include <string.h>
+#include "../util/strings.h"
 #include "../type_info.h"
 #include "symbol.i.h"
 
@@ -52,7 +53,7 @@ static
 void _construct(nuvm_symbol_t* self, const char* s) {
 	nuvm_construct_object((nuvm_object_t*) self, _type_id);
 	self->size = strlen(s);
-	self->string = strdup(s);
+	self->string = duplicate_string(s);
 }
 
 static

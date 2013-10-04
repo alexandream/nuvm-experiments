@@ -1,5 +1,7 @@
 #include <math.h>
 
+#include "types/strings.h"
+
 #include "library.h"
 #include "value.h"
 
@@ -108,7 +110,6 @@ nuvm_value_t nuvm_primitive_not(void* data,
 	return (!nuvm_is_equal(*args, NUVM_FALSE)) ? NUVM_TRUE : NUVM_FALSE;
 }
 
-nuvm_value_t nuvm_primitive_or(void*, nuvm_value_t*, uint8_t);
 
 nuvm_value_t nuvm_primitive_and(void* data,
                                 nuvm_value_t* args,
@@ -129,4 +130,34 @@ nuvm_value_t nuvm_primitive_or(void* data,
 		result = nuvm_is_equal(args[i], NUVM_TRUE);
 	}
 	return result ? NUVM_TRUE : NUVM_FALSE;
+}
+nuvm_value_t nuvm_primitive_string_eq(void* data,
+                                      nuvm_value_t* args,
+                                      uint8_t nargs) {
+	assert(nargs == 2);
+	assert(nuvm_is_string(args[0]) && nuvm_is_string(args[1]));
+	nuvm_string_t* arg0 = nuvm_unwrap_pointer(args[0]);
+	nuvm_string_t* arg1 = nuvm_unwrap_pointer(args[1]);
+
+	bool result = nuvm_string_is_equal(arg0, arg1);
+	return result ? NUVM_TRUE : NUVM_FALSE;
+}
+nuvm_value_t nuvm_primitive_string_len(void* data,
+                                       nuvm_value_t* args,
+                                       uint8_t nargs) {
+	assert(nargs == 1);
+	assert(nuvm_is_string(args[0]));
+
+	nuvm_string_t* arg0 = nuvm_unwrap_pointer(args[0]);
+
+	// FIXME: The representation for fixnums can't encode the whole possible
+	// range of the following value.
+	int32_t result = (int32_t) nuvm_string_length(arg0);
+	return nuvm_wrap_fixnum(result);
+}
+nuvm_value_t nuvm_primitive_is_same(void* data,
+                                    nuvm_value_t* args,
+                                    uint8_t nargs) {
+	assert(nargs == 2);
+	return nuvm_is_equal(args[0], args[1]) ? NUVM_TRUE : NUVM_FALSE;
 }

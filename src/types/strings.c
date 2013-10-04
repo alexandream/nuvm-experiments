@@ -1,14 +1,9 @@
 #include <string.h>
+#include "../util/strings.h"
 
 #include "../type_info.h"
 
 #include "strings.i.h"
-
-
-#include <string.h>
-#include <string.h>
-#include <string.h>
-#include <string.h>
 
 // Static prototypes.
 static
@@ -22,9 +17,12 @@ static nuvm_type_info_t _type_info;
 
 
 // Function implementations.
+bool nuvm_is_string(nuvm_value_t val) {
+	return nuvm_typeof(val) == _type_id;
+}
 
 nuvm_string_t* nuvm_new_string(const char* source) {
-	nuvm_string_t* self = 
+	nuvm_string_t* self =
 		(nuvm_string_t*) nuvm_alloc(sizeof(nuvm_string_t));
 	_construct(self, source);
 	return self;
@@ -48,15 +46,12 @@ void nuvm_string_t_init() {
 	}
 }
 
-uint32_t NUVM_STRING_T_TYPE() {
-	return _type_id;
-}
 // Static function implementations.
 static
 void _construct(nuvm_string_t* self, const char* s) {
 	nuvm_construct_object((nuvm_object_t*) self, _type_id);
 	self->size = strlen(s);
-	self->string = strdup(s);
+	self->string = duplicate_string(s);
 }
 
 // TODO: Create destructor;

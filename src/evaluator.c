@@ -255,7 +255,7 @@ _op_new_symbol(nuvm_evaluator_t* self, nuvm_instruction_t inst) {
 	nuvm_decode_op_new_symbol(inst, &loutput, &lstring);
 
 	nuvm_value_t string_val = _get_local(self, lstring);
-	assert(nuvm_typeof(string_val) == NUVM_STRING_T_TYPE());
+	assert(nuvm_is_string(string_val));
 
 	nuvm_string_t* string = nuvm_unwrap_pointer(string_val);
 
