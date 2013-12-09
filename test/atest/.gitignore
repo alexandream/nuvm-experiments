@@ -1,0 +1,23 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.d
+build/*
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Editor backup files.
+.*.swp
+*~
+
+# Test garbage
+/test/runner
+/runner.c
