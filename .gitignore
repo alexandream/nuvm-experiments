@@ -1,6 +1,7 @@
 # Object files
 *.o
 *.ko
+*.d
 
 # Libraries
 *.lib
@@ -16,3 +17,13 @@
 *.exe
 *.out
 *.app
+
+# Build byproducts
+/build/*
+
+# Vim backup files.
+*.swp
+*~
+
+# Test support files.
+/runner.c
