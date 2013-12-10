@@ -1,6 +1,8 @@
 #ifndef __NUVM__ERROR_H__
 #define __NUVM__ERROR_H__
 
+#include "util/types.h"
+
 enum {
 	N_E_OK = 0,
 	N_E_BAD_ALLOCATION,
