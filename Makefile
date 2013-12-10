@@ -4,7 +4,7 @@ CFLAGS=-pedantic -Wall -std=c89 -g
 LIBS=
 
 SOURCE_FILES=$(wildcard src/*.c)
-OBJ_FILES=$(SOURCE_FILES:src/%.c=build/nuvm/%.o)
+#OBJ_FILES=$(SOURCE_FILES:src/%.c=build/nuvm/%.o)
 
 TESTED_OBJ_FILES=$(SOURCE_FILES:src/%.c=build/tested/%.o)
 TESTED_CFLAGS=$(CFLAGS) -DRUNNING_TESTS
@@ -13,11 +13,11 @@ TEST_CFLAGS=$(CFLAGS) -I src/ -Wno-variadic-macros
 TEST_LIBS=-L build/tested -lnuvm -L build/atest -latest
 
 TEST_SOURCE_FILES=$(wildcard test/suites/*.c)
-TEST_OBJ_FILES=$(TEST_SOURCE_FILES:test/suites/%.cpp=build/test/%.o)
+TEST_OBJ_FILES=$(TEST_SOURCE_FILES:test/suites/%.c=build/test/%.o)
 
 all:build/tested/libnuvm.a
 
--include $(patsubst %.o, %.d, $(OBJ_FILES))
+#-include $(patsubst %.o, %.d, $(OBJ_FILES))
 -include $(patsubst %.o, %.d, $(TESTED_OBJ_FILES))
 
 
