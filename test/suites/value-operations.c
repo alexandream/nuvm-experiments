@@ -9,6 +9,7 @@ typedef struct {
 	union {
 		NValue value;
 		void*  pointer;
+		int32_t fixnum;
 	} item;
 } NamedItem;
 
@@ -23,6 +24,8 @@ typedef struct {
 static int32_t _add_item(ItemList* self, NamedItem* item);
 
 static void _destroy_list(ItemList* list);
+
+static ItemList* _get_fixnums();
 
 static ItemList* _get_pointers();
 
@@ -76,6 +79,35 @@ TEST(values_are_equals_to_themselves) {
 }
 
 
+TEST(wrapped_fixnums_are_fixnums) {
+	ItemList* list = _get_fixnums();
+	int32_t i;
+	for (i = 0; i < list->count; i++) {
+		const char* name = list->items[i]->name;
+		int32_t fixnum = list->items[i]->item.fixnum;
+		NValue value = n_wrap_fixnum(fixnum);
+		EXPECT_MSG(n_is_fixnum(value),
+			"Fixnum %s [%d] failed to be recognized as fixnum "
+			"after wrapping.",
+			name, fixnum);
+	}
+}
+
+
+TEST(wrapped_fixnums_are_not_pointers) {
+	ItemList* list = _get_fixnums();
+	int32_t i;
+	for (i = 0; i < list->count; i++) {
+		const char* name = list->items[i]->name;
+		int32_t fixnum = list->items[i]->item.fixnum;
+		NValue value = n_wrap_fixnum(fixnum);
+		EXPECT_MSG(!n_is_pointer(value),
+			"Fixnum %s [%d] was recognized as pointer after wrapping.",
+			name, fixnum);
+	}
+}
+
+
 TEST(wrapped_pointers_are_pointers) {
 	ItemList* list = _get_pointers();
 	int32_t i;
@@ -84,9 +116,23 @@ TEST(wrapped_pointers_are_pointers) {
 		void* pointer = list->items[i]->item.pointer;
 		NValue value = n_wrap_pointer(pointer);
 		EXPECT_MSG(n_is_pointer(value),
-		           "Pointer %s [%p] failed to be recognized "
-		           "as pointer after wrapping.",
-		           name, pointer);
+			"Pointer %s [%p] failed to be recognized "
+			"as pointer after wrapping.",
+			name, pointer);
+	}
+	_destroy_list(list);
+}
+
+TEST(wrapped_pointers_are_not_fixnums) {
+	ItemList* list = _get_pointers();
+	int32_t i;
+	for (i = 0; i < list->count; i++) {
+		const char* name = list->items[i]->name;
+		void* pointer = list->items[i]->item.pointer;
+		NValue value = n_wrap_pointer(pointer);
+		EXPECT_MSG(!n_is_fixnum(value),
+			"Pointer %s [%p] was recognized as fixnum after wrapping.",
+			name, pointer);
 	}
 	_destroy_list(list);
 }
@@ -131,6 +177,13 @@ _np(const char* name, void* pointer) {
 
 
 static NamedItem*
+_nfix(const char* name, int32_t fixnum) {
+	NamedItem* result = _new_named_item(name);
+	result->item.fixnum = fixnum;
+	return result;
+}
+
+static NamedItem*
 _nv(const char* name, NValue value) {
 	NamedItem* result = _new_named_item(name);
 	result->item.value = value;
@@ -173,6 +226,18 @@ _destroy_list(ItemList* list) {
 
 
 static ItemList*
+_get_fixnums() {
+	ItemList* list = _new_item_list();
+	_add_item(list, _nfix("Minimum Fixnum", -2147483648));
+	_add_item(list, _nfix("Maximum Fixnum", 2147483647));
+	_add_item(list, _nfix("Zero", 0));
+	_add_item(list, _nfix("Small Positive Fixnum", 1));
+	_add_item(list, _nfix("Small Negative Fixnum", -1));
+	return list;
+}
+
+
+static ItemList*
 _get_pointers() {
 	ItemList* list = _new_item_list();
 	void* heap_addr = malloc(sizeof(NValue));
@@ -187,7 +252,7 @@ _get_pointers() {
 static ItemList*
 _get_values() {
 	ItemList* list = _new_item_list();
-	ItemList* pointer_list;
+	ItemList* pointer_list, *fixnum_list;
 	int32_t i;
 	
 	pointer_list = _get_pointers();
@@ -196,6 +261,14 @@ _get_values() {
 		_add_item(list, _nv(ni->name, n_wrap_pointer(ni->item.pointer)));
 	}
 	_destroy_list(pointer_list);
+
+	fixnum_list = _get_fixnums();
+	for (i = 0; i < fixnum_list->count; i++) {
+		NamedItem* ni = fixnum_list->items[i];
+		_add_item(list, _nv(ni->name, n_wrap_fixnum(ni->item.fixnum)));
+	}
+	_destroy_list(fixnum_list);
+
 	return list;
 }
 

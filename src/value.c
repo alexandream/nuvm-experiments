@@ -6,6 +6,9 @@
 #include "value.h"
 #include "type-info.h"
 
+#define HALF_TAG_POINTER 0x0000u
+#define TAG_FIXNUM       0xFFFFFFFFu
+
 static NType   _bool_type;
 static int32_t _bool_type_id;
 
@@ -53,6 +56,15 @@ n_init_values() {
 
 
 NValue
+n_wrap_fixnum(int32_t fixnum) {
+	NValue result;
+	result.immediate.fixnum = fixnum;
+	result.immediate.tags.full_tag = TAG_FIXNUM;
+	return result;
+}
+
+
+NValue
 n_wrap_pointer(void* pointer) {
 	NValue result;
 	result.pointer = pointer;
@@ -65,15 +77,24 @@ n_unwrap_pointer(NValue value) {
 	return value.pointer;
 }
 
+
 bool
 n_is_equal(NValue value1, NValue value2) {
 	return value1.contents == value2.contents;
 }
 
+
+bool
+n_is_fixnum(NValue value) {
+	return value.immediate.tags.full_tag == TAG_FIXNUM;
+}
+
+
 bool
 n_is_pointer(NValue value) {
-	return true;
+	return value.immediate.tags.half_tags.upper_tag == HALF_TAG_POINTER;
 }
+
 
 int32_t n_typeof(NValue value) {
 	if (n_is_pointer(value)) {
