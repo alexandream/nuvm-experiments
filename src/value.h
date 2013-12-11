@@ -13,6 +13,7 @@ typedef struct {
 	int32_t type_id;
 } NObject;
 
+void n_init_values();
 
 NValue n_wrap_pointer(void* pointer);
 void*  n_unwrap_pointer(NValue value);

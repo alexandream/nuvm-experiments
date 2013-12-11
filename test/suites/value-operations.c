@@ -2,6 +2,7 @@
 #include "../test-suite.h"
 
 #include "value.h"
+#include "type-info.h"
 
 typedef struct {
 	const char* name;
@@ -32,6 +33,15 @@ static ItemList* _new_item_list();
 
 
 /* Test functions. */
+
+TEST(basic_types_have_been_registered) {
+	NTypeRegistry* registry = n_type_registry_get_default();
+
+	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Boolean"));
+	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Fixnum32"));
+	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Undefined"));
+}
+
 
 TEST(different_values_are_not_equals) {
 	int32_t i, j;

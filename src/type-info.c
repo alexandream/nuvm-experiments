@@ -101,3 +101,10 @@ n_type_registry_find_type(NTypeRegistry* self,
 	}
 	return NULL;
 }
+
+
+bool
+n_type_registry_has_type(NTypeRegistry* self, const char* name) {
+	int id;
+	return n_type_registry_find_type(self, name, &id) != NULL;
+}

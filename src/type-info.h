@@ -34,4 +34,6 @@ n_type_registry_count_types(NTypeRegistry*);
 NType*
 n_type_registry_find_type(NTypeRegistry*, const char* name, int32_t* out_id);
 
+bool
+n_type_registry_has_type(NTypeRegistry*, const char* name);
 #endif

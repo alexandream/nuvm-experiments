@@ -14,11 +14,11 @@ Target Description:
   3) a representation for the "undefined" value.
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-11 16:00
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Create types for fixnum32, boolean and undefined;
+  x Create types for fixnum32, boolean and undefined;
   - Representation for integers in value_t;
   - Representation for booleans (singleton pointers);
   - Representation for undefined (singleton pointer);

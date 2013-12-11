@@ -4,5 +4,6 @@
 
 void
 n_init() {
+	n_init_values();
 	n_init_primitives();
 }
