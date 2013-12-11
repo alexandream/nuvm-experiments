@@ -55,6 +55,7 @@ n_primitive_new(NPrimitiveFunction function, void* data, NError* error) {
 		n_error_set_msg(error, "self");
 	}
 	
+	self->parent.type_id = _type_id;
 	self->function = function;
 	self->data = data;
 

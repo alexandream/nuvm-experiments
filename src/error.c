@@ -8,7 +8,7 @@ void n_error_clear(NError* error) {
 }
 
 bool n_error_ok(NError* error) {
-	return (error != NULL && error->code == N_E_OK);
+	return (error == NULL || error->code == N_E_OK);
 }
 
 void n_error_set(NError* error, uint32_t code) {

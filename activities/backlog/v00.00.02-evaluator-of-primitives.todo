@@ -23,7 +23,7 @@ Target Tasks:
   x Create the registry of types;
   x Create a representation and type representation for primitive
     procedures;
-  - Update the evaluator to call the primitive when the entry point of
+  x Update the evaluator to call the primitive when the entry point of
     a module refers to a primitive, and return the result of the call
     as the result of running the module.
 
