@@ -34,26 +34,27 @@
 #define ARRAY_ELEMENTS PREFIX_NAME(ARRAY_PREFIX, elements)
 
 typedef struct {
-	uint32_t size;
+	int32_t size;
 	ARRAY_CONTENTS_TYPE* elements;
 } ARRAY_TYPE_NAME;
 
 
 static
-void ARRAY_INIT(ARRAY_TYPE_NAME*array, uint32_t size) {
+void ARRAY_INIT(ARRAY_TYPE_NAME*array, int32_t size) {
+	size_t mem_size = sizeof(ARRAY_CONTENTS_TYPE) * size;
 	array->size = size;
 	array->elements =
-		(ARRAY_CONTENTS_TYPE*) malloc(sizeof(ARRAY_CONTENTS_TYPE)*size);
+		(ARRAY_CONTENTS_TYPE*) ARRAY_ALLOCATOR(mem_size);
 }
 
 static
-ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME*array, uint32_t index) {
+ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME*array, int32_t index) {
 	return array->elements[index];
 }
 
 static
 void ARRAY_SET(ARRAY_TYPE_NAME* array,
-               uint32_t index,
+               int32_t index,
                ARRAY_CONTENTS_TYPE value) {
 	do {
 		ARRAY_COPY_ELEMENT(&array->elements[index], &value);
@@ -62,11 +63,11 @@ void ARRAY_SET(ARRAY_TYPE_NAME* array,
 
 static
 void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
-	free(array->elements);
+	ARRAY_DEALLOCATOR(array->elements);
 }
 
 static
-uint32_t ARRAY_SIZE(ARRAY_TYPE_NAME* array) {
+int32_t ARRAY_SIZE(ARRAY_TYPE_NAME* array) {
 	return array->size;
 }
 
