@@ -15,11 +15,11 @@ Target Description:
   each type with a type id.
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-11 10:52
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create the representation for types;
+  x Create the representation for types;
   - Create the registry of types;
   - Create a representation and type representation for primitive
     procedures;
