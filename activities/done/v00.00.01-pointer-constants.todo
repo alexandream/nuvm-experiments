@@ -34,12 +34,12 @@ Target Description:
   4) A nice infra-structure to perform tests on what we have so far.
 
 Activity start:  2013-12-09 02:00
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-12-11 00:41
 
 Target Tasks:
   x Create value representation of pointers (NValue);
   x Create error representation (NError);
   x Create representation for the programs (NModule);
-  - Create representation for the evaluator (NEvaluator);
-  - Create runner method for evaluator;
+  x Create representation for the evaluator (NEvaluator);
+  x Create runner method for evaluator;
 
