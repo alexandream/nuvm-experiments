@@ -26,6 +26,10 @@
 #define ARRAY_COPY_ELEMENT(E1, E2) *E1 = *E2
 #endif
 
+#ifndef ARRAY_SIZE_T
+#define ARRAY_SIZE_T int32_t
+#endif
+
 #define ARRAY_INIT PREFIX_NAME(ARRAY_PREFIX, init)
 #define ARRAY_GET  PREFIX_NAME(ARRAY_PREFIX, get)
 #define ARRAY_SET  PREFIX_NAME(ARRAY_PREFIX, set)
@@ -34,13 +38,13 @@
 #define ARRAY_ELEMENTS PREFIX_NAME(ARRAY_PREFIX, elements)
 
 typedef struct {
-	int32_t size;
+	ARRAY_SIZE_T size;
 	ARRAY_CONTENTS_TYPE* elements;
 } ARRAY_TYPE_NAME;
 
 
 static
-void ARRAY_INIT(ARRAY_TYPE_NAME*array, int32_t size) {
+void ARRAY_INIT(ARRAY_TYPE_NAME*array, ARRAY_SIZE_T size) {
 	size_t mem_size = sizeof(ARRAY_CONTENTS_TYPE) * size;
 	array->size = size;
 	array->elements =
@@ -48,13 +52,13 @@ void ARRAY_INIT(ARRAY_TYPE_NAME*array, int32_t size) {
 }
 
 static
-ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME*array, int32_t index) {
+ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME*array, ARRAY_SIZE_T index) {
 	return array->elements[index];
 }
 
 static
 void ARRAY_SET(ARRAY_TYPE_NAME* array,
-               int32_t index,
+               ARRAY_SIZE_T index,
                ARRAY_CONTENTS_TYPE value) {
 	do {
 		ARRAY_COPY_ELEMENT(&array->elements[index], &value);
@@ -67,7 +71,7 @@ void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
 }
 
 static
-int32_t ARRAY_SIZE(ARRAY_TYPE_NAME* array) {
+ARRAY_SIZE_T ARRAY_SIZE(ARRAY_TYPE_NAME* array) {
 	return array->size;
 }
 
@@ -82,6 +86,7 @@ ARRAY_CONTENTS_TYPE* ARRAY_ELEMENTS(ARRAY_TYPE_NAME* array) {
 #undef ARRAY_PREFIX
 #undef ARRAY_CONTENTS_TYPE
 #undef ARRAY_COPY_ELEMENT
+#undef ARRAY_SIZE_T
 #undef ARRAY_ALLOCATOR
 #undef ARRAY_DEALLOCATOR
 #undef ARRAY_INIT
