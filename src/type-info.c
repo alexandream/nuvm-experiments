@@ -15,6 +15,16 @@ struct NTypeRegistry {
 	NTypeArray types;
 };
 
+static NTypeRegistry* _default_registry = NULL;
+
+NTypeRegistry*
+n_type_registry_get_default() {
+	if (_default_registry == NULL) {
+		_default_registry = n_type_registry_new(NULL);
+	}
+	return _default_registry;
+}
+
 void
 n_type_init(NType* self, const char* name) {
 	self->name = name;

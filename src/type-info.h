@@ -16,6 +16,9 @@ void
 n_type_init(NType* self, const char* name);
 
 NTypeRegistry*
+n_type_registry_get_default();
+
+NTypeRegistry*
 n_type_registry_new(NError*);
 
 void

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "util/types.h"
+#include "nuvm.h"
 
 #include "test-suite.h"
 
@@ -79,10 +80,14 @@ void print_result_totals(ATResultList* result_list) {
 }
 
 int main() {
-	ATResultList* result_list = at_run_all_tests();
+	ATResultList* result_list;
+
+	n_init();
+
+	result_list = at_run_all_tests();
+
 	print_results(result_list);
 	puts("");
 	print_result_totals(result_list);
 	return 0;
 }
-

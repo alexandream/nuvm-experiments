@@ -20,8 +20,8 @@ Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
   x Create the representation for types;
-  - Create the registry of types;
-  - Create a representation and type representation for primitive
+  x Create the registry of types;
+  x Create a representation and type representation for primitive
     procedures;
   - Update the evaluator to call the primitive when the entry point of
     a module refers to a primitive, and return the result of the call
