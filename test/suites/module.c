@@ -11,6 +11,9 @@ static void
 test_correct_construction(uint16_t reg_count, uint16_t entry);
 
 static void
+test_get_entry_point(uint16_t reg_count, uint16_t entry);
+
+static void
 test_get_gives_register_previously_set(uint16_t index, NValue val);
 
 static void
@@ -50,6 +53,15 @@ TEST(empty_module_construction_fails) {
 	           "Construction of empty module reported invalid argument error "
 	           "under wrong argument name [%s], expected \"register_count\".",
 	           error.message);
+}
+
+
+TEST(get_entry_value_gives_correct_value) {
+	test_get_entry_point(5, 0);
+	test_get_entry_point(5, 1);
+	test_get_entry_point(5, 2);
+	test_get_entry_point(5, 3);
+	test_get_entry_point(5, 4);
 }
 
 
@@ -110,6 +122,29 @@ test_correct_construction(uint16_t reg_count, uint16_t entry) {
 
 
 static void
+test_get_entry_point(uint16_t reg_count, uint16_t entry) {
+	NValue output;
+	NValue v1 = n_wrap_pointer(NULL),
+	       v2 = n_wrap_pointer((void*)0xDEADBEE0);
+	NModule* mod = n_module_new(reg_count, entry, NULL);
+	int i;
+
+	for (i = 0; i < reg_count; i++) {
+		n_module_set_register(mod, i, v1, NULL);
+	}
+
+	n_module_set_register(mod, entry, v2, NULL);
+	output = n_module_get_entry_value(mod, NULL);
+
+	EXPECT_MSG(n_is_equal(v2, output),
+		"Setting and subsequently getting entry value on register %u "
+		"yielded a different result.",
+		entry);
+	n_module_destroy(mod);
+}
+
+
+static void
 test_get_gives_register_previously_set(uint16_t index, NValue val) {
 	NValue output;
 	NModule* mod = n_module_new(index+1, 0, NULL);
@@ -121,6 +156,7 @@ test_get_gives_register_previously_set(uint16_t index, NValue val) {
 		"Setting and subsequently getting register %u "
 		"yielded a different result.",
 		index);
+	n_module_destroy(mod);
 }
 
 

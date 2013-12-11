@@ -13,7 +13,7 @@
 
 struct NModule {
 	NRegisterArray registers;
-	uint16_t entry;
+	uint16_t entry_point;
 };
 
 NModule*
@@ -40,6 +40,7 @@ n_module_new(uint16_t register_count, uint16_t entry, NError* error) {
 	}
 
 	n_register_array_init(&self->registers, register_count);
+	self->entry_point = entry;
 
 	return self;
 }
@@ -49,6 +50,12 @@ void
 n_module_destroy(NModule* self) {
 	n_register_array_destroy(&self->registers);
 	n_free(self);
+}
+
+
+NValue
+n_module_get_entry_value(NModule* self, NError* error) {
+	return n_module_get_register(self, self->entry_point, error);
 }
 
 

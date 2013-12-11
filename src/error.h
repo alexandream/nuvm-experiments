@@ -8,6 +8,7 @@ enum {
 	N_E_BAD_ALLOCATION,
 	N_E_INVALID_ARGUMENT,
 	N_E_OUT_OF_BOUNDS,
+	N_E_UNINITIALIZED_EVALUATOR,
 	N_E_TYPE_REGISTRY_CONFLICT
 };
 
@@ -19,6 +20,8 @@ typedef struct {
 } NError;
 
 void n_error_clear(NError* error);
+
+bool n_error_ok(NError* error);
 
 void n_error_set(NError* error, uint32_t code);
 
