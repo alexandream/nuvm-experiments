@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "util/types.h"
+
 #include "test-suite.h"
 
 ATResultList* at_run_all_tests() {
@@ -23,8 +25,7 @@ ATResultList* at_run_all_tests() {
 	return result_list;
 }
 
-void print_results(ATResultList* result_list) {
-	int succeeded = 0, failed = 0;
+void _print_results(ATResultList* result_list, bool show_failures) {
 	int result_count = at_count_results(result_list);
 	int i, j;
 	for(i = 0; i < result_count; i++) {
@@ -33,27 +34,55 @@ void print_results(ATResultList* result_list) {
 		fprintf(stderr, "[%s]: %s\n",
 				(failure_count)?"F":"S",
 				at_get_full_name(result));
-		for (j = 0; j < failure_count; j++) {
-			ATFailure* failure = at_get_nth_failure(result, j);
-			fprintf(stderr, "     %s[%d]: %s\n",
-					failure->file_name,
-					failure->line_number,
-					failure->message);
-		}
-		if (failure_count == 0) {
-			succeeded++;
-		}
-		else {
-			failed++;
+		if (show_failures) {
+			for (j = 0; j < failure_count; j++) {
+				ATFailure* failure = at_get_nth_failure(result, j);
+				fprintf(stderr, "     %s[%d]: %s\n\n",
+						failure->file_name,
+						failure->line_number,
+						failure->message);
+			}
 		}
 	}
-	fprintf(stderr, "\nTotal: %d succeeded, %d failed.\n",
-			succeeded, failed);
+}
+
+void _count_results(ATResultList* list, int* success, int* failure) {
+	int result_count = at_count_results(list);
+	int i;
+	(*success) = 0;
+	(*failure) = 0;
+	for (i = 0; i < result_count; i++) {
+		ATResult* result = at_get_nth_result(list, i);
+		int failure_count = at_count_failures(result);
+		if (failure_count > 0) {
+			(*failure)++;
+		}
+		else {
+			(*success)++;
+		}
+	}
+}
+
+void print_compact_results(ATResultList* result_list) {
+	_print_results(result_list, false);
+}
+
+void print_results(ATResultList* result_list) {
+	_print_results(result_list, true);
+}
+
+void print_result_totals(ATResultList* result_list) {
+	int succeeded, failed;
+	_count_results(result_list, &succeeded, &failed);
+	fprintf(stderr, "Total: %d; Succeeded: %d; Failed: %d.\n",
+			(succeeded+failed), succeeded, failed);
 }
 
 int main() {
 	ATResultList* result_list = at_run_all_tests();
 	print_results(result_list);
+	puts("");
+	print_result_totals(result_list);
 	return 0;
 }
 

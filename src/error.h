@@ -18,11 +18,11 @@ typedef struct {
 	char message[N_MAX_ERROR_MSG_LENGTH];
 } NError;
 
-void n_clear_error(NError* error);
+void n_error_clear(NError* error);
 
-void n_set_error(NError* error, uint32_t code);
+void n_error_set(NError* error, uint32_t code);
 
-void n_set_error_msg(NError* error, const char* msg);
+void n_error_set_msg(NError* error, const char* msg);
 
 #endif
 

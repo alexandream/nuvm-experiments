@@ -7,9 +7,9 @@ SOURCE_FILES=$(wildcard src/*.c)
 #OBJ_FILES=$(SOURCE_FILES:src/%.c=build/nuvm/%.o)
 
 TESTED_OBJ_FILES=$(SOURCE_FILES:src/%.c=build/tested/%.o)
-TESTED_CFLAGS=$(CFLAGS) -DRUNNING_TESTS
+TESTED_CFLAGS=$(CFLAGS) -DRUNNING_TESTS -Werror
 
-TEST_CFLAGS=$(CFLAGS) -I src/ -Wno-variadic-macros
+TEST_CFLAGS=$(CFLAGS) -I src/ -Wno-variadic-macros -Werror
 TEST_LIBS=-L build/tested -lnuvm -L build/atest -latest
 
 TEST_SOURCE_FILES=$(wildcard test/suites/*.c)
@@ -31,8 +31,8 @@ build/atest/libatest.a: test/atest/src/atest.c test/atest/src/atest.h
 
 
 build/tested/%.o: src/%.c
-	@${CC} -c $< -o $@ ${CFLAGS}
-	@${CC} -MM -MT $@ $(CFLAGS) $< > $(@:.o=.d)
+	@${CC} -c $< -o $@ ${TESTED_CFLAGS}
+	@${CC} -MM -MT $@ $(TESTED_CFLAGS) $< > $(@:.o=.d)
 
 build/test/runner: build/tested/libnuvm.a \
                    build/atest/libatest.a \

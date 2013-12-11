@@ -3,15 +3,18 @@
 
 #include "error.h"
 
-void n_clear_error(NError* error) {
-	n_set_error(error, N_E_OK);
+void n_error_clear(NError* error) {
+	n_error_set(error, N_E_OK);
 }
 
-void n_set_error(NError* error, uint32_t code) {
-	if (error != NULL) error->code = code;
+void n_error_set(NError* error, uint32_t code) {
+	if (error != NULL) {
+		error->code = code;
+		error->message[0] = '\0';
+	}
 }
 
-void n_set_error_msg(NError* error, const char* msg) {
+void n_error_set_msg(NError* error, const char* msg) {
 	if (error != NULL) {
 		strncpy(error->message, msg, N_MAX_ERROR_MSG_LENGTH -1);
 		error->message[N_MAX_ERROR_MSG_LENGTH-1] = '\0';

@@ -39,7 +39,7 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks:
   x Create value representation of pointers (NValue);
   x Create error representation (NError);
-  o Create representation for the programs (NModule);
+  x Create representation for the programs (NModule);
   - Create representation for the evaluator (NEvaluator);
   - Create runner method for evaluator;
 
