@@ -1,0 +1,26 @@
+Target Version:
+  v00.00.03
+
+Target Description:
+  With this version we get three more types in our machine: signed
+  32bits integers, booleans and undefined value.
+  
+  The changes are really minimal, but this is just a small step in
+  preparing the machine to start handling some real computation soon.
+
+  After this, we have:
+  1) a representation for 32bit (fixnum) signed integers;
+  2) a representation for boolean values;
+  3) a representation for the "undefined" value.
+
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Create types for fixnum32, boolean and undefined;
+  - Representation for integers in value_t;
+  - Representation for booleans (singleton pointers);
+  - Representation for undefined (singleton pointer);
+
+
