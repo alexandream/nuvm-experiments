@@ -89,6 +89,11 @@ TEST(singletons_are_pointers) {
 }
 
 
+TEST(undefined_has_undefined_type) {
+	EXPECT(n_is_undefined(N_UNDEFINED));
+}
+
+
 TEST(values_are_equals_to_themselves) {
 	int32_t i;
 	ItemList* values = _get_values();
@@ -278,6 +283,7 @@ _get_singletons() {
 	ItemList* list = _new_item_list();
 	_add_item(list, _nv("Boolean True", N_TRUE));
 	_add_item(list, _nv("Boolean False", N_FALSE));
+	_add_item(list, _nv("Undefined", N_UNDEFINED));
 	return list;
 }
 

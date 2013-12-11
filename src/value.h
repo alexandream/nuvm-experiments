@@ -21,6 +21,7 @@ typedef union {
 
 extern NValue N_TRUE;
 extern NValue N_FALSE;
+extern NValue N_UNDEFINED;
 
 typedef struct {
 	int32_t type_id;
@@ -49,6 +50,9 @@ n_is_fixnum(NValue value);
 
 bool
 n_is_pointer(NValue value);
+
+bool
+n_is_undefined(NValue value);
 
 bool
 n_is_equal(NValue value1, NValue value2);

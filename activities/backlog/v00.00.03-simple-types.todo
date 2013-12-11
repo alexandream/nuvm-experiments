@@ -21,6 +21,6 @@ Target Tasks:
   x Create types for fixnum32, boolean and undefined;
   x Representation for fixnums;
   x Representation for booleans (singleton pointers);
-  - Representation for undefined (singleton pointer);
+  x Representation for undefined (singleton pointer);
 
 

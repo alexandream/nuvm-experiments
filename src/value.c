@@ -26,7 +26,7 @@ NValue N_UNDEFINED;
 void
 n_init_values() {
 	NError error;
-	NObject *obj_true, *obj_false;
+	NObject *obj_true, *obj_false, *obj_undefined;
 	NTypeRegistry* registry = n_type_registry_get_default();
 
 	n_type_init(&_bool_type, "org.nuvm.Boolean");
@@ -66,6 +66,9 @@ n_init_values() {
 	obj_false->type_id = _bool_type_id;
 	N_FALSE = n_wrap_pointer(obj_false);
 
+	obj_undefined = n_alloc_unmanaged(sizeof(NObject));
+	obj_undefined->type_id = _undefined_type_id;
+	N_UNDEFINED = n_wrap_pointer(obj_undefined);
 }
 
 
@@ -111,6 +114,12 @@ n_is_fixnum(NValue value) {
 bool
 n_is_pointer(NValue value) {
 	return value.immediate.tags.half_tags.upper_tag == HALF_TAG_POINTER;
+}
+
+
+bool
+n_is_undefined(NValue value) {
+	return n_typeof(value) == _undefined_type_id;
 }
 
 
