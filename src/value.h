@@ -19,6 +19,9 @@ typedef union {
 	} immediate;
 } NValue;
 
+extern NValue N_TRUE;
+extern NValue N_FALSE;
+
 typedef struct {
 	int32_t type_id;
 } NObject;
@@ -37,6 +40,9 @@ n_unwrap_fixnum(NValue value);
 
 void*
 n_unwrap_pointer(NValue value);
+
+bool
+n_is_boolean(NValue value);
 
 bool
 n_is_fixnum(NValue value);

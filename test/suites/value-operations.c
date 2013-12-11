@@ -29,6 +29,8 @@ static ItemList* _get_fixnums();
 
 static ItemList* _get_pointers();
 
+static ItemList* _get_singletons();
+
 static ItemList* _get_values();
 
 static ItemList* _new_item_list();
@@ -43,6 +45,12 @@ TEST(basic_types_have_been_registered) {
 	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Boolean"));
 	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Fixnum32"));
 	EXPECT(n_type_registry_has_type(registry, "org.nuvm.Undefined"));
+}
+
+
+TEST(booleans_have_boolean_type) {
+	EXPECT(n_is_boolean(N_TRUE));
+	EXPECT(n_is_boolean(N_FALSE));
 }
 
 
@@ -62,6 +70,22 @@ TEST(different_values_are_not_equals) {
 		}
 	}
 	_destroy_list(values);
+}
+
+
+TEST(singletons_are_pointers) {
+	ItemList* list = _get_singletons();
+	int32_t i;
+
+	for (i = 0; i < list->count; i ++) {
+		const char* name = list->items[i]->name;
+		NValue singleton = list->items[i]->item.value;
+
+		EXPECT_MSG(n_is_pointer(singleton),
+			"Singleton %s failed to be recognized as pointer.",
+			name);
+	}
+	_destroy_list(list);
 }
 
 
@@ -245,6 +269,15 @@ _get_pointers() {
 	_add_item(list, _np("Unmanaged Heap Address", heap_addr));
 
 	free(heap_addr);
+	return list;
+}
+
+
+static ItemList*
+_get_singletons() {
+	ItemList* list = _new_item_list();
+	_add_item(list, _nv("Boolean True", N_TRUE));
+	_add_item(list, _nv("Boolean False", N_FALSE));
 	return list;
 }
 

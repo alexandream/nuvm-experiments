@@ -5,6 +5,7 @@
 
 #include "value.h"
 #include "type-info.h"
+#include "memory.h"
 
 #define HALF_TAG_POINTER 0x0000u
 #define TAG_FIXNUM       0xFFFFFFFFu
@@ -18,10 +19,14 @@ static int32_t _fixnum_type_id;
 static NType   _undefined_type;
 static int32_t _undefined_type_id;
 
+NValue N_TRUE;
+NValue N_FALSE;
+NValue N_UNDEFINED;
 
 void
 n_init_values() {
 	NError error;
+	NObject *obj_true, *obj_false;
 	NTypeRegistry* registry = n_type_registry_get_default();
 
 	n_type_init(&_bool_type, "org.nuvm.Boolean");
@@ -52,6 +57,15 @@ n_init_values() {
 		                "Aborting.\n");
 		exit(1);
 	}
+
+	obj_true = n_alloc_unmanaged(sizeof(NObject));
+	obj_true->type_id = _bool_type_id;
+	N_TRUE = n_wrap_pointer(obj_true);
+
+	obj_false = n_alloc_unmanaged(sizeof(NObject));
+	obj_false->type_id = _bool_type_id;
+	N_FALSE = n_wrap_pointer(obj_false);
+
 }
 
 
@@ -77,6 +91,10 @@ n_unwrap_pointer(NValue value) {
 	return value.pointer;
 }
 
+bool
+n_is_boolean(NValue value) {
+	return n_typeof(value) == _bool_type_id;
+}
 
 bool
 n_is_equal(NValue value1, NValue value2) {
