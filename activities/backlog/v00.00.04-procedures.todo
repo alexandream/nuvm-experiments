@@ -65,11 +65,11 @@ Target Description:
     5) three instructions for the evaluator (global-ref, global-set
        and return);
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2012-12-11 18:10
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Representation for Instructions in the machine;
+  x Representation for Instructions in the machine;
   - Add a code segment on modules;
   - Representation for user defined procedures;
   - Create evaluator setup for procedures (alloc locals)
