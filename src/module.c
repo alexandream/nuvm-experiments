@@ -80,6 +80,12 @@ n_module_fetch(NModule* self, uint32_t index, NError* error) {
 }
 
 
+uint32_t
+n_module_get_code_size(NModule* self) {
+	return n_instruction_array_size(&self->code);
+}
+
+
 NValue
 n_module_get_entry_value(NModule* self, NError* error) {
 	return n_module_get_register(self, self->entry_point, error);

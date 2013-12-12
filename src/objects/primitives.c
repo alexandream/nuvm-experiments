@@ -12,8 +12,8 @@ struct NPrimitive {
 	void* data;
 };
 
-NType   _type;
-int32_t _type_id;
+static NType   _type;
+static int32_t _type_id;
 
 void
 n_init_primitives() {
@@ -48,19 +48,19 @@ n_primitive_new(NPrimitiveFunction function, void* data, NError* error) {
 		n_error_set_msg(error, "function");
 		return NULL;
 	}
-	
-	self = n_alloc_unmanaged(sizeof(NPrimitive));
+
+	self = n_alloc(sizeof(NPrimitive));
 	if (self == NULL) {
 		n_error_set(error, N_E_BAD_ALLOCATION);
 		n_error_set_msg(error, "self");
 	}
-	
+
 	self->parent.type_id = _type_id;
 	self->function = function;
 	self->data = data;
 
 	return self;
-	
+
 }
 
 

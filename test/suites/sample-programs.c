@@ -49,7 +49,7 @@ TEST(primitive_evaluator_runs_primitive) {
 	NPrimitive* prim3 = n_primitive_new(toggle_bool, &flag, NULL);
 
 	NEvaluator* eval = n_evaluator_new(NULL);
-	NModule* mod = n_module_new(1, 0, NULL);
+	NModule* mod = n_module_new(1, 0, 0, NULL);
 
 	n_module_set_register(mod, 0, n_wrap_pointer(prim1), NULL);
 	n_evaluator_setup(eval, mod);
@@ -87,7 +87,7 @@ static NValue
 test_constant_runner(NValue constant) {
 	NError error;
 	NEvaluator* eval = n_evaluator_new(NULL);
-	NModule* mod = n_module_new(1, 0, NULL);
+	NModule* mod = n_module_new(1, 0, 0, NULL);
 	NValue result;
 
 	n_module_set_register(mod, 0, constant, NULL);

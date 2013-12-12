@@ -71,8 +71,7 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   x Representation for Instructions in the machine;
   x Add a code segment on modules;
-  - Representation for user defined procedures;
-  - Create evaluator setup for procedures (alloc locals)
+  x Representation for user defined procedures;
   - Create opcodes, encoders and decoders for instructions
     (global-ref, global-set, return)
   - Create the execution behaviour of the instructions;

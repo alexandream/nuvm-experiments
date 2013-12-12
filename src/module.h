@@ -18,6 +18,9 @@ n_module_destroy(NModule*);
 NInstruction
 n_module_fetch(NModule*, uint32_t index, NError*);
 
+uint32_t
+n_module_get_code_size(NModule*);
+
 NValue
 n_module_get_entry_value(NModule*, NError*);
 
