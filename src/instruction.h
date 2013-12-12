@@ -3,6 +3,12 @@
 
 #include "util/types.h"
 
+#define N_OP_GLOBAL_REF 0x00
+#define N_OP_GLOBAL_SET 0x01
+#define N_OP_RETURN     0x02
+
+
+
 typedef union NInstruction NInstruction;
 
 union NInstruction {
@@ -17,4 +23,22 @@ union NInstruction {
 
 NInstruction
 n_instruction(uint8_t opcode, uint8_t arg1, uint8_t arg2, uint8_t arg3);
+
+void
+n_decode_global_ref(NInstruction, uint8_t* dest, uint16_t* src);
+
+void
+n_decode_global_set(NInstruction, uint16_t* dest, uint8_t* src);
+
+void
+n_decode_return(NInstruction, uint8_t* src);
+
+NInstruction
+n_op_global_ref(uint8_t dest, uint16_t src);
+
+NInstruction
+n_op_global_set(uint16_t dest, uint8_t src);
+
+NInstruction
+n_op_return(uint8_t src);
 #endif

@@ -72,7 +72,7 @@ Target Tasks:
   x Representation for Instructions in the machine;
   x Add a code segment on modules;
   x Representation for user defined procedures;
-  - Create opcodes, encoders and decoders for instructions
+  x Create opcodes, encoders and decoders for instructions
     (global-ref, global-set, return)
   - Create the execution behaviour of the instructions;
   - Add the fetch-run loop to the evaluator;

@@ -57,7 +57,7 @@ TEST(booleans_have_boolean_type) {
 TEST(different_values_are_not_equals) {
 	int32_t i, j;
 	ItemList* values = _get_values();
-	
+
 	for (i = 0; i < values->count; i++) {
 		for(j = 0; j < values->count; j++) {
 			if (j != i) {
@@ -97,7 +97,7 @@ TEST(undefined_has_undefined_type) {
 TEST(values_are_equals_to_themselves) {
 	int32_t i;
 	ItemList* values = _get_values();
-	
+
 	for (i = 0; i < values->count; i++) {
 		NamedItem* item = values->items[i];
 		EXPECT_MSG(n_is_equal(item->item.value, item->item.value),
@@ -175,7 +175,7 @@ TEST(wrapped_pointers_unwrap_to_original_value) {
 		void* pointer = list->items[i]->item.pointer;
 		NValue value = n_wrap_pointer(pointer);
 		void* out_pointer = n_unwrap_pointer(value);
-		
+
 		EXPECT_MSG(pointer == out_pointer,
 		           "After wrapping and unwrapping, pointer %s [%p] "
 		           "reported final value %p.",
@@ -293,7 +293,7 @@ _get_values() {
 	ItemList* list = _new_item_list();
 	ItemList* pointer_list, *fixnum_list;
 	int32_t i;
-	
+
 	pointer_list = _get_pointers();
 	for (i = 0; i < pointer_list->count; i++) {
 		NamedItem* ni = pointer_list->items[i];
@@ -315,7 +315,7 @@ static ItemList*
 _new_item_list() {
 	ItemList* list = malloc(sizeof(ItemList));
 	assert(list != NULL);
-	
+
 	list->items = NULL;
 	list->capacity = 0;
 	list->count = 0;
