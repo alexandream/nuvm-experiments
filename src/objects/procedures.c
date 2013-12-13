@@ -69,6 +69,12 @@ n_procedure_new(NModule* mod,
 }
 
 
+bool
+n_is_procedure(NValue value) {
+	return n_typeof(value) == _type_id;
+}
+
+
 void
 n_procedure_destroy(NProcedure* self) {
 	if (self != NULL) {

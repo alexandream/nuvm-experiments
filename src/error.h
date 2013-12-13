@@ -9,10 +9,11 @@ enum {
 	N_E_INVALID_ARGUMENT,
 	N_E_OUT_OF_BOUNDS,
 	N_E_UNINITIALIZED_EVALUATOR,
-	N_E_TYPE_REGISTRY_CONFLICT
+	N_E_TYPE_REGISTRY_CONFLICT,
+	N_E_UNKNOWN_OPCODE
 };
 
-#define N_MAX_ERROR_MSG_LENGTH 128
+#define N_MAX_ERROR_MSG_LENGTH 255
 
 typedef struct {
 	uint32_t code;
@@ -27,5 +28,6 @@ void n_error_set(NError* error, uint32_t code);
 
 void n_error_set_msg(NError* error, const char* msg);
 
+void n_error_set_msgf(NError* error, const char* format, ...);
 #endif
 

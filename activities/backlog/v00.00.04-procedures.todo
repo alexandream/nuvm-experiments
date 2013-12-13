@@ -75,5 +75,5 @@ Target Tasks:
   x Create opcodes, encoders and decoders for instructions
     (global-ref, global-set, return)
   - Create the execution behaviour of the instructions;
-  - Add the fetch-run loop to the evaluator;
+  o Add the fetch-run loop to the evaluator;
 
