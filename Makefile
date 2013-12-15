@@ -12,8 +12,8 @@ TESTED_CFLAGS=$(CFLAGS) -DRUNNING_TESTS -Werror
 TEST_CFLAGS=$(CFLAGS) -I src/ -Wno-variadic-macros -Werror
 TEST_LIBS=-L build/tested -lnuvm -L build/atest -latest
 
-TEST_SOURCE_FILES=$(wildcard test/suites/*.c)
-TEST_OBJ_FILES=$(TEST_SOURCE_FILES:test/suites/%.c=build/test/%.o)
+TEST_SOURCE_FILES=$(wildcard tests/suites/*.c)
+TEST_OBJ_FILES=$(TEST_SOURCE_FILES:tests/suites/%.c=build/tests/%.o)
 
 all:build/tested/libnuvm.a
 
@@ -25,8 +25,8 @@ build/tested/libnuvm.a: $(TESTED_OBJ_FILES)
 	@ar rcs build/tested/libnuvm.a $^
 
 
-build/atest/libatest.a: test/atest/src/atest.c test/atest/src/atest.h
-	@${CC} -o build/atest.o -c test/atest/src/atest.c ${TEST_CFLAGS}
+build/atest/libatest.a: tests/atest/src/atest.c tests/atest/src/atest.h
+	@${CC} -o build/atest.o -c tests/atest/src/atest.c ${TEST_CFLAGS}
 	@ar rcs build/atest/libatest.a build/atest.o
 
 
@@ -34,22 +34,22 @@ build/tested/%.o: src/%.c
 	@${CC} -c $< -o $@ ${TESTED_CFLAGS}
 	@${CC} -MM -MT $@ $(TESTED_CFLAGS) $< > $(@:.o=.d)
 
-build/test/runner: build/tested/libnuvm.a \
+build/tests/runner: build/tested/libnuvm.a \
                    build/atest/libatest.a \
-                   build/test/runner.o \
+                   build/tests/runner.o \
                    $(TEST_OBJ_FILES)
-	@${CC} -o build/test/runner $^ ${TEST_LIBS}
+	@${CC} -o build/tests/runner $^ ${TEST_LIBS}
 
-build/test/runner.o: test/runner.c
+build/tests/runner.o: tests/runner.c
 	@${CC} -c $< -o $@ ${TEST_CFLAGS}
 
 
-build/test/%.o: test/suites/%.c
+build/tests/%.o: tests/suites/%.c
 	@${CC} -c $< -o $@ ${TEST_CFLAGS}
 
 
-test: build/test/runner
-	@./build/test/runner
+test: build/tests/runner
+	@./build/tests/runner
 
 
 clean:
@@ -63,7 +63,7 @@ clean:
 	       build/tested/*.d\
 	       build/atest/*.o\
 	       build/atest/*.d\
-	       build/test/*.o\
-	       build/test/*.d\
-	       build/test/runner
+	       build/tests/*.o\
+	       build/tests/*.d\
+	       build/tests/runner
 
