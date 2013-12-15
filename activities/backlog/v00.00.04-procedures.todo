@@ -74,6 +74,6 @@ Target Tasks:
   x Representation for user defined procedures;
   x Create opcodes, encoders and decoders for instructions
     (global-ref, global-set, return)
-  - Create the execution behaviour of the instructions;
-  o Add the fetch-run loop to the evaluator;
+  x Create the execution behaviour of the instructions;
+  x Add the fetch-run loop to the evaluator;
 

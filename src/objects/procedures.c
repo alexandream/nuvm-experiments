@@ -61,7 +61,7 @@ n_procedure_new(NModule* mod,
 		n_error_set_msg(error, "self");
 		return NULL;
 	}
-
+	self->parent.type_id = _type_id;
 	self->module = mod;
 	self->num_locals = nlocals;
 	self->entry_point = entry;

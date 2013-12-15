@@ -11,6 +11,7 @@
 #include "memory.h"
 
 #include "objects/primitives.h"
+#include "objects/procedures.h"
 
 static NValue
 test_constant_runner(NValue constant);
@@ -81,6 +82,45 @@ TEST(primitive_evaluator_runs_primitive) {
 	n_free(ptr1);
 	n_free(ptr2);
 }
+
+
+TEST(swap_two_global_values) {
+	NError error;
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(3, 0, 5, NULL);
+	NProcedure* proc;
+	NValue result;
+	NValue reg1, reg2;
+
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 1, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod, 2, n_op_global_set(1, 1), NULL);
+	n_module_set_instruction(mod, 3, n_op_global_set(2, 0), NULL);
+	n_module_set_instruction(mod, 4, n_op_return(0), NULL);
+
+	n_module_set_register(mod, 1, n_wrap_fixnum(10588), NULL);
+	n_module_set_register(mod, 2, n_wrap_fixnum(42), NULL);
+
+	proc = n_procedure_new(mod, 0, 2, NULL);
+	n_module_set_register(mod, 0, n_wrap_pointer(proc), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	EXPECT(n_is_equal(result, n_wrap_fixnum(10588)));
+
+	reg1 = n_module_get_register(mod, 1, NULL);
+	reg2 = n_module_get_register(mod, 2, NULL);
+	EXPECT(n_is_equal(reg1, n_wrap_fixnum(42)));
+	EXPECT(n_is_equal(reg2, n_wrap_fixnum(10588)));
+
+	n_procedure_destroy(proc);
+	n_module_destroy(mod);
+	n_evaluator_destroy(eval);
+
+}
+
 
 /* ----- Auxiliary functions ----- */
 static NValue

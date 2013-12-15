@@ -82,8 +82,12 @@ test_construction(NModule* mod, uint32_t entry, uint8_t nlocals) {
 	EXPECT_MSG(error.code == N_E_OK,
 		"Procedure construction (%p, %u, %u) generated error code %u.",
 		mod, entry, nlocals, error.code);
-	
+
 	ASSERT(proc != NULL);
+	ASSERT_MSG(n_is_procedure(n_wrap_pointer(proc)),
+		"Procedure constructed from module %p, with entry point %u and %u "
+		"locals failed to be recognized as procedure.",
+		mod, entry, nlocals);
 
 	out_mod = n_procedure_get_module(proc);
 	out_entry = n_procedure_get_entry_point(proc);
@@ -100,7 +104,6 @@ test_construction(NModule* mod, uint32_t entry, uint8_t nlocals) {
 		"Procedure constructed with locals count %u got locals count "
 		"reported as %u.",
 		nlocals, out_nlocals);
-
 	n_procedure_destroy(proc);
 }
 
@@ -132,7 +135,7 @@ static void
 test_invalid_module_construction(uint32_t entry, uint8_t nlocals) {
 	NError error;
 	NProcedure* proc = n_procedure_new(NULL, entry, nlocals, &error);
-	
+
 	EXPECT_MSG(error.code == N_E_INVALID_ARGUMENT,
 		"Procedure construction with null module with entry point %u "
 		"and locals size %u reported wrong error code %u. "
