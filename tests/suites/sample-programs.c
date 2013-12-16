@@ -14,6 +14,9 @@
 #include "objects/procedures.h"
 
 static NValue
+increment_fixnum(void*data, NValue arg, NError*);
+
+static NValue
 run_value_selection_if(NValue condition, NValue v1, NValue v2);
 
 static NValue
@@ -21,6 +24,9 @@ run_value_selection_unless(NValue condition, NValue v1, NValue v2);
 
 static NValue
 test_constant_runner(NValue constant);
+
+static void
+test_increment_fixnum_using_primitive(int32_t fixnum);
 
 static NValue
 toggle_bool(void*, NValue arg, NError*);
@@ -75,6 +81,13 @@ TEST(constant_evaluator_returns_constant) {
 	n_free(ptr2);
 }
 
+
+TEST(increment_fixnum_using_primitive) {
+	test_increment_fixnum_using_primitive(0);
+	test_increment_fixnum_using_primitive(1);
+	test_increment_fixnum_using_primitive(1234567899);
+	test_increment_fixnum_using_primitive(-1234567899);
+}
 
 
 TEST(primitive_evaluator_runs_primitive) {
@@ -165,6 +178,13 @@ TEST(swap_two_global_values) {
 /* ----- Auxiliary functions ----- */
 
 static NValue
+increment_fixnum(void*data, NValue arg, NError* error) {
+	int32_t i_arg = n_unwrap_fixnum(arg);
+	return n_wrap_fixnum(i_arg+1);
+}
+
+
+static NValue
 run_value_selection_if(NValue condition, NValue v1, NValue v2) {
 	NError error;
 	NProcedure* proc;
@@ -244,6 +264,46 @@ test_constant_runner(NValue constant) {
 }
 
 
+static void
+test_increment_fixnum_using_primitive(int32_t fixnum) {
+	NError error;
+	NValue result;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(3, 0, 4, NULL);
+
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 1, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod, 2, n_op_call_sva(0, 1, 0), NULL);
+	n_module_set_instruction(mod, 3, n_op_return(0), NULL);
+
+	{
+		NPrimitive* primitive =
+			n_primitive_new(increment_fixnum, NULL, NULL);
+
+		NValue primitive_val = n_wrap_pointer(primitive);
+
+		NProcedure* procedure = n_procedure_new(mod, 0, 2, NULL);
+		NValue procedure_val = n_wrap_pointer(procedure);
+
+		NValue fixnum_val = n_wrap_fixnum(fixnum);
+
+		n_module_set_register(mod, 0, procedure_val, NULL);
+		n_module_set_register(mod, 1, fixnum_val, NULL);
+		n_module_set_register(mod, 2, primitive_val, NULL);
+	}
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	EXPECT(n_is_fixnum(result));
+
+	EXPECT_MSG(n_unwrap_fixnum(result) == fixnum + 1,
+		"Expected result of %d, but got %d instead.",
+		fixnum + 1, n_unwrap_fixnum(result));
+
+}
 
 
 static NValue

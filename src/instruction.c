@@ -22,6 +22,8 @@ n_decode_call_sva(NInstruction inst,
 	*func = inst.base.arg2;
 	*arg  = inst.base.arg3;
 }
+
+
 void
 n_decode_global_ref(NInstruction inst, uint8_t* dest, uint16_t* src) {
 	*dest = inst.base.arg1;

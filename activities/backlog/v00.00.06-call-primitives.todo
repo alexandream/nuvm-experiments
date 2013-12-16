@@ -32,7 +32,7 @@ Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
   x Create instruction encoding for call-sva;
-  - Create instruction behaviour for call-sva;
-  - Add the instruction to fetch-run-loop;
-  - Create sample test program (increment integer);
+  x Create instruction behaviour for call-sva;
+  x Add the instruction to fetch-run-loop;
+  x Create sample test program (increment integer);
 

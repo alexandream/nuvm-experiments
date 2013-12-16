@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
 
 #include "memory.h"
@@ -14,6 +15,9 @@ _get_global(NEvaluator*, uint16_t);
 
 static NValue
 _get_local(NEvaluator*, uint8_t);
+
+static uint32_t
+_op_call_sva(NEvaluator*, NInstruction);
 
 static uint32_t
 _op_global_ref(NEvaluator*, NInstruction);
@@ -123,6 +127,26 @@ _get_local(NEvaluator* self, uint8_t index) {
 
 
 static uint32_t
+_op_call_sva(NEvaluator* self, NInstruction inst) {
+	NValue func_val, arg, result;
+	uint8_t l_dest, l_func, l_arg;
+	NPrimitive* prim;
+	
+	n_decode_call_sva(inst, &l_dest, &l_func, &l_arg);
+	func_val = _get_local(self, l_func);
+	arg = _get_local(self, l_arg);
+	
+	assert(n_is_primitive(func_val));
+
+	prim = n_unwrap_pointer(func_val);
+	result = n_primitive_call(prim, arg, NULL);
+	_set_local(self, l_dest, result);
+
+	return self->code_pointer +1;
+}
+
+
+static uint32_t
 _op_global_ref(NEvaluator* self, NInstruction inst) {
 	uint8_t dest;
 	uint16_t source;
@@ -228,6 +252,9 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 		               NULL); /* TODO: Handle errors here. */
 
 	switch(inst.base.opcode) {
+		case N_OP_CALL_SVA:
+			next_instruction = _op_call_sva(self, inst);
+			break;
 		case N_OP_GLOBAL_REF:
 			next_instruction = _op_global_ref(self, inst);
 			break;
