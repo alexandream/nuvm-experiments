@@ -94,7 +94,7 @@ n_evaluator_run(NEvaluator* self, NError* error) {
 		return _run_loop(self, n_unwrap_pointer(entry), error);
 	}
 	else if (n_is_primitive(entry)) {
-		return n_primitive_call(n_unwrap_pointer(entry), error);
+		return n_primitive_call(n_unwrap_pointer(entry), N_UNDEFINED, error);
 	}
 	else {
 		return entry;

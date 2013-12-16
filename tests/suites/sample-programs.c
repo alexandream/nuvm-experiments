@@ -23,10 +23,12 @@ static NValue
 test_constant_runner(NValue constant);
 
 static NValue
-wrap_input(void*, NError*);
+toggle_bool(void*, NValue arg, NError*);
 
 static NValue
-toggle_bool(void*, NError*);
+wrap_input(void*, NValue arg, NError*);
+
+
 
 TEST(choose_between_two_global_values_using_if) {
 	NValue f12345 = n_wrap_fixnum(12345);
@@ -72,6 +74,7 @@ TEST(constant_evaluator_returns_constant) {
 	n_free(ptr1);
 	n_free(ptr2);
 }
+
 
 
 TEST(primitive_evaluator_runs_primitive) {
@@ -160,6 +163,7 @@ TEST(swap_two_global_values) {
 
 
 /* ----- Auxiliary functions ----- */
+
 static NValue
 run_value_selection_if(NValue condition, NValue v1, NValue v2) {
 	NError error;
@@ -240,16 +244,18 @@ test_constant_runner(NValue constant) {
 }
 
 
-static NValue
-wrap_input(void* data, NError* error) {
-	return n_wrap_pointer(data);
-}
 
 
 static NValue
-toggle_bool(void* data, NError* error) {
+toggle_bool(void* data, NValue arg, NError* error) {
 	NValue result;
 	bool* flag = (bool*) data;
 	*flag = !(*flag);
 	return result;
+}
+
+
+static NValue
+wrap_input(void* data, NValue arg, NError* error) {
+	return n_wrap_pointer(data);
 }

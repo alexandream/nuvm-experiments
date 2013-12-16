@@ -137,6 +137,24 @@ TEST(wrapped_fixnums_are_not_pointers) {
 }
 
 
+TEST(wrapped_fixnums_unwrap_to_original_value) {
+	ItemList* list = _get_fixnums();
+	int32_t i;
+	for (i = 0; i < list->count; i++) {
+		const char* name = list->items[i]->name;
+		int32_t fixnum = list->items[i]->item.fixnum;
+		NValue value = n_wrap_fixnum(fixnum);
+		int32_t out_fixnum = n_unwrap_fixnum(value);
+
+		EXPECT_MSG(fixnum == out_fixnum,
+		           "After wrapping and unwrapping, fixnum %s [%d] "
+		           "reported final value %d.",
+		           name, fixnum, out_fixnum);
+	}
+	_destroy_list(list);
+}
+
+
 TEST(wrapped_pointers_are_pointers) {
 	ItemList* list = _get_pointers();
 	int32_t i;
@@ -151,6 +169,7 @@ TEST(wrapped_pointers_are_pointers) {
 	}
 	_destroy_list(list);
 }
+
 
 TEST(wrapped_pointers_are_not_fixnums) {
 	ItemList* list = _get_pointers();

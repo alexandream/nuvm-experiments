@@ -11,10 +11,10 @@
 #include "memory.h"
 
 static NValue
-toggle_bool(void* data, NError* error);
+toggle_bool(void* data, NValue, NError* error);
 
 static NValue
-wrap_input(void* data, NError* error);
+wrap_input(void* data, NValue, NError* error);
 
 
 TEST(type_information_is_registered) {
@@ -47,14 +47,14 @@ TEST(execution_of_primitive_sees_data) {
 	bool checked = false;
 	NPrimitive* primitive = n_primitive_new(toggle_bool, &checked, &error);
 
-	n_primitive_call(primitive, &error);
+	n_primitive_call(primitive, N_UNDEFINED, &error);
 
 	ASSERT_MSG(checked != false,
 		"Upon execution of toggle_bool primitive, checked should be updated "
 		"to a non-false value but wasn't. Got checked: %d.",
 		checked);
 
-	n_primitive_call(primitive, &error);
+	n_primitive_call(primitive, N_UNDEFINED, &error);
 	ASSERT_MSG(checked == false,
 		"Upon second execution of toggle_bool primitive, checked should be "
 		"updated to a false value but wasn't. Got checked: %d.",
@@ -67,7 +67,7 @@ TEST(execution_of_primitive_sees_data) {
 TEST(execution_of_primitive_returns_function_result) {
 	void* heap_addr = n_alloc_unmanaged(sizeof(NValue));
 	NPrimitive* primitive = n_primitive_new(wrap_input, heap_addr, NULL);
-	NValue result = n_primitive_call(primitive, NULL);
+	NValue result = n_primitive_call(primitive, N_UNDEFINED, NULL);
 
 	EXPECT(n_is_pointer(result));
 	EXPECT(n_unwrap_pointer(result) == heap_addr);
@@ -79,7 +79,7 @@ TEST(execution_of_primitive_returns_function_result) {
 /* ----- Auxiliary Functions ----- */
 
 static NValue
-toggle_bool(void* data, NError* error) {
+toggle_bool(void* data, NValue arg, NError* error) {
 	NValue result;
 	bool* checked = (bool*) data;
 
@@ -89,6 +89,6 @@ toggle_bool(void* data, NError* error) {
 
 
 static NValue
-wrap_input(void* data, NError* error) {
+wrap_input(void* data, NValue arg, NError* error) {
 	return n_wrap_pointer(data);
 }

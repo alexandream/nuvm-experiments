@@ -27,11 +27,11 @@ Target Description:
   being called and a local storing the argument to be passed to the
   primitive.
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-16 00:45
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Create instruction encoding for call-sva;
+  x Create instruction encoding for call-sva;
   - Create instruction behaviour for call-sva;
   - Add the instruction to fetch-run-loop;
   - Create sample test program (increment integer);

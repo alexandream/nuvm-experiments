@@ -21,6 +21,27 @@ TEST(instructions_fit_32_bits) {
 }
 
 
+TEST(op_call_sva_encoding) {
+	NInstruction inst = n_op_call_sva(0x01, 0x02, 0x03);
+	uint8_t dest, func, arg;
+
+	EXPECT_MSG(inst.base.opcode == N_OP_CALL_SVA,
+		"Expected opcode %u, got %u.",
+		N_OP_CALL_SVA, inst.base.opcode);
+
+	n_decode_call_sva(inst, &dest, &func, &arg);
+	EXPECT_MSG(dest == 0x01,
+		"Expected destination to be 0x01, got 0x%02X.",
+		dest);
+	EXPECT_MSG(func == 0x02,
+		"Expected function to be 0x02, got 0x%02X.",
+		func);
+	EXPECT_MSG(arg == 0x03,
+		"Expected argument to be 0x03, got 0x%02X.",
+		arg);
+}
+
+
 TEST(op_global_ref_encoding) {
 	NInstruction inst = n_op_global_ref(0x01, 0xBEEF);
 	uint8_t l_dest;

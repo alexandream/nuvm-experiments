@@ -94,6 +94,12 @@ n_unwrap_pointer(NValue value) {
 	return value.pointer;
 }
 
+
+int32_t
+n_unwrap_fixnum(NValue value) {
+	return value.immediate.fixnum;
+}
+
 bool
 n_is_boolean(NValue value) {
 	return n_typeof(value) == _bool_type_id;
