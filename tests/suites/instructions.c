@@ -3,19 +3,22 @@
 
 #include "instruction.h"
 
+static void
+test_op_jump_if_encoding(uint8_t condition, int16_t offset);
+
+
 TEST(instructions_fit_32_bits) {
 	EXPECT(sizeof(NInstruction) == 4);
 }
 
 
-TEST(pack_ordering_is_correct) {
-	NInstruction inst = n_instruction(0x00, 0x01, 0x02, 0x03);
-	EXPECT_MSG(inst.contents == 0x00010203,
-		"Expected instruction layout to replicate 0x00010203, "
-		"but got 0x%08X instead.",
-		inst.contents);
+TEST(op_jump_if_encoding) {
+	test_op_jump_if_encoding(0, -32768);
+	test_op_jump_if_encoding(1, -1);
+	test_op_jump_if_encoding(2, 0);
+	test_op_jump_if_encoding(3, 1);
+	test_op_jump_if_encoding(4, 32767);
 }
-
 
 TEST(op_global_ref_encoding) {
 	NInstruction inst = n_op_global_ref(0x01, 0xBEEF);
@@ -67,4 +70,39 @@ TEST(op_return_encoding) {
 	EXPECT_MSG(l_src == 0x28,
 		"Expected source to be 0x28, got 0x%02X.",
 		l_src);
+}
+
+
+TEST(pack_ordering_is_correct) {
+	NInstruction inst = n_instruction(0x00, 0x01, 0x02, 0x03);
+	EXPECT_MSG(inst.contents == 0x00010203,
+		"Expected instruction layout to replicate 0x00010203, "
+		"but got 0x%08X instead.",
+		inst.contents);
+}
+
+/* ----- Auxiliary Functions ----- */
+
+static void
+test_op_jump_if_encoding(uint8_t condition, int16_t offset) {
+	uint8_t out_condition;
+	int16_t out_offset;
+
+	NInstruction inst = n_op_jump_if(condition, offset);
+
+	EXPECT_MSG(inst.base.opcode == N_OP_JUMP_IF,
+		"JUMP-IF returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		inst.base.opcode, condition, offset);
+
+	n_decode_jump_if(inst, &out_condition, &out_offset);
+
+	EXPECT_MSG(out_condition == condition,
+		"JUMP-IF returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		out_condition, condition, offset);
+	EXPECT_MSG(out_offset == offset,
+		"JUMP-IF returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		out_offset, condition, offset);
 }
