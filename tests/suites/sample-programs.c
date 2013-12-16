@@ -14,6 +14,12 @@
 #include "objects/procedures.h"
 
 static NValue
+run_value_selection_if(NValue condition, NValue v1, NValue v2);
+
+static NValue
+run_value_selection_unless(NValue condition, NValue v1, NValue v2);
+
+static NValue
 test_constant_runner(NValue constant);
 
 static NValue
@@ -21,6 +27,37 @@ wrap_input(void*, NError*);
 
 static NValue
 toggle_bool(void*, NError*);
+
+TEST(choose_between_two_global_values_using_if) {
+	NValue f12345 = n_wrap_fixnum(12345);
+	NValue f54321 = n_wrap_fixnum(54321);
+	NValue result;
+
+	result = run_value_selection_if(N_TRUE, f12345, f54321);
+	EXPECT(n_is_equal(result, f12345));
+
+	result = run_value_selection_if(f54321, f12345, f54321);
+	EXPECT(n_is_equal(result, f12345));
+
+	result = run_value_selection_if(N_FALSE, f12345, f54321);
+	EXPECT(n_is_equal(result, f54321));
+}
+
+
+TEST(choose_between_two_global_values_using_unless) {
+	NValue f12345 = n_wrap_fixnum(12345);
+	NValue f54321 = n_wrap_fixnum(54321);
+	NValue result;
+
+	result = run_value_selection_unless(N_TRUE, f12345, f54321);
+	EXPECT(n_is_equal(result, f54321));
+
+	result = run_value_selection_unless(f54321, f12345, f54321);
+	EXPECT(n_is_equal(result, f54321));
+
+	result = run_value_selection_unless(N_FALSE, f12345, f54321);
+	EXPECT(n_is_equal(result, f12345));
+}
 
 
 TEST(constant_evaluator_returns_constant) {
@@ -123,6 +160,68 @@ TEST(swap_two_global_values) {
 
 
 /* ----- Auxiliary functions ----- */
+static NValue
+run_value_selection_if(NValue condition, NValue v1, NValue v2) {
+	NError error;
+	NProcedure* proc;
+	NValue result;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(4, 0, 6, NULL);
+
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 1, n_op_jump_if(0, 3), NULL);
+	n_module_set_instruction(mod, 2, n_op_global_ref(1, 3), NULL);
+	n_module_set_instruction(mod, 3, n_op_jump(2), NULL);
+	n_module_set_instruction(mod, 4, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod, 5, n_op_return(1), NULL);
+
+	n_module_set_register(mod, 1, condition, NULL);
+	n_module_set_register(mod, 2, v1, NULL);
+	n_module_set_register(mod, 3, v2, NULL);
+
+	proc = n_procedure_new(mod, 0, 6, NULL);
+	n_module_set_register(mod, 0, n_wrap_pointer(proc), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	return result;
+}
+
+
+static NValue
+run_value_selection_unless(NValue condition, NValue v1, NValue v2) {
+	NError error;
+	NProcedure* proc;
+	NValue result;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(4, 0, 6, NULL);
+
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 1, n_op_jump_unless(0, 3), NULL);
+	n_module_set_instruction(mod, 2, n_op_global_ref(1, 3), NULL);
+	n_module_set_instruction(mod, 3, n_op_jump(2), NULL);
+	n_module_set_instruction(mod, 4, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod, 5, n_op_return(1), NULL);
+
+	n_module_set_register(mod, 1, condition, NULL);
+	n_module_set_register(mod, 2, v1, NULL);
+	n_module_set_register(mod, 3, v2, NULL);
+
+	proc = n_procedure_new(mod, 0, 6, NULL);
+	n_module_set_register(mod, 0, n_wrap_pointer(proc), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	return result;
+}
+
+
 static NValue
 test_constant_runner(NValue constant) {
 	NError error;

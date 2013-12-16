@@ -22,6 +22,15 @@ static uint32_t
 _op_global_set(NEvaluator*, NInstruction);
 
 static uint32_t
+_op_jump(NEvaluator* self, NInstruction inst);
+
+static uint32_t
+_op_jump_if(NEvaluator* self, NInstruction inst);
+
+static uint32_t
+_op_jump_unless(NEvaluator* self, NInstruction inst);
+
+static uint32_t
 _op_return(NEvaluator*, NInstruction, bool* halt, NValue* result);
 
 static NValue
@@ -138,14 +147,73 @@ _op_global_set(NEvaluator* self, NInstruction inst) {
 }
 
 
+static uint32_t
+_op_jump(NEvaluator* self, NInstruction inst) {
+	int32_t offset;
+	
+	n_decode_jump(inst, &offset);
+	return self->code_pointer + offset;
+}
+
+
+static uint32_t
+_op_jump_if(NEvaluator* self, NInstruction inst) {
+	uint8_t cond;
+	int16_t offset;
+	
+	uint32_t result = self->code_pointer +1;
+
+	n_decode_jump_if(inst, &cond, &offset);
+	if (!n_is_equal(_get_local(self, cond), N_FALSE)) {
+		result = self->code_pointer + offset;
+	}
+	return result;
+}
+
+
+static uint32_t
+_op_jump_unless(NEvaluator* self, NInstruction inst) {
+	uint8_t cond;
+	int16_t offset;
+	
+	uint32_t result = self->code_pointer +1;
+
+	n_decode_jump_if(inst, &cond, &offset);
+	if (n_is_equal(_get_local(self, cond), N_FALSE)) {
+		result = self->code_pointer + offset;
+	}
+	return result;
+
+}
+
+
+static uint32_t
+_op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
+	uint8_t source;
+	n_decode_return(inst, &source);
+	*result = _get_local(self, source);
+	*halt = true;
+	return self->code_pointer;
+}
+
+
 static NValue
 _run_loop(NEvaluator* self, NProcedure* proc, NError* error) {
+	NError inner_error;
 	NValue result;
 	bool halt = false;
 	self->current_module = n_procedure_get_module(proc);
 	self->code_pointer = n_procedure_get_entry_point(proc);
+	
+	if (error == NULL) {
+		error = &inner_error;
+	}
+	
 	while (!halt) {
 		self->code_pointer = _step(self, &result, &halt, error);
+		if (error->code != N_E_OK) {
+			halt = true;
+		}	
 	}
 	return result;
 }
@@ -166,6 +234,15 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 		case N_OP_GLOBAL_SET:
 			next_instruction = _op_global_set(self, inst);
 			break;
+		case N_OP_JUMP:
+			next_instruction = _op_jump(self, inst);
+			break;
+		case N_OP_JUMP_IF:
+			next_instruction = _op_jump_if(self, inst);
+			break;
+		case N_OP_JUMP_UNLESS:
+			next_instruction = _op_jump_unless(self, inst);
+			break;
 		case N_OP_RETURN:
 			next_instruction = _op_return(self, inst, halt, result);
 			break;
@@ -176,16 +253,6 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 			break;
 	}
 	return next_instruction;
-}
-
-
-static uint32_t
-_op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
-	uint8_t source;
-	n_decode_return(inst, &source);
-	*result = _get_local(self, source);
-	*halt = true;
-	return self->code_pointer;
 }
 
 

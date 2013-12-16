@@ -29,7 +29,7 @@ n_decode_global_set(NInstruction inst, uint16_t* dest, uint8_t* src) {
 
 void
 n_decode_jump(NInstruction inst, int32_t* offset) {
-	int32_t result = 0  |
+	int32_t result = 0           |
 	        inst.base.arg1 << 16 |
 	        inst.base.arg2 << 8  |
 	        inst.base.arg3;
