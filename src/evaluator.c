@@ -93,7 +93,6 @@ struct NEvaluator {
 	uint32_t code_pointer;
 	int32_t stack_pointer;
 	NStack stack;
-	NValue locals[256];
 };
 
 
@@ -195,7 +194,8 @@ _get_global(NEvaluator* self, uint16_t index) {
 
 static NValue
 _get_local(NEvaluator* self, uint8_t index) {
-	return self->locals[index];
+	int32_t stack_index = self->stack_pointer + N_STACK_SLOTS + index;
+	return n_stack_get(&self->stack, stack_index);
 }
 
 
@@ -392,7 +392,8 @@ _set_global(NEvaluator* self, uint16_t index, NValue val) {
 
 static void
 _set_local(NEvaluator* self, uint8_t index, NValue val) {
-	self->locals[index] = val;
+	int32_t stack_index = self->stack_pointer + N_STACK_SLOTS + index;
+	n_stack_set(&self->stack, stack_index, val);
 }
 
 

@@ -63,7 +63,7 @@ Target Tasks:
   x Create the stack pointer member of the evaluator;
   x Update execution of modules with procedures as entry point to store locals
     in the stack and set up a halting stack frame;
-  - Update the return instruction to halt when finding a stack frame with
+  x Update the return instruction to halt when finding a stack frame with
     Undefined  as callee;
   - Update the call-sva instruction to allow for calling procedures along
     with primitives;
