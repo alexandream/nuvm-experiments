@@ -35,6 +35,13 @@ n_decode_jump_if(NInstruction inst, uint8_t* cond, int16_t* offset) {
 
 
 void
+n_decode_jump_unless(NInstruction inst, uint8_t* cond, int16_t* offset) {
+	*offset = (int16_t) pack_8s_as_16(inst.base.arg2, inst.base.arg3);
+	*cond = inst.base.arg1;
+}
+
+
+void
 n_decode_return(NInstruction inst, uint8_t* src) {
 	*src = inst.base.arg1;
 }
@@ -61,6 +68,15 @@ n_op_jump_if(uint8_t cond, int16_t offset) {
 	uint8_t arg2, arg3;
 	unpack_16_to_8s((uint16_t)offset, &arg2, &arg3);
 	return n_instruction(N_OP_JUMP_IF, cond, arg2, arg3);
+
+}
+
+
+NInstruction
+n_op_jump_unless(uint8_t cond, int16_t offset) {
+	uint8_t arg2, arg3;
+	unpack_16_to_8s((uint16_t)offset, &arg2, &arg3);
+	return n_instruction(N_OP_JUMP_UNLESS, cond, arg2, arg3);
 
 }
 

@@ -6,19 +6,14 @@
 static void
 test_op_jump_if_encoding(uint8_t condition, int16_t offset);
 
+static void
+test_op_jump_unless_encoding(uint8_t condition, int16_t offset);
+
 
 TEST(instructions_fit_32_bits) {
 	EXPECT(sizeof(NInstruction) == 4);
 }
 
-
-TEST(op_jump_if_encoding) {
-	test_op_jump_if_encoding(0, -32768);
-	test_op_jump_if_encoding(1, -1);
-	test_op_jump_if_encoding(2, 0);
-	test_op_jump_if_encoding(3, 1);
-	test_op_jump_if_encoding(4, 32767);
-}
 
 TEST(op_global_ref_encoding) {
 	NInstruction inst = n_op_global_ref(0x01, 0xBEEF);
@@ -55,6 +50,24 @@ TEST(op_global_set_encoding) {
 	EXPECT_MSG(l_src == 0xB0,
 		"Expected source to be 0xB0, got 0x%02X.",
 		l_src);
+}
+
+
+TEST(op_jump_if_encoding) {
+	test_op_jump_if_encoding(0, -32768);
+	test_op_jump_if_encoding(1, -1);
+	test_op_jump_if_encoding(2, 0);
+	test_op_jump_if_encoding(3, 1);
+	test_op_jump_if_encoding(4, 32767);
+}
+
+
+TEST(op_jump_unless_encoding) {
+	test_op_jump_unless_encoding(0, -32768);
+	test_op_jump_unless_encoding(1, -1);
+	test_op_jump_unless_encoding(2, 0);
+	test_op_jump_unless_encoding(3, 1);
+	test_op_jump_unless_encoding(4, 32767);
 }
 
 
@@ -103,6 +116,31 @@ test_op_jump_if_encoding(uint8_t condition, int16_t offset) {
 		out_condition, condition, offset);
 	EXPECT_MSG(out_offset == offset,
 		"JUMP-IF returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		out_offset, condition, offset);
+}
+
+
+static void
+test_op_jump_unless_encoding(uint8_t condition, int16_t offset) {
+	uint8_t out_condition;
+	int16_t out_offset;
+
+	NInstruction inst = n_op_jump_unless(condition, offset);
+
+	EXPECT_MSG(inst.base.opcode == N_OP_JUMP_UNLESS,
+		"JUMP-UNLESS returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		inst.base.opcode, condition, offset);
+
+	n_decode_jump_unless(inst, &out_condition, &out_offset);
+
+	EXPECT_MSG(out_condition == condition,
+		"JUMP-UNLESS returned wrong opcode %u "
+		"when built with condition %d and offset %d.",
+		out_condition, condition, offset);
+	EXPECT_MSG(out_offset == offset,
+		"JUMP-UNLESS returned wrong opcode %u "
 		"when built with condition %d and offset %d.",
 		out_offset, condition, offset);
 }
