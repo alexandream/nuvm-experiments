@@ -9,6 +9,15 @@
 #include "objects/primitives.h"
 #include "objects/procedures.h"
 
+#define N_STACK_SIZE 8192
+
+#define ARRAY_TYPE_NAME     NStack
+#define ARRAY_PREFIX        n_stack
+#define ARRAY_CONTENTS_TYPE NValue
+#define ARRAY_ELEMENTS__SKIP
+#define ARRAY_GET__SKIP
+#define ARRAY_SET__SKIP
+#include "util/array.h"
 
 static NValue
 _get_global(NEvaluator*, uint16_t);
@@ -53,8 +62,9 @@ _step(NEvaluator*, NValue*, bool*, NError*);
 struct NEvaluator {
 	NModule* current_module;
 	uint32_t code_pointer;
+	int32_t stack_pointer;
+	NStack stack;
 	NValue locals[256];
-
 };
 
 
@@ -69,12 +79,15 @@ n_evaluator_new(NError* error) {
 
 	self->current_module = NULL;
 	self->code_pointer = 0;
+	self->stack_pointer = 0;
+	n_stack_init(&self->stack, N_STACK_SIZE);
 	return self;
 }
 
 
 void
 n_evaluator_destroy(NEvaluator* self) {
+	n_stack_destroy(&self->stack);
 	n_free(self);
 }
 
@@ -111,6 +124,16 @@ n_evaluator_setup(NEvaluator* self, NModule* mod) {
 	self->current_module = mod;
 }
 
+
+int32_t
+n_evaluator_stack_capacity(NEvaluator* self) {
+	return n_stack_size(&self->stack);
+}
+
+int32_t
+n_evaluator_stack_pointer(NEvaluator* self) {
+	return self->stack_pointer;
+}
 
 /* ----- Auxiliary functions. ----- */
 

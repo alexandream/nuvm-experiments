@@ -51,25 +51,22 @@ Target Description:
 
   To finish it off, so we can detect when we're returning from the
   entry-point procedure instead of simply returning to a previous
-  caller, the caller procedure of the first frame is set to a new
-  singleton value, called Stack Bottom. When a return instruction is
-  asked to go back on a frame where the caller is Stack Bottom, this
-  signals the machine to halt.
+  caller, the caller procedure of the first frame is set to undefined.
+  When a return instruction is asked to go back on a frame where the
+  caller is undefined, this signals the machine to halt.
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-16 13:40
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Create the singleton for Stack Bottom;
-  - Give up the union on stack values, use value's uint64_t contents;
-  - Create the storage for the stack in the evaluator;
-  - Create the stack pointer member of the evaluator;
+  x Create the storage for the stack in the evaluator;
+  x Create the stack pointer member of the evaluator;
   - Update execution of modules with procedures as entry point to store locals
     in the stack and set up a halting stack frame;
   - Update the return instruction to halt when finding a stack frame with
-    the Stack Bottom as callee;
+    Undefined  as callee;
   - Update the call-sva instruction to allow for calling procedures along
     with primitives;
   - Update the return instruction to actually return to a previous
-    block when it is executed on a stack frame with a real caller;
+    procedure when it is executed on a stack frame with a real caller;
   - Write a sample program that uses the procedure call implemented above;

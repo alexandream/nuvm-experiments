@@ -51,11 +51,14 @@ void ARRAY_INIT(ARRAY_TYPE_NAME*array, ARRAY_SIZE_T size) {
 		(ARRAY_CONTENTS_TYPE*) ARRAY_ALLOCATOR(mem_size);
 }
 
+#ifndef ARRAY_GET__SKIP
 static
 ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME*array, ARRAY_SIZE_T index) {
 	return array->elements[index];
 }
+#endif
 
+#ifndef ARRAY_SET__SKIP
 static
 void ARRAY_SET(ARRAY_TYPE_NAME* array,
                ARRAY_SIZE_T index,
@@ -64,6 +67,7 @@ void ARRAY_SET(ARRAY_TYPE_NAME* array,
 		ARRAY_COPY_ELEMENT(&array->elements[index], &value);
 	} while(0);
 }
+#endif
 
 static
 void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
@@ -95,5 +99,6 @@ ARRAY_CONTENTS_TYPE* ARRAY_ELEMENTS(ARRAY_TYPE_NAME* array) {
 #undef ARRAY_DESTROY
 #undef ARRAY_SIZE
 #undef ARRAY_ELEMENTS
-#undef ARRAY__SKIP__ELEMENTS
-
+#undef ARRAY_ELEMENTS__SKIP
+#undef ARRAY_GET__SKIP
+#undef ARRAY_SET__SKIP

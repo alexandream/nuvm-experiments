@@ -22,3 +22,12 @@ TEST(running_uninitialized_evaluator_fails) {
 
 	n_evaluator_destroy(eval);
 }
+
+TEST(evaluator_construction_initializes_stack) {
+	NEvaluator* eval = n_evaluator_new(NULL);
+
+	EXPECT(n_evaluator_stack_pointer(eval) == 0);
+	EXPECT(n_evaluator_stack_capacity(eval) > 0);
+
+	n_evaluator_destroy(eval);
+}
