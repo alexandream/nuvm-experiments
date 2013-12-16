@@ -9,15 +9,29 @@
 #include "objects/primitives.h"
 #include "objects/procedures.h"
 
-#define N_STACK_SIZE 8192
 
 #define ARRAY_TYPE_NAME     NStack
 #define ARRAY_PREFIX        n_stack
 #define ARRAY_CONTENTS_TYPE NValue
 #define ARRAY_ELEMENTS__SKIP
-#define ARRAY_GET__SKIP
-#define ARRAY_SET__SKIP
 #include "util/array.h"
+
+#define N_STACK_SIZE 8192
+
+#define N_STACK_CALLER_SLOT        0
+#define N_STACK_CODE_POINTER_SLOT  1
+#define N_STACK_STACK_POINTER_SLOT 2
+#define N_STACK_RETURN_SLOT        3
+#define N_STACK_NUM_LOCALS_SLOT    4
+
+#define N_STACK_SLOTS 5
+
+
+static NValue
+_get_frame_caller(NEvaluator* self);
+
+static uint8_t
+_get_frame_num_locals(NEvaluator* self);
 
 static NValue
 _get_global(NEvaluator*, uint16_t);
@@ -47,7 +61,22 @@ static uint32_t
 _op_return(NEvaluator*, NInstruction, bool* halt, NValue* result);
 
 static NValue
-_run_loop(NEvaluator*, NProcedure*, NError*);
+_run_procedure(NEvaluator*, NProcedure*, NError*);
+
+static void
+_set_frame_caller(NEvaluator* self, NValue caller);
+
+static void
+_set_frame_code_pointer(NEvaluator* self, uint32_t code_pointer);
+
+static void
+_set_frame_num_locals(NEvaluator* self, uint8_t num_locals);
+
+static void
+_set_frame_return_storage(NEvaluator* self, uint8_t return_storage);
+
+static void
+_set_frame_stack_pointer(NEvaluator* self, int32_t stack_pointer);
 
 static void
 _set_global(NEvaluator*, uint16_t, NValue);
@@ -108,7 +137,7 @@ n_evaluator_run(NEvaluator* self, NError* error) {
 	}
 
 	if (n_is_procedure(entry)) {
-		return _run_loop(self, n_unwrap_pointer(entry), error);
+		return _run_procedure(self, n_unwrap_pointer(entry), error);
 	}
 	else if (n_is_primitive(entry)) {
 		return n_primitive_call(n_unwrap_pointer(entry), N_UNDEFINED, error);
@@ -137,6 +166,27 @@ n_evaluator_stack_pointer(NEvaluator* self) {
 
 /* ----- Auxiliary functions. ----- */
 
+static int32_t
+_calculate_next_stack_pointer(NEvaluator* self) {
+	uint8_t n_locals = _get_frame_num_locals(self);
+	return self->stack_pointer + n_locals + N_STACK_SLOTS;
+}
+
+
+static NValue
+_get_frame_caller(NEvaluator* self) {
+	int32_t caller_index = self->stack_pointer + N_STACK_CALLER_SLOT;
+	return n_stack_get(&self->stack, caller_index);
+}
+
+
+static uint8_t
+_get_frame_num_locals(NEvaluator* self) {
+	int32_t num_locals_index = self->stack_pointer + N_STACK_NUM_LOCALS_SLOT;
+	return (uint8_t) n_stack_get(&self->stack, num_locals_index).contents;
+}
+
+
 static NValue
 _get_global(NEvaluator* self, uint16_t index) {
 	return n_module_get_register(self->current_module, index, NULL);
@@ -147,6 +197,24 @@ static NValue
 _get_local(NEvaluator* self, uint8_t index) {
 	return self->locals[index];
 }
+
+
+static void
+_push_stack_frame(NEvaluator* self,
+                  NValue caller,
+                  uint8_t return_storage,
+                  uint8_t num_locals) {
+	int32_t old_stack_pointer = self->stack_pointer;
+
+	self->stack_pointer = _calculate_next_stack_pointer(self);
+	
+	_set_frame_caller(self, caller);
+	_set_frame_code_pointer(self, self->code_pointer);
+	_set_frame_stack_pointer(self, old_stack_pointer);
+	_set_frame_return_storage(self, return_storage);
+	_set_frame_num_locals(self, num_locals);
+}
+
 
 
 static uint32_t
@@ -224,7 +292,7 @@ _op_jump_unless(NEvaluator* self, NInstruction inst) {
 	int16_t offset;
 	
 	uint32_t result = self->code_pointer +1;
-
+	
 	n_decode_jump_if(inst, &cond, &offset);
 	if (n_is_equal(_get_local(self, cond), N_FALSE)) {
 		result = self->code_pointer + offset;
@@ -237,21 +305,28 @@ _op_jump_unless(NEvaluator* self, NInstruction inst) {
 static uint32_t
 _op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
 	uint8_t source;
+	NValue caller = _get_frame_caller(self);
+
 	n_decode_return(inst, &source);
-	*result = _get_local(self, source);
-	*halt = true;
+	if (n_is_equal(caller, N_UNDEFINED)) {
+		*result = _get_local(self, source);
+		*halt = true;
+	}
 	return self->code_pointer;
 }
 
 
 static NValue
-_run_loop(NEvaluator* self, NProcedure* proc, NError* error) {
+_run_procedure(NEvaluator* self, NProcedure* proc, NError* error) {
 	NError inner_error;
 	NValue result;
+	uint8_t num_locals = n_procedure_count_locals(proc);
 	bool halt = false;
+	
 	self->current_module = n_procedure_get_module(proc);
 	self->code_pointer = n_procedure_get_entry_point(proc);
-	
+	_push_stack_frame(self, N_UNDEFINED, num_locals, 0);
+
 	if (error == NULL) {
 		error = &inner_error;
 	}
@@ -263,6 +338,61 @@ _run_loop(NEvaluator* self, NProcedure* proc, NError* error) {
 		}	
 	}
 	return result;
+}
+
+
+static void
+_set_frame_caller(NEvaluator* self, NValue caller) {
+	int32_t slot = self->stack_pointer + N_STACK_CALLER_SLOT;
+	n_stack_set(&self->stack, slot, caller);
+}
+
+
+static void
+_set_frame_code_pointer(NEvaluator* self, uint32_t code_pointer) {
+	int32_t slot = self->stack_pointer + N_STACK_CODE_POINTER_SLOT;
+	NValue cp_val;
+	cp_val.contents = (uint64_t) code_pointer;
+	n_stack_set(&self->stack, slot, cp_val);
+}
+
+
+static void
+_set_frame_num_locals(NEvaluator* self, uint8_t num_locals) {
+	int32_t slot = self->stack_pointer + N_STACK_NUM_LOCALS_SLOT;
+	NValue num_locals_val;
+	num_locals_val.contents = (uint64_t) num_locals;
+	n_stack_set(&self->stack, slot, num_locals_val);
+}
+
+
+static void
+_set_frame_return_storage(NEvaluator* self, uint8_t return_storage) {
+	int32_t slot = self->stack_pointer + N_STACK_RETURN_SLOT;
+	NValue return_storage_val;
+	return_storage_val.contents = (uint64_t) return_storage;
+	n_stack_set(&self->stack, slot, return_storage_val);
+}
+
+
+static void
+_set_frame_stack_pointer(NEvaluator* self, int32_t stack_pointer) {
+	int32_t slot = self->stack_pointer + N_STACK_STACK_POINTER_SLOT;
+	NValue sp_val;
+	sp_val.contents = (uint64_t) stack_pointer;
+	n_stack_set(&self->stack, slot, sp_val);
+}
+
+
+static void
+_set_global(NEvaluator* self, uint16_t index, NValue val) {
+	n_module_set_register(self->current_module, index, val, NULL);
+}
+
+
+static void
+_set_local(NEvaluator* self, uint8_t index, NValue val) {
+	self->locals[index] = val;
 }
 
 
@@ -303,16 +433,4 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 			break;
 	}
 	return next_instruction;
-}
-
-
-static void
-_set_global(NEvaluator* self, uint16_t index, NValue val) {
-	n_module_set_register(self->current_module, index, val, NULL);
-}
-
-
-static void
-_set_local(NEvaluator* self, uint8_t index, NValue val) {
-	self->locals[index] = val;
 }

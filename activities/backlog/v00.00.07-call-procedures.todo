@@ -37,9 +37,9 @@ Target Description:
   [        callee local 2          ] NValue
   [        callee local 1          ] NValue
   [        callee local 0          ] NValue
-  [   caller return storage local  ] uint8_t
-  [     previous stack pointer     ] uint32_t
   [   number of locals in callee   ] uint8_t
+  [   caller return storage local  ] uint8_t
+  [      caller stack-pointer      ] uint32_t
   [       caller code-pointer      ] uint32_t
   [        caller procedure        ] NValue
 
@@ -61,7 +61,7 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   x Create the storage for the stack in the evaluator;
   x Create the stack pointer member of the evaluator;
-  - Update execution of modules with procedures as entry point to store locals
+  x Update execution of modules with procedures as entry point to store locals
     in the stack and set up a halting stack frame;
   - Update the return instruction to halt when finding a stack frame with
     Undefined  as callee;
