@@ -3,6 +3,12 @@
 
 #include "instruction.h"
 
+static int32_t
+encode_decode_op_jump(int32_t offset);
+
+static void
+test_op_jump_encoding(int32_t offset);
+
 static void
 test_op_jump_if_encoding(uint8_t condition, int16_t offset);
 
@@ -53,12 +59,45 @@ TEST(op_global_set_encoding) {
 }
 
 
+TEST(op_jump_correct_positive_encoding_works) {
+	test_op_jump_encoding(0);
+	test_op_jump_encoding(1);
+	test_op_jump_encoding(8388607);
+}
+
+
+TEST(op_jump_correct_negative_encoding_works) {
+	test_op_jump_encoding(-1);
+	test_op_jump_encoding(-8388608);
+}
+
+
 TEST(op_jump_if_encoding) {
 	test_op_jump_if_encoding(0, -32768);
 	test_op_jump_if_encoding(1, -1);
 	test_op_jump_if_encoding(2, 0);
 	test_op_jump_if_encoding(3, 1);
 	test_op_jump_if_encoding(4, 32767);
+}
+
+
+TEST(op_jump_positive_overflow_truncates) {
+	int32_t offset;
+	offset = encode_decode_op_jump(8388608);
+	EXPECT(offset == 8388607);
+
+	offset = encode_decode_op_jump(2147483647);
+	EXPECT(offset == 8388607);
+}
+
+
+TEST(op_jump_negative_overflow_truncates) {
+	int32_t offset;
+	offset = encode_decode_op_jump(-8388609);
+	EXPECT(offset == -8388608);
+
+	offset = encode_decode_op_jump(-2147483648);
+	EXPECT(offset == -8388608);
 }
 
 
@@ -95,6 +134,27 @@ TEST(pack_ordering_is_correct) {
 }
 
 /* ----- Auxiliary Functions ----- */
+
+static int32_t
+encode_decode_op_jump(int32_t offset) {
+	int32_t out_offset;
+	NInstruction inst = n_op_jump(offset);
+
+	n_decode_jump(inst, &out_offset);
+
+	return out_offset;
+}
+
+
+static void
+test_op_jump_encoding(int32_t offset) {
+	int32_t out_offset = encode_decode_op_jump(offset);
+	EXPECT_MSG(out_offset == offset,
+		"Decoding of op_jump encoded with offset %d "
+		"yielded different offset %d",
+		offset, out_offset);
+}
+
 
 static void
 test_op_jump_if_encoding(uint8_t condition, int16_t offset) {

@@ -33,7 +33,7 @@ Activity start:  2013-12-15 22:55
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create instruction encoder for jump;
+  x Create instruction encoder for jump;
   x Create instruction encoder for jump-if;
   x Create instruction encoder for jump-unless;
   - Create instruction behaviour for jump;
