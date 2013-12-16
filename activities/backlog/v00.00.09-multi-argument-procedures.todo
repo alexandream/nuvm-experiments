@@ -1,0 +1,43 @@
+Target Version:
+  v00.00.09
+
+Target Description:
+  Continuing the work of previous version, we now extend the call
+  instruction to be able to call procedures of many arguments, along
+  with the current support for primitives.
+
+  This changes the creation and unwinding of stack frames, to make
+  space for the arguments to be stored on the stack during a call.
+  
+  To lessen the number of instructions needed to access arguments, the
+  idea for now is to access arguments as if they were locals.  Since a
+  procedure knows how many locals it has, it's reasonable to accept
+  that procedure writers (and compilers) need to make the math to find
+  the location of arguments on the stack (that is, to find the nth
+  argument on the stack you access the local value on index
+  (number-of-locals + n).
+
+  There's a trade-off here, though: The machine as it is now is
+  capable of indexing only a small number of locals (256) and there
+  might happen that we overflow that number with procedures taking
+  many arguments and declaring many locals at the same time. We'll
+  worry about that later, if needed, profiling real world programs and
+  investigating how much local storage pressure we usually run into.
+
+  Along with the arguments, the stack frame will need another register
+  to hold the number of arguments provided at the time of call, so a
+  procedure can know how far its stack frame extends in case it needs
+  to call another procedure during its execution.
+  
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks:
+  - Extend stack frames to hold number of arguments passed to the
+    procedure being executed;
+  - Modify frame setup to reserve space for the current procedure's
+    arguments;
+  - Modify call instruction to copy the parameters onto the callee
+    stack frame;
+  - Sample program: return the maximum value between two integers;
