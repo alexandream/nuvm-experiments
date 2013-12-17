@@ -14,7 +14,20 @@
 #include "objects/procedures.h"
 
 static NValue
+add_many_fixnums(void* data, NValue* args, uint8_t n_args, NError*);
+
+static NValue
+fixnum_less_than(void* data, NValue* args, uint8_t n_args, NError* error);
+
+static NValue
 increment_fixnum(void*data, NValue* args, uint8_t nargs, NError*);
+
+static void
+run_less_than_with_primitives(int32_t a, int32_t b);
+
+static void
+run_sum_of_fixnums(int32_t a1, int32_t a2, int32_t a3, int32_t a4,
+                   int32_t a5, int32_t a6, int32_t a7);
 
 static NValue
 run_value_selection_if(NValue condition, NValue v1, NValue v2);
@@ -95,7 +108,15 @@ TEST(increment_fixnum_using_primitive) {
 
 TEST(increment_fixnums_on_multiple_procedures) {
 	test_increment_fixnums_on_many_proceures(1, 2, 3);
-/*	test_increment_fixnums_on_many_proceures(234242, 23456212, 66546113); */
+	test_increment_fixnums_on_many_proceures(234242, 23456212, 66546113);
+}
+
+
+TEST(less_than_with_primitives) {
+	run_less_than_with_primitives(1, 2);
+	run_less_than_with_primitives(10, 2);
+	run_less_than_with_primitives(-431, 2);
+	run_less_than_with_primitives(121, 122);
 }
 
 
@@ -146,6 +167,12 @@ TEST(primitive_evaluator_runs_primitive) {
 }
 
 
+TEST(sum_of_many_fixnums) {
+	run_sum_of_fixnums(1, 2, 3, 4, 5, 6, 7);
+	run_sum_of_fixnums(11, 12, 13, -14, -15, 16, 17);
+}
+
+
 TEST(swap_two_global_values) {
 	NError error;
 	NEvaluator* eval = n_evaluator_new(NULL);
@@ -185,11 +212,153 @@ TEST(swap_two_global_values) {
 
 
 /* ----- Auxiliary functions ----- */
+static NValue
+add_many_fixnums(void* data, NValue* args, uint8_t n_args, NError* error) {
+	int32_t sum = 0;
+	int i;
+	for (i = 0; i < n_args; i++) {
+		sum += n_unwrap_fixnum(args[i]);
+	}
+	return n_wrap_fixnum(sum);
+}
+
+
+static NValue
+fixnum_less_than(void* data, NValue* args, uint8_t n_args, NError* error) {
+	int32_t arg0;
+	int32_t arg1;
+
+	assert(n_args == 2);
+	arg0 = n_unwrap_fixnum(args[0]);
+	arg1 = n_unwrap_fixnum(args[1]);
+	return (arg0 < arg1) ? N_TRUE : N_FALSE;
+}
+
 
 static NValue
 increment_fixnum(void*data, NValue* args, uint8_t nargs, NError* error) {
 	int32_t i_arg = n_unwrap_fixnum(*args);
 	return n_wrap_fixnum(i_arg+1);
+}
+
+
+static void
+run_less_than_with_primitives(int32_t a, int32_t b) {
+	NValue expected_result = a < b ? N_TRUE : N_FALSE;
+	NError error;
+	NPrimitive* less_than;
+	NProcedure* entry;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(4, 0, 6, NULL);
+
+	n_module_set_instruction(mod,  0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod,  1, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod,  2, n_op_global_ref(2, 3), NULL);
+	n_module_set_instruction(mod,  3, n_op_call(3, 0, 2), NULL);
+
+	n_module_set_instruction(mod,  4, n_pack_op_arguments(1, 2, 0, 0), NULL);
+	n_module_set_instruction(mod,  5, n_op_return(3), NULL);
+
+	less_than = n_primitive_new(fixnum_less_than, NULL, NULL);
+
+	entry = n_procedure_new(mod, 0, 4, NULL);
+
+
+	n_module_set_register(mod, 0, n_wrap_pointer(entry), NULL);
+	n_module_set_register(mod, 1, n_wrap_pointer(less_than), NULL);
+	n_module_set_register(mod, 2, n_wrap_fixnum(a), NULL);
+	n_module_set_register(mod, 3, n_wrap_fixnum(b), NULL);
+
+	n_evaluator_setup(eval, mod);
+	{
+		char *expected_str = "[Unknown value]";
+		char *result_str = "[Unknown value]";
+
+		NValue result = n_evaluator_run(eval, &error);
+		EXPECT_MSG(error.code == N_E_OK,
+			"Expected error code %u, got %u.", N_E_OK, error.code);
+		EXPECT(n_is_boolean(result));
+
+		if (n_is_equal(expected_result, N_TRUE)) {
+			expected_str = "True";
+		}
+		else if (n_is_equal(expected_result, N_FALSE)) {
+			expected_str = "False";
+		}
+
+		if (n_is_equal(result, N_TRUE)) {
+			result_str = "True";
+		}
+		else if (n_is_equal(result, N_FALSE)) {
+			result_str = "False";
+		}
+		EXPECT_MSG(n_is_equal(expected_result, result),
+				"Expected result of %s, but got %s instread.",
+				expected_str, result_str);
+	}
+}
+
+
+static void run_sum_of_fixnums(int32_t a1,
+                               int32_t a2,
+                               int32_t a3,
+                               int32_t a4,
+                               int32_t a5,
+                               int32_t a6,
+                               int32_t a7) {
+	NError error;
+	NPrimitive* primitive;
+	NProcedure* entry;
+	NValue result;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(9, 0, 12, NULL);
+
+	n_module_set_instruction(mod,  0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod,  1, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod,  2, n_op_global_ref(2, 3), NULL);
+	n_module_set_instruction(mod,  3, n_op_global_ref(3, 4), NULL);
+	n_module_set_instruction(mod,  4, n_op_global_ref(4, 5), NULL);
+	n_module_set_instruction(mod,  5, n_op_global_ref(5, 6), NULL);
+	n_module_set_instruction(mod,  6, n_op_global_ref(6, 7), NULL);
+	n_module_set_instruction(mod,  7, n_op_global_ref(7, 8), NULL);
+
+	n_module_set_instruction(mod,  8, n_op_call(8, 0, 7), NULL);
+    n_module_set_instruction(mod,  9,
+			n_pack_op_arguments(1, 2, 3, 4), NULL);
+
+    n_module_set_instruction(mod, 10,
+			n_pack_op_arguments(5, 6, 7, 0), NULL);
+
+	n_module_set_instruction(mod, 11, n_op_return(8), NULL);
+
+	primitive = n_primitive_new(add_many_fixnums, NULL, NULL);
+
+	entry = n_procedure_new(mod, 0, 9, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(entry), NULL);
+	n_module_set_register(mod, 1, n_wrap_pointer(primitive), NULL);
+	n_module_set_register(mod, 2, n_wrap_fixnum(a1), NULL);
+	n_module_set_register(mod, 3, n_wrap_fixnum(a2), NULL);
+	n_module_set_register(mod, 4, n_wrap_fixnum(a3), NULL);
+	n_module_set_register(mod, 5, n_wrap_fixnum(a4), NULL);
+	n_module_set_register(mod, 6, n_wrap_fixnum(a5), NULL);
+	n_module_set_register(mod, 7, n_wrap_fixnum(a6), NULL);
+	n_module_set_register(mod, 8, n_wrap_fixnum(a7), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	EXPECT(n_is_fixnum(result));
+
+	{
+		int32_t expected_result = a1 + a2 + a3 + a4 + a5 + a6 + a7;
+		EXPECT_MSG(n_unwrap_fixnum(result) == expected_result,
+			"Expected result of %d, but got %d instead.",
+			expected_result, result);
+	}
 }
 
 

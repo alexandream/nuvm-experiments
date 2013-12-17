@@ -51,6 +51,13 @@ build/tests/%.o: tests/suites/%.c
 test: build/tests/runner
 	@./build/tests/runner $(TEST)
 
+cloc:
+	@echo "Source code:"
+	@cloc src;
+	@echo "Test code:"
+	@cloc --exclude-dir tests/atest tests
+	@echo "Total:"
+	@cloc .
 
 clean:
 	@rm -f build/*.o\
@@ -61,6 +68,8 @@ clean:
 	       build/nuvm/*.d\
 	       build/tested/*.o\
 	       build/tested/*.d\
+	       build/tested/objects/*.o\
+	       build/tested/objects/*.d\
 	       build/atest/*.o\
 	       build/atest/*.d\
 	       build/tests/*.o\

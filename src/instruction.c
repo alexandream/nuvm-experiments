@@ -150,3 +150,15 @@ NInstruction
 n_op_return(uint8_t src) {
 	return n_instruction(N_OP_RETURN, src, 0, 0);
 }
+
+
+NInstruction
+n_pack_op_arguments(uint8_t arg1, uint8_t arg2, uint8_t arg3, uint8_t arg4) {
+	NInstruction inst;
+	inst.extra.arg1 = arg1;
+	inst.extra.arg2 = arg2;
+	inst.extra.arg3 = arg3;
+	inst.extra.arg4 = arg4;
+
+	return inst;
+}

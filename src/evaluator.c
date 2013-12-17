@@ -46,6 +46,9 @@ static NValue
 _get_local(NEvaluator*, uint8_t);
 
 static uint32_t
+_op_call(NEvaluator* self, NInstruction inst);
+
+static uint32_t
 _op_call_sva(NEvaluator*, NInstruction);
 
 static uint32_t
@@ -131,16 +134,15 @@ n_evaluator_destroy(NEvaluator* self) {
 NValue
 n_evaluator_run(NEvaluator* self, NError* error) {
 	NValue entry;
-	NValue result;
 	n_error_clear(error);
 	if (self->current_module == NULL) {
 		n_error_set(error, N_E_UNINITIALIZED_EVALUATOR);
-		return result;
+		return N_UNDEFINED;
 	}
 
 	entry = n_module_get_entry_value(self->current_module, error);
 	if (!n_error_ok(error)) {
-		return result;
+		return N_UNDEFINED;
 	}
 
 	if (n_is_procedure(entry)) {
@@ -257,6 +259,64 @@ _pop_stack_frame(NEvaluator* self) {
 	self->code_pointer = code_pointer;
 	self->current_procedure = caller;
 	self->current_module = n_procedure_get_module(caller);
+}
+
+
+static uint32_t
+_op_call(NEvaluator* self, NInstruction inst) {
+	NValue args[256];
+
+	uint8_t l_dest, l_callee, nargs;
+	uint32_t cp = self->code_pointer + 1;
+
+	NPrimitive* callee = NULL;
+	NValue result = N_UNDEFINED;
+
+	uint32_t num_blocks;
+	uint8_t extra_args;
+	bool has_tail_block;
+
+	int i, bp;
+
+	n_decode_call(inst, &l_dest, &l_callee, &nargs);
+
+	num_blocks = nargs/4;
+	extra_args = nargs % 4;
+	has_tail_block = (extra_args > 0);
+
+	for (i = 0; i < num_blocks; i++) {
+		NInstruction arg_pack =
+			n_module_fetch(self->current_module, cp + i, NULL);
+
+		bp = i * 4;
+		args[bp + 0] = _get_local(self, arg_pack.extra.arg1);
+		args[bp + 1] = _get_local(self, arg_pack.extra.arg2);
+		args[bp + 2] = _get_local(self, arg_pack.extra.arg3);
+		args[bp + 3] = _get_local(self, arg_pack.extra.arg4);
+	}
+
+	bp = num_blocks * 4;
+	if (has_tail_block) {
+		NInstruction arg_pack =
+			n_module_fetch(self->current_module, cp + num_blocks, NULL);
+
+		args[bp + 0] = _get_local(self, arg_pack.extra.arg1);
+		if (extra_args > 1) {
+			args[bp + 1] = _get_local(self, arg_pack.extra.arg2);
+		}
+		if (extra_args > 2) {
+			args[bp + 2] = _get_local(self, arg_pack.extra.arg3);
+		}
+	}
+
+
+	callee = n_unwrap_pointer(_get_local(self, l_callee));
+	result = n_primitive_call(callee, args, nargs, NULL);
+
+	_set_local(self, l_dest, result);
+
+	return cp + num_blocks + (has_tail_block ? 1 : 0);
+
 }
 
 
@@ -382,9 +442,8 @@ _op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
 static NValue
 _run_procedure(NEvaluator* self, NProcedure* proc, NError* error) {
 	NError inner_error;
-	NValue result;
+	NValue result = N_UNDEFINED;
 	bool halt = false;
-
 	self->current_module = n_procedure_get_module(proc);
 	self->current_procedure = proc;
 	self->code_pointer = n_procedure_get_entry_point(proc);
@@ -471,6 +530,9 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 		               NULL); /* TODO: Handle errors here. */
 
 	switch(inst.base.opcode) {
+		case N_OP_CALL:
+			next_instruction = _op_call(self, inst);
+			break;
 		case N_OP_CALL_SVA:
 			next_instruction = _op_call_sva(self, inst);
 			break;

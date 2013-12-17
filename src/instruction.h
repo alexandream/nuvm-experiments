@@ -82,4 +82,8 @@ n_op_jump_unless(uint8_t cond, int16_t offset);
 
 NInstruction
 n_op_return(uint8_t src);
+
+NInstruction
+n_pack_op_arguments(uint8_t arg1, uint8_t arg2, uint8_t arg3, uint8_t arg4);
+
 #endif

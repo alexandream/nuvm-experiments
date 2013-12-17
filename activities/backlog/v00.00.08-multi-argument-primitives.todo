@@ -32,7 +32,7 @@ Target Tasks:
   x Update call-sva to pass its parameters to primitives with a single
     element array and argument count;
   x Create encoder for the call instruction;
-  - Create behaviour of call instruction;
-  - Insert call instruction on the fetch-run loop;
-  - Write simple test program (integer addition with many arguments);
-  - write simple test program (binary less-than on integers);
+  x Create behaviour of call instruction;
+  x Insert call instruction on the fetch-run loop;
+  x Write simple test program (integer addition with many arguments);
+  x write simple test program (binary less-than on integers);
