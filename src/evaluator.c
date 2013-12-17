@@ -147,7 +147,7 @@ n_evaluator_run(NEvaluator* self, NError* error) {
 		return _run_procedure(self, n_unwrap_pointer(entry), error);
 	}
 	else if (n_is_primitive(entry)) {
-		return n_primitive_call(n_unwrap_pointer(entry), N_UNDEFINED, error);
+		return n_primitive_call(n_unwrap_pointer(entry), NULL, 0, error);
 	}
 	else {
 		return entry;
@@ -274,7 +274,7 @@ _op_call_sva(NEvaluator* self, NInstruction inst) {
 
 	if (n_is_primitive(callee)) {
 		NPrimitive* prim = n_unwrap_pointer(callee);
-		NValue output = n_primitive_call(prim, arg, NULL);
+		NValue output = n_primitive_call(prim, &arg, 1, NULL);
 
 		_set_local(self, l_dest, output);
 		result = self->code_pointer + 1;

@@ -27,9 +27,9 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   x Update NInstruction to allow for another union case: words
     of extra arguments;
-  - Update primitives to receive an array of arguments together with
+  x Update primitives to receive an array of arguments together with
     the length of the array (argument count);
-  - Update call-sva to pass its parameters to primitives with a single
+  x Update call-sva to pass its parameters to primitives with a single
     element array and argument count;
   - Create encoder for the call instruction;
   - Create behaviour of call instruction;

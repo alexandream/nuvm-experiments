@@ -71,7 +71,7 @@ n_primitive_destroy(NPrimitive* self) {
 
 
 NValue
-n_primitive_call(NPrimitive* self, NValue arg, NError* error) {
+n_primitive_call(NPrimitive* self, NValue* args, uint8_t nargs, NError* error) {
 	n_error_clear(error);
-	return self->function(self->data, arg, error);
+	return self->function(self->data, args, nargs, error);
 }

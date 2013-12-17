@@ -14,7 +14,7 @@
 #include "objects/procedures.h"
 
 static NValue
-increment_fixnum(void*data, NValue arg, NError*);
+increment_fixnum(void*data, NValue* args, uint8_t nargs, NError*);
 
 static NValue
 run_value_selection_if(NValue condition, NValue v1, NValue v2);
@@ -32,10 +32,10 @@ static void
 test_increment_fixnum_using_primitive(int32_t fixnum);
 
 static NValue
-toggle_bool(void*, NValue arg, NError*);
+toggle_bool(void*, NValue* args, uint8_t nargs, NError*);
 
 static NValue
-wrap_input(void*, NValue arg, NError*);
+wrap_input(void*, NValue* arg, uint8_t nargs, NError*);
 
 
 
@@ -187,8 +187,8 @@ TEST(swap_two_global_values) {
 /* ----- Auxiliary functions ----- */
 
 static NValue
-increment_fixnum(void*data, NValue arg, NError* error) {
-	int32_t i_arg = n_unwrap_fixnum(arg);
+increment_fixnum(void*data, NValue* args, uint8_t nargs, NError* error) {
+	int32_t i_arg = n_unwrap_fixnum(*args);
 	return n_wrap_fixnum(i_arg+1);
 }
 
@@ -403,7 +403,7 @@ test_increment_fixnum_using_primitive(int32_t fixnum) {
 
 
 static NValue
-toggle_bool(void* data, NValue arg, NError* error) {
+toggle_bool(void* data, NValue* arg, uint8_t nargs, NError* error) {
 	NValue result;
 	bool* flag = (bool*) data;
 	*flag = !(*flag);
@@ -412,6 +412,6 @@ toggle_bool(void* data, NValue arg, NError* error) {
 
 
 static NValue
-wrap_input(void* data, NValue arg, NError* error) {
+wrap_input(void* data, NValue* args, uint8_t nargs, NError* error) {
 	return n_wrap_pointer(data);
 }

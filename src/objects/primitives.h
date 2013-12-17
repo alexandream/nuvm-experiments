@@ -5,7 +5,7 @@
 #include "../value.h"
 
 typedef struct NPrimitive NPrimitive;
-typedef NValue (*NPrimitiveFunction)(void*, NValue, NError*);
+typedef NValue (*NPrimitiveFunction)(void*, NValue*, uint8_t, NError*);
 
 
 void
@@ -21,6 +21,6 @@ void
 n_primitive_destroy(NPrimitive*);
 
 NValue
-n_primitive_call(NPrimitive*, NValue arg, NError*);
+n_primitive_call(NPrimitive*, NValue* args, uint8_t num_args, NError*);
 
 #endif
