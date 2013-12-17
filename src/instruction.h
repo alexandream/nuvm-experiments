@@ -23,6 +23,12 @@ union NInstruction {
 		uint8_t arg1;
 		uint8_t opcode;
 	} base;
+	struct {
+		uint8_t arg4;
+		uint8_t arg3;
+		uint8_t arg2;
+		uint8_t arg1;
+	} extra;
 };
 
 NInstruction

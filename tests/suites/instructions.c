@@ -148,10 +148,21 @@ TEST(op_return_encoding) {
 
 TEST(pack_ordering_is_correct) {
 	NInstruction inst = n_instruction(0x00, 0x01, 0x02, 0x03);
+	NInstruction args;
 	EXPECT_MSG(inst.contents == 0x00010203,
 		"Expected instruction layout to replicate 0x00010203, "
 		"but got 0x%08X instead.",
 		inst.contents);
+
+	args.extra.arg1 = 0xff;
+	args.extra.arg2 = 0xee;
+	args.extra.arg3 = 0xdd;
+	args.extra.arg4 = 0xcc;
+
+	EXPECT_MSG(args.contents == 0xFFEEDDCC,
+		"Expected instruction layout to replicate 0xFFEEDDCC, "
+		"but got 0x%08X instead.",
+		args.contents);
 }
 
 /* ----- Auxiliary Functions ----- */

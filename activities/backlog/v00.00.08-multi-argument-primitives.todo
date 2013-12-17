@@ -21,11 +21,11 @@ Target Description:
   Because of that, a call instruction is encoded in 1 +
   ceiling(number-of-arguments/4) instruction words.
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-17 01:17
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Update NInstruction to allow for another union case: words
+  x Update NInstruction to allow for another union case: words
     of extra arguments;
   - Update primitives to receive an array of arguments together with
     the length of the array (argument count);

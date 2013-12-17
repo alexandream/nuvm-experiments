@@ -1,3 +1,3 @@
 #include "version.h"
 
-uint8_t version[] = { 0, 0, 7 };
+uint8_t version[] = { 0, 0, 8 };
