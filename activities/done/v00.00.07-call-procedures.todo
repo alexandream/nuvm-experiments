@@ -56,7 +56,7 @@ Target Description:
   caller is undefined, this signals the machine to halt.
 
 Activity start:  2013-12-16 13:40
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-12-16 23:07
 
 Target Tasks: 
   x Create the storage for the stack in the evaluator;
