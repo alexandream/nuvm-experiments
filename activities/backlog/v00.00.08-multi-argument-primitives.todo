@@ -31,7 +31,7 @@ Target Tasks:
     the length of the array (argument count);
   x Update call-sva to pass its parameters to primitives with a single
     element array and argument count;
-  - Create encoder for the call instruction;
+  x Create encoder for the call instruction;
   - Create behaviour of call instruction;
   - Insert call instruction on the fetch-run loop;
   - Write simple test program (integer addition with many arguments);

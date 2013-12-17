@@ -14,6 +14,17 @@ n_instruction(uint8_t opcode, uint8_t arg1, uint8_t arg2, uint8_t arg3) {
 
 
 void
+n_decode_call(NInstruction inst,
+              uint8_t* dest,
+              uint8_t* callee,
+              uint8_t* nargs) {
+	*dest = inst.base.arg1;
+	*callee = inst.base.arg2;
+	*nargs = inst.base.arg3;
+}
+
+
+void
 n_decode_call_sva(NInstruction inst,
                   uint8_t* dest,
                   uint8_t* func,
@@ -71,6 +82,12 @@ n_decode_jump_unless(NInstruction inst, uint8_t* cond, int16_t* offset) {
 void
 n_decode_return(NInstruction inst, uint8_t* src) {
 	*src = inst.base.arg1;
+}
+
+
+NInstruction
+n_op_call(uint8_t dest, uint8_t callee, uint8_t nargs) {
+	return n_instruction(N_OP_CALL, dest, callee, nargs);
 }
 
 

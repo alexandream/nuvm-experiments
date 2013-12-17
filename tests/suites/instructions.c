@@ -7,6 +7,9 @@ static int32_t
 encode_decode_op_jump(int32_t offset);
 
 static void
+test_op_call_encoding(uint8_t storage, uint8_t l_callable, uint8_t nargs);
+
+static void
 test_op_jump_encoding(int32_t offset);
 
 static void
@@ -18,6 +21,13 @@ test_op_jump_unless_encoding(uint8_t condition, int16_t offset);
 
 TEST(instructions_fit_32_bits) {
 	EXPECT(sizeof(NInstruction) == 4);
+}
+
+
+TEST(op_call_encoding) {
+	test_op_call_encoding(0, 1, 2);
+	test_op_call_encoding(4, 5, 6);
+	test_op_call_encoding(255, 255, 255);
 }
 
 
@@ -175,6 +185,37 @@ encode_decode_op_jump(int32_t offset) {
 	n_decode_jump(inst, &out_offset);
 
 	return out_offset;
+}
+
+
+static void
+test_op_call_encoding(uint8_t storage, uint8_t l_callable, uint8_t nargs) {
+	uint8_t out_storage;
+	uint8_t out_l_callable;
+	uint8_t out_nargs;
+
+	NInstruction inst = n_op_call(storage, l_callable, nargs);
+
+	EXPECT_MSG(inst.base.opcode == N_OP_CALL,
+		"Call encoded with return storage %u, callable local %u and "
+		"number of arguments %u, returned wrong opcode. Expected 0x%02X, "
+		"got 0x%02X.",
+		storage, l_callable, nargs, inst.base.opcode, N_OP_CALL);
+
+	n_decode_call(inst, &out_storage, &out_l_callable, &out_nargs);
+
+	EXPECT_MSG(storage == out_storage,
+		"Decoding of call encoded with return storage %u "
+		"yielded different return storage %u",
+		storage, out_storage);
+	EXPECT_MSG(l_callable == out_l_callable,
+		"Decoding of call encoded with callable local %u "
+		"yielded different callable local %u",
+		l_callable, out_l_callable);
+	EXPECT_MSG(nargs == out_nargs,
+		"Decoding of call encoded with number of arguments %u "
+		"yielded different number of arguments %u",
+		nargs, out_nargs);
 }
 
 
