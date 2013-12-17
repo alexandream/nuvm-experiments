@@ -22,7 +22,7 @@ Target Description:
   ceiling(number-of-arguments/4) instruction words.
 
 Activity start:  2013-12-17 01:17
-Activity finish: xxxx-xx-xx xx:xx
+Activity finish: 2013-12-17 15:48
 
 Target Tasks: 
   x Update NInstruction to allow for another union case: words
