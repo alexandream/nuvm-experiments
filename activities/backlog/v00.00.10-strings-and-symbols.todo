@@ -4,7 +4,7 @@ Target Version:
 Target Description:
   It's time to add new types to our machine again. This time it's all
   about strings and their interned unique counterparts, symbols.
-  
+
   Even though the machine is supposed to deal with strings and symbols
   by storing them in unicode's UTF-8 encoding, since most of the work
   related to it is concerning library functions, for now it'll just
@@ -21,7 +21,7 @@ Target Description:
   are equal among themselves. This is basically mapping a string
   content to a unique value, so it can be used for faster lookups and
   things like that.
-  
+
   Just like strings, symbols are immutable and have their own type, a
   constructor that takes a C-string and returns a symbol and a method
   to get the string contents of the symbol.

@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "util/types.h"
 #include "nuvm.h"
 
 #include "test-suite.h"
 
-ATResultList* at_run_all_tests() {
+ATResultList* at_run_all_tests(char* test_name) {
+	char buffer[1024];
 	int i, j, case_count, suite_count;
 	ATCase* tcase;
 	ATResult* result;
@@ -18,9 +20,16 @@ ATResultList* at_run_all_tests() {
 		suite = at_get_nth_suite(i);
 		case_count = at_count_cases(suite);
 		for (j = 0; j < case_count; j++) {
+			bool run_test = true;
 			tcase = at_get_nth_case(suite, j);
-			result = at_execute_case(suite, tcase);
-			at_append_result(result_list, result);
+			if (test_name != NULL) {
+				sprintf(buffer, "%s.%s", suite->name, tcase->name);
+				run_test = strcmp(buffer, test_name) == 0;
+			}
+			if (run_test) {
+				result = at_execute_case(suite, tcase);
+				at_append_result(result_list, result);
+			}
 		}
 	}
 	return result_list;
@@ -79,12 +88,13 @@ void print_result_totals(ATResultList* result_list) {
 			(succeeded+failed), succeeded, failed);
 }
 
-int main() {
+int main(int argc, char** argv) {
+	char* test_name = (argc > 1) ? argv[1] : NULL;
 	ATResultList* result_list;
 
 	n_init();
 
-	result_list = at_run_all_tests();
+	result_list = at_run_all_tests(test_name);
 
 	print_results(result_list);
 	puts("");

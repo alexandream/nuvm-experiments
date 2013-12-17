@@ -30,7 +30,7 @@ TEST(adding_new_type_works) {
 	EXPECT_MSG(error.code == 0,
 		"Expected error code of 0, got %u.",
 		error.code);
-	
+
 	EXPECT_MSG(type_id >= 0,
 		"Type id should be set after adding to a registry, got 0.");
 
@@ -38,7 +38,7 @@ TEST(adding_new_type_works) {
 		"Type name should be unchanged after adding to a registry. "
 		"Expected \"foo.bar.Type\", got %s.",
 		type.name);
-	
+
 	type_count = n_type_registry_count_types(registry);
 	EXPECT_MSG(type_count == 1,
 		"Expected a type count of 1 after registering a type, got %u.",
@@ -55,7 +55,7 @@ TEST(adding_repeated_type_name_fails) {
 
 	n_type_init(&type1, "foo.bar.Type");
 	n_type_init(&type2, "foo.bar.Type");
-	
+
 	n_type_registry_add_type(registry, &type1, &error);
 	ASSERT(error.code == N_E_OK);
 
@@ -113,7 +113,7 @@ TEST(find_type_by_name_works) {
 	type_id = n_type_registry_add_type(registry, &type, NULL);
 
 	out_type = n_type_registry_find_type(registry, "foo.bar.Type", &out_id);
-	
+
 	EXPECT_MSG(out_type == &type,
 		"Expected type found to have same address as type added [%p]. "
 		"Got [%p].",

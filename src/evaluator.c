@@ -30,8 +30,14 @@
 static NValue
 _get_frame_caller(NEvaluator* self);
 
+static uint32_t
+_get_frame_code_pointer(NEvaluator* self);
+
 static uint8_t
 _get_frame_num_locals(NEvaluator* self);
+
+static int32_t
+_get_frame_stack_pointer(NEvaluator* self);
 
 static NValue
 _get_global(NEvaluator*, uint16_t);
@@ -90,6 +96,7 @@ _step(NEvaluator*, NValue*, bool*, NError*);
 
 struct NEvaluator {
 	NModule* current_module;
+	NProcedure* current_procedure;
 	uint32_t code_pointer;
 	int32_t stack_pointer;
 	NStack stack;
@@ -106,6 +113,7 @@ n_evaluator_new(NError* error) {
 	}
 
 	self->current_module = NULL;
+	self->current_procedure = NULL;
 	self->code_pointer = 0;
 	self->stack_pointer = 0;
 	n_stack_init(&self->stack, N_STACK_SIZE);
@@ -168,7 +176,7 @@ n_evaluator_stack_pointer(NEvaluator* self) {
 static int32_t
 _calculate_next_stack_pointer(NEvaluator* self) {
 	uint8_t n_locals = _get_frame_num_locals(self);
-	return self->stack_pointer + n_locals + N_STACK_SLOTS;
+	return self->stack_pointer + n_locals + N_STACK_SLOTS + 1;
 }
 
 
@@ -179,10 +187,32 @@ _get_frame_caller(NEvaluator* self) {
 }
 
 
+static uint32_t
+_get_frame_code_pointer(NEvaluator* self) {
+	int32_t index = self->stack_pointer + N_STACK_CODE_POINTER_SLOT;
+	return (uint32_t) n_stack_get(&self->stack, index).contents;
+}
+
+
 static uint8_t
 _get_frame_num_locals(NEvaluator* self) {
 	int32_t num_locals_index = self->stack_pointer + N_STACK_NUM_LOCALS_SLOT;
 	return (uint8_t) n_stack_get(&self->stack, num_locals_index).contents;
+}
+
+
+static uint8_t
+_get_frame_return_storage(NEvaluator* self) {
+	int32_t index = self->stack_pointer + N_STACK_RETURN_SLOT;
+	return (uint8_t) n_stack_get(&self->stack, index).contents;
+}
+
+
+static int32_t
+_get_frame_stack_pointer(NEvaluator* self) {
+	int32_t stack_pointer_index =
+		self->stack_pointer + N_STACK_STACK_POINTER_SLOT;
+	return (int32_t) n_stack_get(&self->stack, stack_pointer_index).contents;
 }
 
 
@@ -201,39 +231,67 @@ _get_local(NEvaluator* self, uint8_t index) {
 
 static void
 _push_stack_frame(NEvaluator* self,
-                  NValue caller,
+				  NProcedure* callee,
                   uint8_t return_storage,
-                  uint8_t num_locals) {
+				  NValue arg) {
+	NProcedure* caller = self->current_procedure;
 	int32_t old_stack_pointer = self->stack_pointer;
-
+	uint8_t num_locals = n_procedure_count_locals(callee);
+	NValue caller_val = (caller != NULL) ? n_wrap_pointer(caller)
+	                                     : N_UNDEFINED;
 	self->stack_pointer = _calculate_next_stack_pointer(self);
-	
-	_set_frame_caller(self, caller);
-	_set_frame_code_pointer(self, self->code_pointer);
+	_set_frame_caller(self, caller_val);
+	_set_frame_code_pointer(self, self->code_pointer +1);
 	_set_frame_stack_pointer(self, old_stack_pointer);
 	_set_frame_return_storage(self, return_storage);
 	_set_frame_num_locals(self, num_locals);
 }
 
 
+static void
+_pop_stack_frame(NEvaluator* self) {
+	NProcedure* caller = n_unwrap_pointer(_get_frame_caller(self));
+	uint32_t code_pointer = _get_frame_code_pointer(self);
+
+	self->stack_pointer = _get_frame_stack_pointer(self);
+	self->code_pointer = code_pointer;
+	self->current_procedure = caller;
+	self->current_module = n_procedure_get_module(caller);
+}
+
 
 static uint32_t
 _op_call_sva(NEvaluator* self, NInstruction inst) {
-	NValue func_val, arg, result;
+	NValue callee, arg;
 	uint8_t l_dest, l_func, l_arg;
-	NPrimitive* prim;
-	
+
+	uint32_t result = 0;
+
 	n_decode_call_sva(inst, &l_dest, &l_func, &l_arg);
-	func_val = _get_local(self, l_func);
+
+	callee = _get_local(self, l_func);
 	arg = _get_local(self, l_arg);
-	
-	assert(n_is_primitive(func_val));
 
-	prim = n_unwrap_pointer(func_val);
-	result = n_primitive_call(prim, arg, NULL);
-	_set_local(self, l_dest, result);
+	if (n_is_primitive(callee)) {
+		NPrimitive* prim = n_unwrap_pointer(callee);
+		NValue output = n_primitive_call(prim, arg, NULL);
 
-	return self->code_pointer +1;
+		_set_local(self, l_dest, output);
+		result = self->code_pointer + 1;
+	}
+	else if (n_is_procedure(callee)) {
+		NProcedure* proc = n_unwrap_pointer(callee);
+		_push_stack_frame(self, proc, l_dest, arg);
+
+		self->current_module = n_procedure_get_module(proc);
+		self->current_procedure = proc;
+		result = n_procedure_get_entry_point(proc);
+	}
+	else {
+		assert(false);
+	}
+
+	return result;
 }
 
 
@@ -265,7 +323,7 @@ _op_global_set(NEvaluator* self, NInstruction inst) {
 static uint32_t
 _op_jump(NEvaluator* self, NInstruction inst) {
 	int32_t offset;
-	
+
 	n_decode_jump(inst, &offset);
 	return self->code_pointer + offset;
 }
@@ -275,7 +333,7 @@ static uint32_t
 _op_jump_if(NEvaluator* self, NInstruction inst) {
 	uint8_t cond;
 	int16_t offset;
-	
+
 	uint32_t result = self->code_pointer +1;
 
 	n_decode_jump_if(inst, &cond, &offset);
@@ -290,9 +348,9 @@ static uint32_t
 _op_jump_unless(NEvaluator* self, NInstruction inst) {
 	uint8_t cond;
 	int16_t offset;
-	
+
 	uint32_t result = self->code_pointer +1;
-	
+
 	n_decode_jump_if(inst, &cond, &offset);
 	if (n_is_equal(_get_local(self, cond), N_FALSE)) {
 		result = self->code_pointer + offset;
@@ -306,11 +364,16 @@ static uint32_t
 _op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
 	uint8_t source;
 	NValue caller = _get_frame_caller(self);
-
 	n_decode_return(inst, &source);
 	if (n_is_equal(caller, N_UNDEFINED)) {
 		*result = _get_local(self, source);
 		*halt = true;
+	}
+	else {
+		NValue output = _get_local(self, source);
+		uint8_t l_dest = _get_frame_return_storage(self);
+		_pop_stack_frame(self);
+		_set_local(self, l_dest, output);
 	}
 	return self->code_pointer;
 }
@@ -320,22 +383,24 @@ static NValue
 _run_procedure(NEvaluator* self, NProcedure* proc, NError* error) {
 	NError inner_error;
 	NValue result;
-	uint8_t num_locals = n_procedure_count_locals(proc);
 	bool halt = false;
-	
+
 	self->current_module = n_procedure_get_module(proc);
+	self->current_procedure = proc;
 	self->code_pointer = n_procedure_get_entry_point(proc);
-	_push_stack_frame(self, N_UNDEFINED, num_locals, 0);
+
+	_set_frame_caller(self, N_UNDEFINED);
+	_set_frame_num_locals(self, n_procedure_count_locals(proc));
 
 	if (error == NULL) {
 		error = &inner_error;
 	}
-	
+
 	while (!halt) {
 		self->code_pointer = _step(self, &result, &halt, error);
 		if (error->code != N_E_OK) {
 			halt = true;
-		}	
+		}
 	}
 	return result;
 }

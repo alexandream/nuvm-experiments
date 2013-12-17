@@ -26,6 +26,9 @@ static NValue
 test_constant_runner(NValue constant);
 
 static void
+test_increment_fixnums_on_many_proceures(int32_t x, int32_t y, int32_t z);
+
+static void
 test_increment_fixnum_using_primitive(int32_t fixnum);
 
 static NValue
@@ -87,6 +90,12 @@ TEST(increment_fixnum_using_primitive) {
 	test_increment_fixnum_using_primitive(1);
 	test_increment_fixnum_using_primitive(1234567899);
 	test_increment_fixnum_using_primitive(-1234567899);
+}
+
+
+TEST(increment_fixnums_on_multiple_procedures) {
+	test_increment_fixnums_on_many_proceures(1, 2, 3);
+/*	test_increment_fixnums_on_many_proceures(234242, 23456212, 66546113); */
 }
 
 
@@ -261,6 +270,93 @@ test_constant_runner(NValue constant) {
 	n_evaluator_destroy(eval);
 	n_module_destroy(mod);
 	return result;
+}
+
+
+static void
+test_increment_fixnums_on_many_proceures(int32_t x, int32_t y, int32_t z) {
+	NError error;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(7, 0, 30, NULL);
+
+	NValue x_val = n_wrap_fixnum(x);
+	NValue y_val = n_wrap_fixnum(y);
+	NValue z_val = n_wrap_fixnum(z);
+
+	NPrimitive* primitive;
+
+	NProcedure *inc_reg3, *inc_reg4, *inc_reg5;
+	NValue result;
+
+	/* Instructions for inc_reg3 */
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 6), NULL);
+	n_module_set_instruction(mod, 1, n_op_global_ref(1, 3), NULL);
+	n_module_set_instruction(mod, 2, n_op_call_sva(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 3, n_op_global_set(3, 1), NULL);
+	/* Call next (inc_reg4) procedure */
+	n_module_set_instruction(mod, 4, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 5, n_op_call_sva(1, 0, 1), NULL);
+	/* Increment the result from the call before returning */
+	n_module_set_instruction(mod, 6, n_op_global_ref(0, 6), NULL);
+	n_module_set_instruction(mod, 7, n_op_call_sva(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 8, n_op_return(1), NULL);
+	/* Explanation for the code below:
+	 * first procedure, inc_reg3, gets the register number 3 and
+	 * incrmeents it, saving it again on reg #3, then it calls
+	 * inc_reg4 and returns the return value of inc_reg4 + 1;
+	 *
+	 * inc_reg4 gets the register #4 and increments it, saving it
+	 * again on reg #4, then it calls inc_reg5 and returns the
+	 * return value of inc_reg5;
+	 *
+	 * inc_reg5 gets the register #5, increments its value and
+	 * returns it.
+	 *
+	 * In the end, the first procedure receives the value returned
+	 * by inc_reg5 and increments it, so the expected final result is
+	 * the value of register #5 (z) + 2. */
+
+	/* Instructions for inc_reg4 */
+	n_module_set_instruction(mod, 9, n_op_global_ref(0, 6), NULL);
+	n_module_set_instruction(mod, 10, n_op_global_ref(1, 4), NULL);
+	n_module_set_instruction(mod, 11, n_op_call_sva(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 12, n_op_global_set(4, 1), NULL);
+
+	/* Call next (inc_reg5) procedure */
+	n_module_set_instruction(mod, 13, n_op_global_ref(0, 2), NULL);
+	n_module_set_instruction(mod, 14, n_op_call_sva(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 15, n_op_return(1), NULL);
+
+	/* Instructions for inc_reg5 */
+	n_module_set_instruction(mod, 16, n_op_global_ref(0, 6), NULL);
+	n_module_set_instruction(mod, 17, n_op_global_ref(1, 5), NULL);
+	n_module_set_instruction(mod, 18, n_op_call_sva(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 19, n_op_global_set(5, 1), NULL);
+	n_module_set_instruction(mod, 20, n_op_return(1), NULL);
+
+	primitive = n_primitive_new(increment_fixnum, NULL, NULL);
+
+	inc_reg3 = n_procedure_new(mod, 0, 2, NULL);
+	inc_reg4 = n_procedure_new(mod, 9, 2, NULL);
+	inc_reg5 = n_procedure_new(mod, 16, 2, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(inc_reg3), NULL);
+	n_module_set_register(mod, 1, n_wrap_pointer(inc_reg4), NULL);
+	n_module_set_register(mod, 2, n_wrap_pointer(inc_reg5), NULL);
+	n_module_set_register(mod, 3, x_val, NULL);
+	n_module_set_register(mod, 4, y_val, NULL);
+	n_module_set_register(mod, 5, z_val, NULL);
+	n_module_set_register(mod, 6, n_wrap_pointer(primitive), NULL);
+
+	n_evaluator_setup(eval, mod);
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	EXPECT(n_is_fixnum(result));
+
+	EXPECT_MSG(n_unwrap_fixnum(result) == z + 2,
+		"Expected result of %d, but got %d instead.",
+		z + 2, n_unwrap_fixnum(result));
 }
 
 

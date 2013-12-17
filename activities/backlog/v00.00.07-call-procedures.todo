@@ -65,8 +65,8 @@ Target Tasks:
     in the stack and set up a halting stack frame;
   x Update the return instruction to halt when finding a stack frame with
     Undefined  as callee;
-  - Update the call-sva instruction to allow for calling procedures along
+  x Update the call-sva instruction to allow for calling procedures along
     with primitives;
-  - Update the return instruction to actually return to a previous
+  x Update the return instruction to actually return to a previous
     procedure when it is executed on a stack frame with a real caller;
-  - Write a sample program that uses the procedure call implemented above;
+  x Write a sample program that uses the procedure call implemented above;

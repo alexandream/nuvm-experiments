@@ -6,12 +6,12 @@ Target Description:
   one type of value (pointers, implemented through the NValue struct)
   and is capable of running "programs" that consist solely of
   returning a constant value stored in the program.
-  
+
   No virtual machine operations are supported so far, and programs
   (implemented through the NModule struct) are simply a structure
   wrapping a single register of type NValue, which represents the
   value it will return.
-  
+
   To complete the interface needed to support the above mechanisms,
   a simple error reporting convention will be used, of threading an
   "error" variable to functions which can be modified to describe the
@@ -19,7 +19,7 @@ Target Description:
 
   This version is absolutely useless, but gives us the following basic
   results that are needed for future improvement: 
-  
+
   1) A representation for values, so far limited to pointers, but this
      is easy to extended to other values, as we'll see in a couple
      versions ahead;

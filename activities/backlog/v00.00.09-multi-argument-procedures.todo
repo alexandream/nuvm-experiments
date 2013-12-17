@@ -8,7 +8,7 @@ Target Description:
 
   This changes the creation and unwinding of stack frames, to make
   space for the arguments to be stored on the stack during a call.
-  
+
   To lessen the number of instructions needed to access arguments, the
   idea for now is to access arguments as if they were locals.  Since a
   procedure knows how many locals it has, it's reasonable to accept
@@ -28,7 +28,7 @@ Target Description:
   to hold the number of arguments provided at the time of call, so a
   procedure can know how far its stack frame extends in case it needs
   to call another procedure during its execution.
-  
+
 
 Activity start:  xxxx-xx-xx xx:xx
 Activity finish: xxxx-xx-xx xx:xx

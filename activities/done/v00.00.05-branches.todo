@@ -15,7 +15,7 @@ Target Description:
   unconditional flow control; jump-if which gives us conditional
   branches; and jump-unless, which is just like jump-if but with its
   condition negated.
-  
+
   The three instructions receive a signed argument representing the
   offset to add to our current code-pointer if the jump is to be made.
   There's a difference in the size of this argument, though: jump-if

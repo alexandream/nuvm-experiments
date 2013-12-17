@@ -49,7 +49,7 @@ build/tests/%.o: tests/suites/%.c
 
 
 test: build/tests/runner
-	@./build/tests/runner
+	@./build/tests/runner $(TEST)
 
 
 clean:

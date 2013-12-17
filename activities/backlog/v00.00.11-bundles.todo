@@ -7,12 +7,12 @@ Target Description:
   dictionaries mapping from symbols to general values. Bundles are
   similar to Lua's tables but more limited in that they only accept
   symbols as keys.
-  
+
   A bundle's main purpose is to map a module's public interface, and
   to be able to do so are created and modified through new
   instructions on the machine. This ensures that a module can expose a
   bundle without depending on any other external library function.
-  
+
   The interface to manipulate a bundle is defined as the following
   instructions:
 

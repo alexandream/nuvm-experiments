@@ -21,7 +21,7 @@ Target Description:
   After this version we add a single instruction to our machine: 
   call-sva, which stands for call-with-single-value-and-argument,
   which for now is only capable of calling primitives.
-  
+
   The instruction call-sva takes three arguments: a local where to
   store the result of the call, a local where to find the primitive
   being called and a local storing the argument to be passed to the
