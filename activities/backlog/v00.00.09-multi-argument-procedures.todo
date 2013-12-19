@@ -40,4 +40,4 @@ Target Tasks:
     arguments;
   - Modify call instruction to copy the parameters onto the callee
     stack frame;
-  - Sample program: return the maximum value between two integers;
+  x Sample program: return the maximum value between two integers;

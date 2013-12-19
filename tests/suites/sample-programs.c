@@ -47,6 +47,9 @@ test_increment_fixnums_on_many_proceures(int32_t x, int32_t y, int32_t z);
 static void
 test_increment_fixnum_using_primitive(int32_t fixnum);
 
+static void
+test_max_procedure(int32_t a, int32_t b);
+
 static NValue
 toggle_bool(void*, NValue* args, uint8_t nargs, NError*);
 
@@ -114,6 +117,13 @@ TEST(increment_fixnums_on_multiple_procedures) {
 	test_increment_fixnums_on_many_proceures(234242, 23456212, 66546113);
 }
 
+
+TEST(max_procedure) {
+	test_max_procedure(10, 2);
+	test_max_procedure(1, 2);
+	test_max_procedure(-431, 2);
+	test_max_procedure(121, 122);
+}
 
 TEST(less_than_with_primitives) {
 	run_less_than_with_primitives(1, 2);
@@ -621,6 +631,66 @@ test_increment_fixnum_using_primitive(int32_t fixnum) {
 		"Expected result of %d, but got %d instead.",
 		fixnum + 1, n_unwrap_fixnum(result));
 
+}
+
+
+static void
+test_max_procedure(int32_t a, int32_t b) {
+	NError error;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(5, 0, 15, NULL);
+
+	NProcedure* main;
+	NProcedure* max;
+	NPrimitive* less_than;
+
+	NValue expected = n_wrap_fixnum(a < b ? a : b);
+	NValue result;
+
+	/* Body for "main" procedure. */
+	n_module_set_instruction(mod,  0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod,  1, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod,  2, n_op_global_ref(2, 3), NULL);
+	n_module_set_instruction(mod,  3, n_op_call(3, 2, 2), NULL);
+	n_module_set_instruction(mod,  4, n_pack_op_arguments(0, 1, 9, 9), NULL);
+	n_module_set_instruction(mod,  5, n_op_return(3), NULL);
+
+	/* Body for "max" procedure. */
+	n_module_set_instruction(mod,  6, n_op_global_ref(0, 4), NULL);
+	n_module_set_instruction(mod,  7, n_op_call(1, 0, 2), NULL);
+	n_module_set_instruction(mod,  8, n_pack_op_arguments(2, 3, 9, 9), NULL);
+	n_module_set_instruction(mod,  9, n_op_jump_if(1, +2), NULL);
+	n_module_set_instruction(mod, 10, n_op_return(3), NULL);
+	n_module_set_instruction(mod, 11, n_op_return(2), NULL);
+
+	main = n_procedure_new(mod, 0, 4, NULL);
+	max = n_procedure_new(mod, 6, 2, NULL);
+	less_than = n_primitive_new(fixnum_less_than, NULL, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(main), NULL);
+	n_module_set_register(mod, 1, n_wrap_fixnum(a), NULL);
+	n_module_set_register(mod, 2, n_wrap_fixnum(b), NULL);
+	n_module_set_register(mod, 3, n_wrap_pointer(max), NULL);
+	n_module_set_register(mod, 4, n_wrap_pointer(less_than), NULL);
+
+
+	n_evaluator_setup(eval, mod);
+	result = n_evaluator_run(eval, &error);
+	EXPECT_MSG(error.code == N_E_OK,
+		"Running max procedure with inputs %d & %d yielded wrong "
+		"error code: expected %u, got %u.",
+		a, b, N_E_OK, error.code);
+
+	EXPECT_MSG(n_is_fixnum(result),
+		"Running max procedure with inputs %d & %d yielded result "
+		"that fails to be recognized as fixnum.",
+		a, b);
+
+	EXPECT_MSG(n_is_equal(result, expected),
+		"Running max procedure with inputs %d & %d yielded wrong result: "
+		"expected %d, got %d.",
+		n_unwrap_fixnum(expected), n_unwrap_fixnum(result));
 }
 
 
