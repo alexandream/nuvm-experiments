@@ -73,6 +73,9 @@ static NValue
 _run_procedure(NEvaluator*, NProcedure*, NError*);
 
 static void
+_set_argument(NEvaluator* self, uint8_t index, NValue value);
+
+static void
 _set_frame_caller(NEvaluator* self, NValue caller);
 
 static void
@@ -247,6 +250,7 @@ _push_stack_frame(NEvaluator* self,
 	_set_frame_stack_pointer(self, old_stack_pointer);
 	_set_frame_return_storage(self, return_storage);
 	_set_frame_num_locals(self, num_locals);
+	_set_argument(self, 0, arg);
 }
 
 
@@ -463,6 +467,16 @@ _run_procedure(NEvaluator* self, NProcedure* proc, NError* error) {
 	}
 	return result;
 }
+
+
+static void
+_set_argument(NEvaluator* self, uint8_t index, NValue value) {
+	int32_t nlocals = _get_frame_num_locals(self);
+	int32_t stack_index =
+	   self->stack_pointer + N_STACK_SLOTS + nlocals + index;
+	n_stack_set(&self->stack, stack_index, value);
+}
+
 
 
 static void

@@ -39,6 +39,9 @@ static NValue
 test_constant_runner(NValue constant);
 
 static void
+test_identity_procedure(NValue value, uint8_t nlocals);
+
+static void
 test_increment_fixnums_on_many_proceures(int32_t x, int32_t y, int32_t z);
 
 static void
@@ -120,6 +123,14 @@ TEST(less_than_with_primitives) {
 }
 
 
+TEST(identity_procedure) {
+	test_identity_procedure(N_UNDEFINED, 0);
+	test_identity_procedure(N_UNDEFINED, 30);
+	test_identity_procedure(N_TRUE, 0);
+	test_identity_procedure(N_TRUE, 200);
+	test_identity_procedure(N_FALSE, 0);
+	test_identity_procedure(N_FALSE, 200);
+}
 TEST(primitive_evaluator_runs_primitive) {
 	NValue result;
 
@@ -439,6 +450,48 @@ test_constant_runner(NValue constant) {
 	n_evaluator_destroy(eval);
 	n_module_destroy(mod);
 	return result;
+}
+
+
+static void
+test_identity_procedure(NValue value, uint8_t nlocals) {
+	NError error;
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(3, 0, 10, NULL);
+
+	NProcedure* main;
+	NProcedure* identity;
+
+	NValue result;
+
+	/* Body for "main" procedure. */
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 2), NULL);
+	n_module_set_instruction(mod, 1, n_op_global_ref(1, 1), NULL);
+	n_module_set_instruction(mod, 2, n_op_call_sva(2, 1, 0), NULL);
+	n_module_set_instruction(mod, 3, n_op_return(2), NULL);
+
+	/* Body for "identity" procedure. */
+	n_module_set_instruction(mod, 4, n_op_return(nlocals), NULL);
+
+	main = n_procedure_new(mod, 0, 3, NULL);
+	identity = n_procedure_new(mod, 4, nlocals, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(main), NULL);
+	n_module_set_register(mod, 1, n_wrap_pointer(identity), NULL);
+	n_module_set_register(mod, 2, value, NULL);
+
+	n_evaluator_setup(eval, mod);
+	result = n_evaluator_run(eval, &error);
+	EXPECT_MSG(error.code == N_E_OK,
+		"Running identity procedure with input value 0x%016lX and number "
+		"of locals %u yielded wrong error message. Expected %u, got %u.",
+		value.contents, nlocals, N_E_OK, error.code);
+
+	EXPECT_MSG(n_is_equal(result, value),
+		"Running identity procedure with input value 0x%016lX and number "
+		"of locals %u yielded wrong output. Expected 0x%016lX got 0x%016lX.",
+		value.contents, nlocals, value.contents, result.contents);
 }
 
 
