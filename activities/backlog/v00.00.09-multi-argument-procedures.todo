@@ -30,13 +30,13 @@ Target Description:
   to call another procedure during its execution.
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-19 00:13
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Extend stack frames to hold number of arguments passed to the
+  x Extend stack frames to hold number of arguments passed to the
     procedure being executed;
-  - Modify frame setup to reserve space for the current procedure's
+  x Modify frame setup to reserve space for the current procedure's
     arguments;
   - Modify call instruction to copy the parameters onto the callee
     stack frame;

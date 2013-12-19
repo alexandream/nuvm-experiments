@@ -60,19 +60,22 @@ cloc:
 	@cloc .
 
 clean:
-	@rm -f build/*.o\
+	@rm -f build/*.a\
 	       build/*.d\
-	       build/*.a\
+	       build/*.o\
 	       build/runner\
-	       build/nuvm/*.o\
+	       build/nuvm/*.a\
 	       build/nuvm/*.d\
-	       build/tested/*.o\
+	       build/nuvm/*.o\
+	       build/tested/*.a\
 	       build/tested/*.d\
-	       build/tested/objects/*.o\
+	       build/tested/*.o\
 	       build/tested/objects/*.d\
-	       build/atest/*.o\
+	       build/tested/objects/*.o\
+	       build/atest/*.a\
 	       build/atest/*.d\
-	       build/tests/*.o\
+	       build/atest/*.o\
 	       build/tests/*.d\
+	       build/tests/*.o\
 	       build/tests/runner
 

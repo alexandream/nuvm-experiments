@@ -23,8 +23,9 @@
 #define N_STACK_STACK_POINTER_SLOT 2
 #define N_STACK_RETURN_SLOT        3
 #define N_STACK_NUM_LOCALS_SLOT    4
+#define N_STACK_NUM_ARGS_SLOT      5
 
-#define N_STACK_SLOTS 5
+#define N_STACK_SLOTS 6
 
 
 static NValue
@@ -80,6 +81,9 @@ _set_frame_caller(NEvaluator* self, NValue caller);
 
 static void
 _set_frame_code_pointer(NEvaluator* self, uint32_t code_pointer);
+
+static void
+_set_frame_num_args(NEvaluator* self, uint8_t num_args);
 
 static void
 _set_frame_num_locals(NEvaluator* self, uint8_t num_locals);
@@ -238,7 +242,8 @@ static void
 _push_stack_frame(NEvaluator* self,
 				  NProcedure* callee,
                   uint8_t return_storage,
-				  NValue arg) {
+				  NValue *arg,
+                  uint8_t nargs) {
 	NProcedure* caller = self->current_procedure;
 	int32_t old_stack_pointer = self->stack_pointer;
 	uint8_t num_locals = n_procedure_count_locals(callee);
@@ -250,7 +255,8 @@ _push_stack_frame(NEvaluator* self,
 	_set_frame_stack_pointer(self, old_stack_pointer);
 	_set_frame_return_storage(self, return_storage);
 	_set_frame_num_locals(self, num_locals);
-	_set_argument(self, 0, arg);
+	_set_frame_num_args(self, nargs);
+	_set_argument(self, 0, *arg);
 }
 
 
@@ -345,7 +351,7 @@ _op_call_sva(NEvaluator* self, NInstruction inst) {
 	}
 	else if (n_is_procedure(callee)) {
 		NProcedure* proc = n_unwrap_pointer(callee);
-		_push_stack_frame(self, proc, l_dest, arg);
+		_push_stack_frame(self, proc, l_dest, &arg, 1);
 
 		self->current_module = n_procedure_get_module(proc);
 		self->current_procedure = proc;
@@ -454,6 +460,7 @@ _run_procedure(NEvaluator* self, NProcedure* proc, NError* error) {
 
 	_set_frame_caller(self, N_UNDEFINED);
 	_set_frame_num_locals(self, n_procedure_count_locals(proc));
+	_set_frame_num_args(self, 0);
 
 	if (error == NULL) {
 		error = &inner_error;
@@ -494,6 +501,14 @@ _set_frame_code_pointer(NEvaluator* self, uint32_t code_pointer) {
 	n_stack_set(&self->stack, slot, cp_val);
 }
 
+
+static void
+_set_frame_num_args(NEvaluator* self, uint8_t num_args) {
+	int32_t slot = self->stack_pointer + N_STACK_NUM_ARGS_SLOT;
+	NValue num_args_val;
+	num_args_val.contents = (uint64_t) num_args;
+	n_stack_set(&self->stack, slot, num_args_val);
+}
 
 static void
 _set_frame_num_locals(NEvaluator* self, uint8_t num_locals) {
