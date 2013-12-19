@@ -189,6 +189,42 @@ _calculate_next_stack_pointer(NEvaluator* self) {
 }
 
 
+static uint32_t
+_call_procedure(NEvaluator* self,
+                NProcedure* callee,
+                uint8_t l_dest,
+                NValue* args,
+                uint8_t nargs,
+				uint8_t skip_blocks) {
+	NProcedure* caller = self->current_procedure;
+	int32_t old_stack_pointer = self->stack_pointer;
+	uint8_t num_locals = n_procedure_count_locals(callee);
+
+	NValue caller_val = (caller != NULL) ? n_wrap_pointer(caller)
+	                                     : N_UNDEFINED;
+
+	self->stack_pointer = _calculate_next_stack_pointer(self);
+
+	_set_frame_caller(self, caller_val);
+	_set_frame_code_pointer(self, self->code_pointer + skip_blocks +1);
+	_set_frame_stack_pointer(self, old_stack_pointer);
+	_set_frame_return_storage(self, l_dest);
+	_set_frame_num_locals(self, num_locals);
+	_set_frame_num_args(self, nargs);
+
+	{
+		int i;
+		for (i = 0; i < nargs; i++) {
+			_set_argument(self, i, args[i]);
+		}
+	}
+
+	self->current_module = n_procedure_get_module(callee);
+	self->current_procedure = callee;
+	return n_procedure_get_entry_point(callee);
+}
+
+
 static NValue
 _get_frame_caller(NEvaluator* self) {
 	int32_t caller_index = self->stack_pointer + N_STACK_CALLER_SLOT;
@@ -238,26 +274,7 @@ _get_local(NEvaluator* self, uint8_t index) {
 }
 
 
-static void
-_push_stack_frame(NEvaluator* self,
-				  NProcedure* callee,
-                  uint8_t return_storage,
-				  NValue *arg,
-                  uint8_t nargs) {
-	NProcedure* caller = self->current_procedure;
-	int32_t old_stack_pointer = self->stack_pointer;
-	uint8_t num_locals = n_procedure_count_locals(callee);
-	NValue caller_val = (caller != NULL) ? n_wrap_pointer(caller)
-	                                     : N_UNDEFINED;
-	self->stack_pointer = _calculate_next_stack_pointer(self);
-	_set_frame_caller(self, caller_val);
-	_set_frame_code_pointer(self, self->code_pointer +1);
-	_set_frame_stack_pointer(self, old_stack_pointer);
-	_set_frame_return_storage(self, return_storage);
-	_set_frame_num_locals(self, num_locals);
-	_set_frame_num_args(self, nargs);
-	_set_argument(self, 0, *arg);
-}
+
 
 
 static void
@@ -279,20 +296,22 @@ _op_call(NEvaluator* self, NInstruction inst) {
 	uint8_t l_dest, l_callee, nargs;
 	uint32_t cp = self->code_pointer + 1;
 
-	NPrimitive* callee = NULL;
-	NValue result = N_UNDEFINED;
+	NValue callee;
 
 	uint32_t num_blocks;
 	uint8_t extra_args;
+	uint8_t skip_blocks;
 	bool has_tail_block;
 
 	int i, bp;
+	int32_t result;
 
 	n_decode_call(inst, &l_dest, &l_callee, &nargs);
 
 	num_blocks = nargs/4;
 	extra_args = nargs % 4;
 	has_tail_block = (extra_args > 0);
+	skip_blocks = num_blocks + (has_tail_block ? 1 : 0);
 
 	for (i = 0; i < num_blocks; i++) {
 		NInstruction arg_pack =
@@ -320,12 +339,24 @@ _op_call(NEvaluator* self, NInstruction inst) {
 	}
 
 
-	callee = n_unwrap_pointer(_get_local(self, l_callee));
-	result = n_primitive_call(callee, args, nargs, NULL);
+	callee = _get_local(self, l_callee);
+	if (n_is_primitive(callee)) {
+		NPrimitive* primitive = n_unwrap_pointer(callee);
+		NValue output = n_primitive_call(primitive, args, nargs, NULL);
+		_set_local(self, l_dest, output);
 
-	_set_local(self, l_dest, result);
+		result = cp + skip_blocks;
+	}
+	else if (n_is_procedure(callee)) {
+		NProcedure* proc = n_unwrap_pointer(callee);
+		result = _call_procedure(self, proc, l_dest, args, nargs, skip_blocks);
+	}
+	else {
+		assert(false);
+	}
 
-	return cp + num_blocks + (has_tail_block ? 1 : 0);
+
+	return result;
 
 }
 
@@ -351,11 +382,7 @@ _op_call_sva(NEvaluator* self, NInstruction inst) {
 	}
 	else if (n_is_procedure(callee)) {
 		NProcedure* proc = n_unwrap_pointer(callee);
-		_push_stack_frame(self, proc, l_dest, &arg, 1);
-
-		self->current_module = n_procedure_get_module(proc);
-		self->current_procedure = proc;
-		result = n_procedure_get_entry_point(proc);
+		result = _call_procedure(self, proc, l_dest, &arg, 1, 0);
 	}
 	else {
 		assert(false);
@@ -557,7 +584,6 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 		n_module_fetch(self->current_module,
 		               self->code_pointer,
 		               NULL); /* TODO: Handle errors here. */
-
 	switch(inst.base.opcode) {
 		case N_OP_CALL:
 			next_instruction = _op_call(self, inst);

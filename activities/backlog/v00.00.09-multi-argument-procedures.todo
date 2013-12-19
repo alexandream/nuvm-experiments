@@ -38,6 +38,6 @@ Target Tasks:
     procedure being executed;
   x Modify frame setup to reserve space for the current procedure's
     arguments;
-  - Modify call instruction to copy the parameters onto the callee
+  x Modify call instruction to copy the parameters onto the callee
     stack frame;
   x Sample program: return the maximum value between two integers;
