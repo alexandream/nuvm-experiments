@@ -76,6 +76,20 @@ n_string_contents(NString* self) {
 }
 
 
+bool
+n_string_is_equal(NString* self, NString* other) {
+	if (self == NULL || other == NULL) {
+		return false;
+	}
+	else if (self == other) {
+		return true;
+	}
+	else {
+		return strcmp(self->contents, other->contents) == 0;
+	}
+}
+
+
 uint32_t
 n_string_length(NString* self) {
 	return self->length;

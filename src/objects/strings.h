@@ -19,6 +19,9 @@ n_string_new(const char* contents, NError*);
 const char*
 n_string_contents(NString*);
 
+bool
+n_string_is_equal(NString* self, NString* other);
+
 uint32_t
 n_string_length(NString*);
 #endif

@@ -49,3 +49,35 @@ TEST(construction_with_null_contents_fails) {
 		"message. Expected \"%s\", got \"%s\".",
 		"contents", error.message);
 }
+
+
+TEST(strings_of_different_contents_are_not_equal) {
+	NString* s1 = n_string_new("Hello", NULL);
+	NString* s2 = n_string_new("World", NULL);
+
+	ASSERT(!n_string_is_equal(s1, s2));
+}
+
+TEST(strings_of_equal_contents_are_equal) {
+	char str1[6];
+	char str2[20];
+	NString* s1;
+	NString* s2;
+
+	strcpy(str1, "Hello");
+	strcpy(str2, "Hello");
+
+	/* Assertion below is obviously true, but just to make clear
+	 * what we intend to test here. */
+	ASSERT(str1 != str2);
+
+	s1 = n_string_new(str1, NULL);
+	s2 = n_string_new(str2, NULL);
+
+	/* Again, just making sure there's no implementation optimization
+	 * that could make those the same string while we try to test for
+	 * equality. */
+	ASSERT(s1 != s2);
+
+	ASSERT(n_string_is_equal(s1, s2));
+}
