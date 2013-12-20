@@ -27,11 +27,11 @@ Target Description:
   to get the string contents of the symbol.
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2012-12-19 23:13
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create type for strings;
+  x Create type for strings;
   - Create constructor for strings;
   - Create accessor method is-equal;
   - Create type for symbols;
