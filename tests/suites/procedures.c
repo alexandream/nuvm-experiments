@@ -104,7 +104,6 @@ test_construction(NModule* mod, uint32_t entry, uint8_t nlocals) {
 		"Procedure constructed with locals count %u got locals count "
 		"reported as %u.",
 		nlocals, out_nlocals);
-	n_procedure_destroy(proc);
 }
 
 
@@ -113,7 +112,7 @@ test_invalid_entry_point_construction(NModule* mod,
                                       uint32_t entry,
                                       uint8_t nlocals) {
 	NError error;
-	NProcedure* proc = n_procedure_new(mod, entry, nlocals, &error);
+	n_procedure_new(mod, entry, nlocals, &error);
 
 	EXPECT_MSG(error.code == N_E_INVALID_ARGUMENT,
 		"Procedure construction with invalid entry point %u, "
@@ -127,14 +126,13 @@ test_invalid_entry_point_construction(NModule* mod,
 		"on module with code size %u, reported wrong error msg %s. "
 		"Expected \"entry_point\".",
 		entry, n_module_get_code_size(mod), error.message);
-	n_procedure_destroy(proc);
 }
 
 
 static void
 test_invalid_module_construction(uint32_t entry, uint8_t nlocals) {
 	NError error;
-	NProcedure* proc = n_procedure_new(NULL, entry, nlocals, &error);
+	n_procedure_new(NULL, entry, nlocals, &error);
 
 	EXPECT_MSG(error.code == N_E_INVALID_ARGUMENT,
 		"Procedure construction with null module with entry point %u "
@@ -147,5 +145,4 @@ test_invalid_module_construction(uint32_t entry, uint8_t nlocals) {
 		"and locals size %u reported wrong error message %s. "
 		"Expected \"%s\".",
 		entry, nlocals, error.message, "module");
-	n_procedure_destroy(proc);
 }

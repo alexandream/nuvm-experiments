@@ -75,14 +75,6 @@ n_is_procedure(NValue value) {
 }
 
 
-void
-n_procedure_destroy(NProcedure* self) {
-	if (self != NULL) {
-		n_free(self);
-	}
-}
-
-
 uint8_t
 n_procedure_count_locals(NProcedure* self) {
 	return self->num_locals;

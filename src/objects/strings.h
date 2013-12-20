@@ -1,5 +1,6 @@
 #ifndef __NUVM__OBJECTS__STRINGS_H_
 #define __NUVM__OBJECTS__STRINGS_H_
+#include <stddef.h>
 
 #include "../error.h"
 #include "../value.h"
@@ -13,9 +14,11 @@ bool
 n_is_string(NValue val);
 
 NString*
-n_string_new(NString f, void* data, NError*);
+n_string_new(const char* contents, NError*);
 
-void
-n_string_destroy(NString*);
+const char*
+n_string_contents(NString*);
 
+uint32_t
+n_string_length(NString*);
 #endif

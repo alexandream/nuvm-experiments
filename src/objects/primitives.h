@@ -17,9 +17,6 @@ n_is_primitive(NValue val);
 NPrimitive*
 n_primitive_new(NPrimitiveFunction f, void* data, NError*);
 
-void
-n_primitive_destroy(NPrimitive*);
-
 NValue
 n_primitive_call(NPrimitive*, NValue* args, uint8_t num_args, NError*);
 

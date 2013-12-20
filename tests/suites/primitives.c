@@ -38,7 +38,6 @@ TEST(primitive_construction_works) {
 
 	EXPECT(primitive != NULL);
 	EXPECT(n_is_primitive(n_wrap_pointer(primitive)));
-	n_primitive_destroy(primitive);
 }
 
 
@@ -60,7 +59,6 @@ TEST(execution_of_primitive_sees_data) {
 		"updated to a false value but wasn't. Got checked: %d.",
 		checked);
 
-	n_primitive_destroy(primitive);
 }
 
 
@@ -72,7 +70,6 @@ TEST(execution_of_primitive_returns_function_result) {
 	EXPECT(n_is_pointer(result));
 	EXPECT(n_unwrap_pointer(result) == heap_addr);
 
-	n_primitive_destroy(primitive);
 	n_free(heap_addr);
 }
 

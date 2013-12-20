@@ -1,5 +1,8 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
+
+#include "../util/strings.h"
 
 #include "../type-info.h"
 #include "../memory.h"
@@ -9,7 +12,7 @@
 struct NString {
 	NObject parent;
 	uint32_t length;
-	char* characters;
+	char* contents;
 };
 
 static NType   _type;
@@ -30,8 +33,50 @@ n_init_strings() {
 }
 
 
+NString*
+n_string_new(const char* contents, NError* error) {
+	NString* self;
+
+	n_error_clear(error);
+	if (contents == NULL) {
+		n_error_set(error, N_E_INVALID_ARGUMENT);
+		n_error_set_msg(error, "contents");
+		return NULL;
+	}
+
+	self = n_alloc(sizeof(NString));
+	if (self == NULL) {
+		n_error_set(error, N_E_BAD_ALLOCATION);
+		n_error_set_msg(error, "self");
+		return NULL;
+	}
+
+	self->parent.type_id = _type_id;
+	self->contents = duplicate_string(contents);
+	if (self->contents == NULL) {
+		n_error_set(error, N_E_BAD_ALLOCATION);
+		n_error_set_msg(error, "contents");
+		return NULL;
+	}
+
+	self->length = strlen(contents);
+	return self;
+}
+
+
 bool
 n_is_string(NValue val) {
 	return n_typeof(val) == _type_id;
 }
 
+
+const char*
+n_string_contents(NString* self) {
+	return self->contents;
+}
+
+
+uint32_t
+n_string_length(NString* self) {
+	return self->length;
+}

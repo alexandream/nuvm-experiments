@@ -3,13 +3,13 @@ CC=clang
 CFLAGS=-pedantic -Wall -std=c89 -g
 LIBS=
 
-SOURCE_FILES=$(wildcard src/*.c src/objects/*.c)
+SOURCE_FILES=$(wildcard src/*.c src/objects/*.c src/util/*.c)
 #OBJ_FILES=$(SOURCE_FILES:src/%.c=build/nuvm/%.o)
 
 TESTED_OBJ_FILES=$(SOURCE_FILES:src/%.c=build/tested/%.o)
 TESTED_CFLAGS=$(CFLAGS) -DRUNNING_TESTS -Werror
 
-TEST_CFLAGS=$(CFLAGS) -I src/ -Wno-variadic-macros -Werror
+TEST_CFLAGS=$(TESTED_CFLAGS) -I src/ -Wno-variadic-macros
 TEST_LIBS=-L build/tested -lnuvm -L build/atest -latest
 
 TEST_SOURCE_FILES=$(wildcard tests/suites/*.c)
@@ -72,6 +72,8 @@ clean:
 	       build/tested/*.o\
 	       build/tested/objects/*.d\
 	       build/tested/objects/*.o\
+	       build/tested/util/*.d\
+	       build/tested/util/*.o\
 	       build/atest/*.a\
 	       build/atest/*.d\
 	       build/atest/*.o\

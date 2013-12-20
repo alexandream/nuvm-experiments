@@ -32,7 +32,7 @@ Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
   x Create type for strings;
-  - Create constructor for strings;
+  x Create constructor for strings;
   - Create accessor method is-equal;
   - Create type for symbols;
   - Create constructor for symbols;

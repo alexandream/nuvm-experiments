@@ -19,9 +19,6 @@ n_procedure_new(NModule* mod,
                 uint8_t nlocals,
                 NError* error);
 
-void
-n_procedure_destroy(NProcedure*);
-
 uint8_t
 n_procedure_count_locals(NProcedure*);
 

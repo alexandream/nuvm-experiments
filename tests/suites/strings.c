@@ -21,3 +21,31 @@ TEST(type_information_is_registered) {
 }
 
 
+TEST(construction_works) {
+	const char* str = "Hello, world. Isn't this a lovely day?";
+	NError error;
+	NString* string = n_string_new(str, &error);
+
+	EXPECT(error.code == N_E_OK);
+	ASSERT(string != NULL);
+	EXPECT(n_is_string(n_wrap_pointer(string)));
+	EXPECT(n_string_length(string) == strlen(str));
+	EXPECT(strcmp(n_string_contents(string), str) == 0);
+}
+
+
+TEST(construction_with_null_contents_fails) {
+	NError error;
+	n_string_new(NULL, &error);
+	ASSERT_MSG(error.code != N_E_OK,
+		"Construction of string of null contents failed to report "
+		"any error at all.");
+	EXPECT_MSG(error.code == N_E_INVALID_ARGUMENT,
+		"Construction of string of null contents reported wrong error "
+		"code. Expected %u, got %u.",
+		N_E_INVALID_ARGUMENT, error.code);
+	EXPECT_MSG(strcmp(error.message, "contents") == 0,
+		"Construction of string of null contents reported wrong error "
+		"message. Expected \"%s\", got \"%s\".",
+		"contents", error.message);
+}

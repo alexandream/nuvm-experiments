@@ -53,6 +53,7 @@ n_primitive_new(NPrimitiveFunction function, void* data, NError* error) {
 	if (self == NULL) {
 		n_error_set(error, N_E_BAD_ALLOCATION);
 		n_error_set_msg(error, "self");
+		return NULL;
 	}
 
 	self->parent.type_id = _type_id;
@@ -61,12 +62,6 @@ n_primitive_new(NPrimitiveFunction function, void* data, NError* error) {
 
 	return self;
 
-}
-
-
-void
-n_primitive_destroy(NPrimitive* self) {
-	n_free(self);
 }
 
 

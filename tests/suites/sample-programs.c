@@ -176,10 +176,6 @@ TEST(primitive_evaluator_runs_primitive) {
 
 	EXPECT(flag == true);
 
-	n_primitive_destroy(prim1);
-	n_primitive_destroy(prim2);
-	n_primitive_destroy(prim3);
-
 	n_module_destroy(mod);
 	n_evaluator_destroy(eval);
 
@@ -225,7 +221,6 @@ TEST(swap_two_global_values) {
 	EXPECT(n_is_equal(reg1, n_wrap_fixnum(42)));
 	EXPECT(n_is_equal(reg2, n_wrap_fixnum(10588)));
 
-	n_procedure_destroy(proc);
 	n_module_destroy(mod);
 	n_evaluator_destroy(eval);
 
