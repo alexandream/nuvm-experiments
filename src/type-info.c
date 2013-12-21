@@ -12,6 +12,8 @@
 
 
 struct NTypeRegistry {
+	/* FIXME: Using an array as the pool, but a better mapping data structure
+	 * should be used. */
 	NTypeArray types;
 };
 

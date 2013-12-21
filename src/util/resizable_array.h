@@ -70,10 +70,12 @@ void ARRAY_INIT(ARRAY_TYPE_NAME*array, int32_t size) {
 }
 
 
+#ifndef ARRAY_DESTROY__SKIP
 static
 void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
 	ARRAY_DEALLOCATOR(array->elements);
 }
+#endif
 
 #ifndef ARRAY_APPEND__SKIP
 static
@@ -169,3 +171,4 @@ void ARRAY_SET(ARRAY_TYPE_NAME* array,
 #undef ARRAY_SET
 
 #undef ARRAY_APPEND__SKIP
+#undef ARRAY_DESTROY__SKIP

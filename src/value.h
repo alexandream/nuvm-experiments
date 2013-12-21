@@ -8,7 +8,10 @@ typedef union {
 	uint64_t contents;
 	void* pointer;
 	struct {
-		int32_t fixnum;
+		union {
+			int32_t fixnum;
+			int32_t symbol_id;
+		} data;
 		union {
 			uint32_t full_tag;
 			struct {
@@ -36,11 +39,17 @@ n_wrap_fixnum(int32_t fixnum);
 NValue
 n_wrap_pointer(void* pointer);
 
+NValue
+n_wrap_symbol(int32_t symbol_id);
+
 int32_t
 n_unwrap_fixnum(NValue value);
 
 void*
 n_unwrap_pointer(NValue value);
+
+int32_t
+n_unwrap_symbol(NValue value);
 
 bool
 n_is_boolean(NValue value);
@@ -52,6 +61,9 @@ bool
 n_is_pointer(NValue value);
 
 bool
+n_is_symbol(NValue value);
+
+bool
 n_is_undefined(NValue value);
 
 bool
@@ -60,3 +72,7 @@ n_is_equal(NValue value1, NValue value2);
 int32_t
 n_typeof(NValue value);
 #endif
+
+
+bool
+n_is_symbol(NValue value);

@@ -9,12 +9,16 @@
 
 #define HALF_TAG_POINTER 0x0000u
 #define TAG_FIXNUM       0xFFFFFFFFu
+#define TAG_SYMBOL       0xFFFFFFFEu
 
 static NType   _bool_type;
 static int32_t _bool_type_id;
 
 static NType   _fixnum_type;
 static int32_t _fixnum_type_id;
+
+static NType   _symbol_type;
+static int32_t _symbol_type_id;
 
 static NType   _undefined_type;
 static int32_t _undefined_type_id;
@@ -37,11 +41,9 @@ n_init_values() {
 		exit(1);
 	}
 
-
 	n_type_init(&_fixnum_type, "org.nuvm.Fixnum32");
-	_fixnum_type_id = n_type_registry_add_type(registry,
-	                                           &_fixnum_type,
-	                                           &error);
+	_fixnum_type_id =
+		n_type_registry_add_type(registry, &_fixnum_type, &error);
 	if (error.code != N_E_OK) {
 		fprintf(stderr, "Unable to register type for Fixnums. "
 		                "Aborting.\n");
@@ -49,12 +51,21 @@ n_init_values() {
 	}
 
 	n_type_init(&_undefined_type, "org.nuvm.Undefined");
-	_undefined_type_id = n_type_registry_add_type(registry,
-	                                              &_undefined_type,
-	                                              &error);
+	_undefined_type_id =
+		n_type_registry_add_type(registry, &_undefined_type, &error);
+
 	if (error.code != N_E_OK) {
 		fprintf(stderr, "Unable to register type for Undefined. "
 		                "Aborting.\n");
+		exit(1);
+	}
+
+	n_type_init(&_symbol_type, "org.nuvm.Symbol");
+	_symbol_type_id =
+		n_type_registry_add_type(registry, &_symbol_type, &error);
+
+	if (error.code != N_E_OK) {
+		fprintf(stderr, "Unable to register type for Symbols. Aborting.\n");
 		exit(1);
 	}
 
@@ -75,7 +86,8 @@ n_init_values() {
 NValue
 n_wrap_fixnum(int32_t fixnum) {
 	NValue result;
-	result.immediate.fixnum = fixnum;
+	result.contents = 0L;
+	result.immediate.data.fixnum = fixnum;
 	result.immediate.tags.full_tag = TAG_FIXNUM;
 	return result;
 }
@@ -84,8 +96,25 @@ n_wrap_fixnum(int32_t fixnum) {
 NValue
 n_wrap_pointer(void* pointer) {
 	NValue result;
+	result.contents = 0L;
 	result.pointer = pointer;
 	return result;
+}
+
+
+NValue
+n_wrap_symbol(int32_t symbol_id) {
+	NValue result;
+	result.contents = 0L;
+	result.immediate.tags.full_tag = TAG_SYMBOL;
+	result.immediate.data.symbol_id = symbol_id;
+	return result;
+}
+
+
+int32_t
+n_unwrap_fixnum(NValue value) {
+	return value.immediate.data.fixnum;
 }
 
 
@@ -96,14 +125,16 @@ n_unwrap_pointer(NValue value) {
 
 
 int32_t
-n_unwrap_fixnum(NValue value) {
-	return value.immediate.fixnum;
+n_unwrap_symbol(NValue value) {
+	return value.immediate.data.symbol_id;
 }
+
 
 bool
 n_is_boolean(NValue value) {
 	return n_typeof(value) == _bool_type_id;
 }
+
 
 bool
 n_is_equal(NValue value1, NValue value2) {
@@ -120,6 +151,12 @@ n_is_fixnum(NValue value) {
 bool
 n_is_pointer(NValue value) {
 	return value.immediate.tags.half_tags.upper_tag == HALF_TAG_POINTER;
+}
+
+
+bool
+n_is_symbol(NValue value) {
+	return value.immediate.tags.full_tag == TAG_SYMBOL;
 }
 
 
