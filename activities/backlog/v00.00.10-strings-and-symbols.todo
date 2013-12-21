@@ -34,6 +34,6 @@ Target Tasks:
   x Create type for strings;
   x Create constructor for strings;
   x Create accessor method is-equal;
-  - Create type for symbols;
+  x Create type for symbols;
   - Create constructor for symbols;
   - Create accessor method as-string;
