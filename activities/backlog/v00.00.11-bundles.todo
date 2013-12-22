@@ -36,7 +36,7 @@ Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
   x Create type for bundles;
-  - Create bundle constructor;
+  x Create bundle constructor;
   - Create bundle constructing instruction (new-bundle);
   - Create bundle setter;
   - Create bundle setter instruction (bundle-set);

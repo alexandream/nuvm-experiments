@@ -69,10 +69,12 @@ void ARRAY_SET(ARRAY_TYPE_NAME* array,
 }
 #endif
 
+#ifndef ARRAY_DESTROY__SKIP
 static
 void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
 	ARRAY_DEALLOCATOR(array->elements);
 }
+#endif
 
 static
 ARRAY_SIZE_T ARRAY_SIZE(ARRAY_TYPE_NAME* array) {
