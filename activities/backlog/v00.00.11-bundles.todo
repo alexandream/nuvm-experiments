@@ -52,7 +52,7 @@ Target Tasks:
   - Create bundle constructing instruction (new-bundle);
   x Create bundle setter;
   - Create bundle setter instruction (bundle-set);
-  - Create bundle close method;
+  x Create bundle close method;
   - Create bundle close instruction (bundle-close);
   - Create bundle getter;
   - Create bundle getter instruction (bundle-get);

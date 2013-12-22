@@ -77,6 +77,26 @@ TEST(setting_on_open_bundle_works) {
 }
 
 
+TEST(setting_on_closed_bundle_fails) {
+	NError error;
+	NBundle* bundle = n_bundle_new(1, NULL);
+	NValue symbol = n_symbol_pool_get_symbol("Wakka");
+
+	n_bundle_close(bundle);
+	n_bundle_set(bundle, symbol, N_TRUE, &error);
+
+	EXPECT_MSG(error.code == N_E_INVALID_STATE,
+		"Setting value on closed bundle reported wrong error code. "
+		"Expected %d, got %d.",
+		N_E_INVALID_STATE, error.code);
+
+	EXPECT_MSG(strcmp(error.message, "closed") == 0,
+		"Setting value on closed bundle reported wrong error message. "
+		"Expected \"closed\", got \"%s\".",
+		error.message);
+}
+
+
 TEST(setting_on_full_bundle_fails) {
 	NError error;
 	NBundle* bundle = n_bundle_new(5, NULL);

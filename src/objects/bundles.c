@@ -77,10 +77,21 @@ n_bundle_new(uint16_t size, NError* error) {
 
 
 void
+n_bundle_close(NBundle* self) {
+	self->closed = true;
+}
+
+
+void
 n_bundle_set(NBundle* self, NValue symbol, NValue value, NError* error) {
 	int32_t slot;
 	n_error_clear(error);
 
+	if (self->closed) {
+		n_error_set(error, N_E_INVALID_STATE);
+		n_error_set_msg(error, "closed");
+		return;
+	}
 	slot = _find_slot(self, symbol);
 	if (slot < 0) {
 		n_error_set(error, N_E_INVALID_STATE);
