@@ -6,6 +6,7 @@
 
 #include "objects/bundles.h"
 #include "type-info.h"
+#include "symbol-pool.h"
 
 void
 test_valid_construction(uint16_t size);
@@ -32,7 +33,7 @@ TEST(construction_of_empty_bundle_fails) {
 
 	ASSERT_MSG(error.code != N_E_OK,
 		"Creation of empty bundle failed to report any error at all.");
-	
+
 	EXPECT_MSG(error.code == N_E_INVALID_ARGUMENT,
 		"Creation of empty bundle reported wrong error code: "
 		"expected %d, got %d.\n",
@@ -56,6 +57,65 @@ TEST(valid_construction_works) {
 	test_valid_construction(65535);
 }
 
+
+TEST(setting_on_open_bundle_works) {
+	NError error;
+	NBundle* bundle = n_bundle_new(128, NULL);
+	int i;
+	char buf[32];
+	for (i = 0; i < 128; i++) {
+		NValue symbol;
+		sprintf(buf, "S%03d", i);
+		symbol = n_symbol_pool_get_symbol(buf);
+		n_bundle_set(bundle, symbol, n_wrap_fixnum(i), &error);
+
+		EXPECT_MSG(error.code == N_E_OK,
+			"Setting symbol %s on open bundle reported unexpected "
+			"error code %d.",
+			buf, error.code);
+	}
+}
+
+
+TEST(setting_on_full_bundle_fails) {
+	NError error;
+	NBundle* bundle = n_bundle_new(5, NULL);
+	NValue symbol;
+	int i;
+	char buf[32];
+	for (i = 0; i < 5; i++) {
+		sprintf(buf, "%d", i);
+		symbol = n_symbol_pool_get_symbol(buf);
+		n_bundle_set(bundle, symbol, n_wrap_fixnum(i), &error);
+	}
+
+	symbol = n_symbol_pool_get_symbol("Failing");
+	n_bundle_set(bundle, symbol, N_UNDEFINED, &error);
+	EXPECT_MSG(error.code == N_E_INVALID_STATE,
+		"Setting mapping on full bundle reported wrong code error. "
+		"Expected %d, got %d.",
+		N_E_INVALID_STATE, error.code);
+
+	EXPECT_MSG(strcmp(error.message, "overflow") == 0,
+		"Setting mapping on full bundle reported wrong error message. "
+		"Expected \"overflow\", got \"%s\".",
+		error.message);
+}
+
+
+TEST(setting_same_symbol_twice_works) {
+	NError error;
+	NBundle* bundle = n_bundle_new(1, NULL);
+	NValue symbol = n_symbol_pool_get_symbol("Hello");
+
+	n_bundle_set(bundle, symbol, n_wrap_fixnum(1), NULL);
+	n_bundle_set(bundle, symbol, n_wrap_fixnum(1), &error);
+
+	EXPECT_MSG(error.code == N_E_OK,
+		"Resetting symbol \"Hello\" on bundle reported unexpected "
+		"error code %d with error message \"%s\".",
+		error.code, error.message);
+}
 
 /* ----- Auxiliary functions ----- */
 

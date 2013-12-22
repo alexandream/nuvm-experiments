@@ -52,7 +52,8 @@ n_symbol_pool_get_symbol(const char* contents) {
 	if (contents != NULL) {
 		int32_t index = _find_symbol(contents);
 		if (index < 0) {
-			index = n_symbol_array_append(&_pool, contents);
+			/* FIXME: Hell will break loose if duplicate_string fails. */
+			index = n_symbol_array_append(&_pool, duplicate_string(contents));
 			/* FIXME: If index < 0 we had an allocation error in the array.
 			 * This condition is not handled. */
 		}

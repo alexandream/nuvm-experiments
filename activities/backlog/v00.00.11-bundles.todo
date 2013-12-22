@@ -13,22 +13,34 @@ Target Description:
   instructions on the machine. This ensures that a module can expose a
   bundle without depending on any other external library function.
 
+  A bundle is, at any time, on one of two states: open or closed.  It
+  is open during the process of setting its mappings, when it's a
+  write-only structure -- trying to read from it is an error. It then
+  gets closed by a bundle-close instruction and, from then on it's a
+  read-only structure -- trying to write on it is an error.
+
   The interface to manipulate a bundle is defined as the following
   instructions:
 
   new-bundle: Takes a local index used to store the resulting bundle
   and a number of slots that should be allocated in a bundle. Returns
-  a new bundle with capacity for storing mapping for up to as much
+  a new open bundle with capacity for storing mapping for up to as much
   slots as indicated;
 
-  bundle-set: Takes a local index pointing to the bundle being used, a
-  local index pointing to the symbol being set and a local index
-  pointing to the value that should be set on the bundle;
+  bundle-set: Takes a local index pointing to the open bundle being
+  used, a local index pointing to the symbol being set and a local
+  index pointing to the value that should be set on the bundle. Trying
+  to set a value on a closed bundle is an error;
 
   bundle-get: Takes a local index used to store the resulting value, a
-  loca lindex pointing to the bundle being used and a local index
-  pointing to the symbol used as key. Returns the value stored under
-  that key in the bundle specified;
+  local index pointing to the closed bundle being used and a local
+  index pointing to the symbol used as key. Returns the value stored
+  under that key in the bundle specified, Trying to get a value from
+  an open bundle is an error;
+
+  bundle-close: Takes a local index pointing to an open bundle and
+  turns it into a closed bundle. Trying to close an already closed
+  bundle does nothing;
 
 
 Activity start:  2013-12-21 23:21
@@ -38,8 +50,10 @@ Target Tasks:
   x Create type for bundles;
   x Create bundle constructor;
   - Create bundle constructing instruction (new-bundle);
-  - Create bundle setter;
+  x Create bundle setter;
   - Create bundle setter instruction (bundle-set);
+  - Create bundle close method;
+  - Create bundle close instruction (bundle-close);
   - Create bundle getter;
   - Create bundle getter instruction (bundle-get);
   - Sample program: Given 4 registers specifying symbols and 4
