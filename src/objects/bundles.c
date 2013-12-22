@@ -11,8 +11,6 @@
 #define ARRAY_TYPE_NAME     NValueArray
 #define ARRAY_PREFIX        n_value_array
 #define ARRAY_CONTENTS_TYPE NValue
-#define ARRAY_DESTROY__SKIP
-#define ARRAY_ELEMENTS__SKIP
 #include "../util/array.h"
 
 struct NBundle {
@@ -33,7 +31,7 @@ static int32_t _type_id;
 
 
 static int32_t
-_find_slot(NBundle* self, NValue symbol);
+_find_slot(NBundle* self, NValue symbol, bool insert);
 
 
 void
@@ -66,12 +64,26 @@ n_bundle_new(uint16_t size, NError* error) {
 	if (self == NULL) {
 		n_error_set(error, N_E_BAD_ALLOCATION);
 		n_error_set_msg(error, "self");
+		return NULL;
 	}
-	/* FIXME: slots and mapper may stay uninitialized on allocation failure. */
 	self->closed = false;
 	self->next_slot = 0;
+
 	n_value_array_init(&self->slots, size);
+	if (n_value_array_elements(&self->slots) == NULL) {
+		n_error_set(error, N_E_BAD_ALLOCATION);
+		n_error_set_msg(error, "slots");
+		return NULL;
+	}
+
 	n_value_array_init(&self->mapper, size);
+	if (n_value_array_elements(&self->mapper) == NULL) {
+		n_value_array_destroy(&self->slots);
+		n_error_set(error, N_E_BAD_ALLOCATION);
+		n_error_set_msg(error, "mapper");
+		return NULL;
+	}
+
 	return self;
 }
 
@@ -79,6 +91,26 @@ n_bundle_new(uint16_t size, NError* error) {
 void
 n_bundle_close(NBundle* self) {
 	self->closed = true;
+}
+
+
+NValue
+n_bundle_get(NBundle* self, NValue symbol, NError* error) {
+	int32_t slot;
+	n_error_clear(error);
+
+	if (!self->closed) {
+		n_error_set(error, N_E_INVALID_STATE);
+		n_error_set_msg(error, "open");
+		return N_UNDEFINED;
+	}
+	slot = _find_slot(self, symbol, false);
+	if (slot < 0) {
+		return N_UNDEFINED;
+	}
+	else {
+		return n_value_array_get(&self->slots, slot);
+	}
 }
 
 
@@ -92,7 +124,7 @@ n_bundle_set(NBundle* self, NValue symbol, NValue value, NError* error) {
 		n_error_set_msg(error, "closed");
 		return;
 	}
-	slot = _find_slot(self, symbol);
+	slot = _find_slot(self, symbol, true);
 	if (slot < 0) {
 		n_error_set(error, N_E_INVALID_STATE);
 		n_error_set_msg(error, "overflow");
@@ -112,7 +144,7 @@ n_bundle_size(NBundle* self) {
 /* ----- Auxiliary Functions ----- */
 
 static int32_t
-_find_slot(NBundle* self, NValue symbol) {
+_find_slot(NBundle* self, NValue symbol, bool insert) {
 	int32_t i, index;
 	int32_t nslots = n_value_array_size(&self->slots);
 	for (i = 0; i < nslots; i++) {
@@ -120,12 +152,17 @@ _find_slot(NBundle* self, NValue symbol) {
 			return i;
 		}
 	}
-	index = self->next_slot;
-	if (index >= nslots) {
-		index = -1;
+	if (insert) {
+		index = self->next_slot;
+		if (index >= nslots) {
+			index = -1;
+		}
+		else if (index >= 0) {
+			self->next_slot++;
+		}
+		return index;
 	}
-	else if (index >= 0) {
-		self->next_slot++;
+	else {
+		return -1;
 	}
-	return index;
 }

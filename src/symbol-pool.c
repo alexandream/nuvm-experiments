@@ -46,20 +46,31 @@ n_symbol_pool_fetch(int32_t id) {
 
 
 NValue
-n_symbol_pool_get_symbol(const char* contents) {
-	NValue result = N_UNDEFINED;
-
+n_symbol_pool_get_symbol(const char* contents, NError* error) {
+	n_error_clear(error);
 	if (contents != NULL) {
 		int32_t index = _find_symbol(contents);
 		if (index < 0) {
-			/* FIXME: Hell will break loose if duplicate_string fails. */
-			index = n_symbol_array_append(&_pool, duplicate_string(contents));
-			/* FIXME: If index < 0 we had an allocation error in the array.
-			 * This condition is not handled. */
+			const char* dup_contents = duplicate_string(contents);
+			if (dup_contents == NULL) {
+				n_error_set(error, N_E_BAD_ALLOCATION);
+				n_error_set_msg(error, "contents");
+				return N_UNDEFINED;
+			}
+			index = n_symbol_array_append(&_pool, dup_contents);
+			if (index < 0) {
+				n_error_set(error, N_E_BAD_ALLOCATION);
+				n_error_set_msg(error, "inner-pool");
+				return N_UNDEFINED;
+			}
 		}
-		result = n_wrap_symbol(index);
+		return n_wrap_symbol(index);
 	}
-	return result;
+	else {
+		n_error_set(error, N_E_INVALID_ARGUMENT);
+		n_error_set_msg(error, "contents");
+		return N_UNDEFINED;
+	}
 }
 
 

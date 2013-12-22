@@ -58,6 +58,94 @@ TEST(valid_construction_works) {
 }
 
 
+TEST(getting_on_open_bundle_fails) {
+	NError error;
+	NBundle* bundle = n_bundle_new(5, NULL);
+	NValue symbol = n_symbol_pool_get_symbol("sym", NULL);
+
+	n_bundle_get(bundle, symbol, &error);
+	EXPECT_MSG(error.code == N_E_INVALID_STATE,
+		"Getting from empty open bundle reported wrong error code. "
+		"Expected %d, got %d.",
+		N_E_INVALID_STATE, error.code);
+	EXPECT_MSG(strcmp(error.message, "open") == 0,
+		"Getting from empty open bundle reported wrong error message. "
+		"Expected \"open\", got \"%s\".",
+		error.message);
+
+	n_bundle_set(bundle, symbol, N_TRUE, NULL);
+
+	n_bundle_get(bundle, symbol, &error);
+	EXPECT_MSG(error.code == N_E_INVALID_STATE,
+		"Getting from open bundle reported wrong error code. "
+		"Expected %d, got %d.",
+		N_E_INVALID_STATE, error.code);
+	EXPECT_MSG(strcmp(error.message, "open") == 0,
+		"Getting from open bundle reported wrong error message. "
+		"Expected \"open\", got \"%s\".",
+		error.message);
+}
+
+
+TEST(getting_on_closed_bundle_works) {
+	NError error;
+	NBundle* bundle = n_bundle_new(5, NULL);
+	NValue symbol;
+	int i;
+
+	n_bundle_close(bundle);
+	for (i = 0; i < 5; i++) {
+		char buf[20];
+		sprintf(buf, "SG%03d", i);
+		symbol = n_symbol_pool_get_symbol(buf, NULL);
+		n_bundle_get(bundle, symbol, &error);
+		EXPECT_MSG(error.code == N_E_OK,
+			"Getting symbol \"%s\" on empty closed bundle reported unexpected "
+			"error code %d with message \"%s\".",
+			buf, error.code, error.message);
+	}
+}
+
+
+TEST(getting_on_bundle_results_in_previously_set_value) {
+	NError error;
+	NBundle* bundle = n_bundle_new(5, NULL);
+	NValue symbol;
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		char buf[20];
+		sprintf(buf, "SG%03d", i);
+		symbol = n_symbol_pool_get_symbol(buf, NULL);
+		n_bundle_set(bundle, symbol, n_wrap_fixnum(i), NULL);
+	}
+
+	n_bundle_close(bundle);
+
+	for (i = 4; i >= 0; i--) {
+		char buf[20];
+		NValue output;
+		sprintf(buf, "SG%03d", i);
+		symbol = n_symbol_pool_get_symbol(buf, NULL);
+		output = n_bundle_get(bundle, symbol, &error);
+		EXPECT_MSG(error.code == N_E_OK,
+			"Getting symbol \"%s\" on closed bundle reported unexpected "
+			"error code %d with message \"%s\".",
+			buf, error.code, error.message);
+		EXPECT_MSG(n_is_fixnum(output),
+			"Getting previously set fixnum on closed bundle with symbol "
+			"\"%s\" returned output that fails to be recognized as "
+			"fixnum: 0x%016lX.",
+			buf, output.contents);
+		EXPECT_MSG(n_unwrap_fixnum(output) == i,
+			"Getting previously set fixnum on closed bundle with symbol "
+			"\"%s\" returned wrong value. Expected %d, got %d.",
+			buf, i, n_unwrap_fixnum(output));
+	}
+
+}
+
+
 TEST(setting_on_open_bundle_works) {
 	NError error;
 	NBundle* bundle = n_bundle_new(128, NULL);
@@ -66,7 +154,7 @@ TEST(setting_on_open_bundle_works) {
 	for (i = 0; i < 128; i++) {
 		NValue symbol;
 		sprintf(buf, "S%03d", i);
-		symbol = n_symbol_pool_get_symbol(buf);
+		symbol = n_symbol_pool_get_symbol(buf, NULL);
 		n_bundle_set(bundle, symbol, n_wrap_fixnum(i), &error);
 
 		EXPECT_MSG(error.code == N_E_OK,
@@ -80,7 +168,7 @@ TEST(setting_on_open_bundle_works) {
 TEST(setting_on_closed_bundle_fails) {
 	NError error;
 	NBundle* bundle = n_bundle_new(1, NULL);
-	NValue symbol = n_symbol_pool_get_symbol("Wakka");
+	NValue symbol = n_symbol_pool_get_symbol("Wakka", NULL);
 
 	n_bundle_close(bundle);
 	n_bundle_set(bundle, symbol, N_TRUE, &error);
@@ -105,11 +193,11 @@ TEST(setting_on_full_bundle_fails) {
 	char buf[32];
 	for (i = 0; i < 5; i++) {
 		sprintf(buf, "%d", i);
-		symbol = n_symbol_pool_get_symbol(buf);
+		symbol = n_symbol_pool_get_symbol(buf, NULL);
 		n_bundle_set(bundle, symbol, n_wrap_fixnum(i), &error);
 	}
 
-	symbol = n_symbol_pool_get_symbol("Failing");
+	symbol = n_symbol_pool_get_symbol("Failing", NULL);
 	n_bundle_set(bundle, symbol, N_UNDEFINED, &error);
 	EXPECT_MSG(error.code == N_E_INVALID_STATE,
 		"Setting mapping on full bundle reported wrong code error. "
@@ -126,7 +214,7 @@ TEST(setting_on_full_bundle_fails) {
 TEST(setting_same_symbol_twice_works) {
 	NError error;
 	NBundle* bundle = n_bundle_new(1, NULL);
-	NValue symbol = n_symbol_pool_get_symbol("Hello");
+	NValue symbol = n_symbol_pool_get_symbol("Hello", NULL);
 
 	n_bundle_set(bundle, symbol, n_wrap_fixnum(1), NULL);
 	n_bundle_set(bundle, symbol, n_wrap_fixnum(1), &error);

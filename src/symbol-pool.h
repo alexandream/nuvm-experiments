@@ -8,7 +8,7 @@ void
 n_symbol_pool_init();
 
 NValue
-n_symbol_pool_get_symbol(const char* contents);
+n_symbol_pool_get_symbol(const char* contents, NError*);
 
 const char*
 n_symbol_pool_fetch(int32_t id);

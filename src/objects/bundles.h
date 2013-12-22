@@ -16,6 +16,9 @@ n_bundle_new(uint16_t size, NError*);
 void
 n_bundle_close(NBundle*);
 
+NValue
+n_bundle_get(NBundle*, NValue symbol, NError*);
+
 void
 n_bundle_set(NBundle*, NValue symbol, NValue value, NError*);
 
