@@ -5,8 +5,8 @@ Target Description:
   Continuing with new data types to our machine, increasing our
   vocabulary. This time we're adding Bundles, which are mere
   dictionaries mapping from symbols to general values. Bundles are
-  similar to Lua's tables but more limited in that they only accept
-  symbols as keys.
+  similar to general maps or dictionaries but more limited in that
+  they only accept symbols as keys.
 
   A bundle's main purpose is to map a module's public interface, and
   to be able to do so are created and modified through new
@@ -31,11 +31,11 @@ Target Description:
   that key in the bundle specified;
 
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2013-12-21 23:21
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks:
-  - Create type for bundles;
+  x Create type for bundles;
   - Create bundle constructor;
   - Create bundle constructing instruction (new-bundle);
   - Create bundle setter;
