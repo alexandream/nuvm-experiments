@@ -25,40 +25,63 @@ TEST(instructions_fit_32_bits) {
 
 
 TEST(op_bundle_close_encoding) {
-  NInstruction inst = n_op_bundle_close(0x12);
-  uint8_t l_bundle;
+	NInstruction inst = n_op_bundle_close(0x12);
+	uint8_t l_bundle;
 
-  EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_CLOSE,
-	"Expected opcode %u, got %u.",
-	N_OP_BUNDLE_CLOSE, inst.base.opcode);
+	EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_CLOSE,
+		"Expected opcode %u, got %u.",
+		N_OP_BUNDLE_CLOSE, inst.base.opcode);
 
-  n_decode_bundle_close(inst, &l_bundle);
-  EXPECT_MSG(l_bundle == 0x12,
-	"Expected l_bundle to be 0x12, got 0x%02X.",
-	l_bundle);
+	n_decode_bundle_close(inst, &l_bundle);
+	EXPECT_MSG(l_bundle == 0x12,
+		"Expected l_bundle to be 0x12, got 0x%02X.",
+		l_bundle);
+}
+
+
+TEST(op_bundle_get_encoding) {
+	NInstruction inst = n_op_bundle_get(0xFE, 0x12, 0x34);
+	uint8_t dest, bundle, symbol;
+
+	EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_GET,
+		"Expected opcode %u, got %u.",
+		N_OP_BUNDLE_GET, inst.base.opcode);
+
+	n_decode_bundle_get(inst, &dest, &bundle, &symbol);
+	EXPECT_MSG(dest == 0xFE,
+		"Expected dest to be 0xFE, got 0x%02X.",
+		dest);
+
+	EXPECT_MSG(bundle == 0x12,
+		"Expected bundle to be 0x12, got 0x%02X.",
+		bundle);
+
+	EXPECT_MSG(symbol == 0x34,
+		"Expected symbol to be 0x34, got 0x%02X.",
+		symbol);
 }
 
 
 TEST(op_bundle_set_encoding) {
-  NInstruction inst = n_op_bundle_set(0x12, 0x34, 0x56);
-  uint8_t bundle, symbol, value;
+	NInstruction inst = n_op_bundle_set(0x12, 0x34, 0x56);
+	uint8_t bundle, symbol, value;
 
-  EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_SET,
-	"Expected opcode %u, got %u.",
-	N_OP_BUNDLE_SET, inst.base.opcode);
+	EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_SET,
+		"Expected opcode %u, got %u.",
+		N_OP_BUNDLE_SET, inst.base.opcode);
 
-  n_decode_bundle_set(inst, &bundle, &symbol, &value);
-  EXPECT_MSG(bundle == 0x12,
-	"Expected bundle to be 0x12, got 0x%02X.",
-	bundle);
+	n_decode_bundle_set(inst, &bundle, &symbol, &value);
+	EXPECT_MSG(bundle == 0x12,
+		"Expected bundle to be 0x12, got 0x%02X.",
+		bundle);
 
-  EXPECT_MSG(symbol == 0x34,
-	"Expected symbol to be 0x34, got 0x%02X.",
-	symbol);
+	EXPECT_MSG(symbol == 0x34,
+		"Expected symbol to be 0x34, got 0x%02X.",
+		symbol);
 
-  EXPECT_MSG(value == 0x56,
-	"Expected value to be 0x56, got 0x%02X.",
-	value);
+	EXPECT_MSG(value == 0x56,
+		"Expected value to be 0x56, got 0x%02X.",
+		value);
 }
 
 

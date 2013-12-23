@@ -55,7 +55,7 @@ Target Tasks:
   x Create bundle close method;
   x Create bundle close instruction (bundle-close);
   x Create bundle getter;
-  - Create bundle getter instruction (bundle-get);
+  x Create bundle getter instruction (bundle-get);
   - Create instruction behavior for the instructions above;
   - Sample program: Given 4 registers specifying symbols and 4
     registers specifying values, return the bundle of 4 elements
