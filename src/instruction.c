@@ -80,6 +80,12 @@ n_decode_jump_unless(NInstruction inst, uint8_t* cond, int16_t* offset) {
 
 
 void
+n_decode_new_bundle(NInstruction inst, uint16_t* size) {
+	*size = pack_8s_as_16(inst.base.arg1, inst.base.arg2);
+}
+
+
+void
 n_decode_return(NInstruction inst, uint8_t* src) {
 	*src = inst.base.arg1;
 }
@@ -143,6 +149,14 @@ n_op_jump_unless(uint8_t cond, int16_t offset) {
 	unpack_16_to_8s((uint16_t)offset, &arg2, &arg3);
 	return n_instruction(N_OP_JUMP_UNLESS, cond, arg2, arg3);
 
+}
+
+
+NInstruction
+n_op_new_bundle(uint16_t size) {
+	uint8_t arg1, arg2;
+	unpack_16_to_8s(size, &arg1, &arg2);
+	return n_instruction(N_OP_NEW_BUNDLE, arg1, arg2, 0);
 }
 
 

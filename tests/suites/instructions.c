@@ -141,6 +141,21 @@ TEST(op_jump_unless_encoding) {
 }
 
 
+TEST(op_new_bundle_encoding) {
+  NInstruction inst = n_op_new_bundle(0x1234);
+  uint16_t size;
+
+  EXPECT_MSG(inst.base.opcode == N_OP_NEW_BUNDLE,
+	"Expected opcode %u, got %u.",
+	N_OP_NEW_BUNDLE, inst.base.opcode);
+
+  n_decode_new_bundle(inst, &size);
+  EXPECT_MSG(size == 0x1234,
+	"Expected size to be 0x1234, got 0x%04X.",
+	size);
+}
+
+
 TEST(op_return_encoding) {
 	NInstruction inst = n_op_return(0x28);
 	uint8_t l_src;
