@@ -24,6 +24,21 @@ TEST(instructions_fit_32_bits) {
 }
 
 
+TEST(op_bundle_close_encoding) {
+  NInstruction inst = n_op_bundle_close(0x12);
+  uint8_t l_bundle;
+
+  EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_CLOSE,
+	"Expected opcode %u, got %u.",
+	N_OP_BUNDLE_CLOSE, inst.base.opcode);
+
+  n_decode_bundle_close(inst, &l_bundle);
+  EXPECT_MSG(l_bundle == 0x12,
+	"Expected l_bundle to be 0x12, got 0x%02X.",
+	l_bundle);
+}
+
+
 TEST(op_call_encoding) {
 	test_op_call_encoding(0, 1, 2);
 	test_op_call_encoding(4, 5, 6);

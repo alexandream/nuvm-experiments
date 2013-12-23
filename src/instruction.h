@@ -40,6 +40,9 @@ NInstruction
 n_instruction(uint8_t opcode, uint8_t arg1, uint8_t arg2, uint8_t arg3);
 
 void
+n_decode_bundle_close(NInstruction, uint8_t *bundle);
+
+void
 n_decode_call(NInstruction, uint8_t* dest, uint8_t* callee, uint8_t* nargs);
 
 void
@@ -65,6 +68,9 @@ n_decode_new_bundle(NInstruction, uint16_t* size);
 
 void
 n_decode_return(NInstruction, uint8_t* src);
+
+NInstruction
+n_op_bundle_close(uint8_t bundle);
 
 NInstruction
 n_op_call(uint8_t dest, uint8_t callee, uint8_t nargs);
