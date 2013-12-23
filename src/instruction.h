@@ -13,7 +13,7 @@
 #define N_OP_JUMP         0x07
 #define N_OP_JUMP_IF      0x08
 #define N_OP_JUMP_UNLESS  0x09
-#define N_OP_NEW_BUNDLE   0x0C
+#define N_OP_NEW_BUNDLE   0x0A
 #define N_OP_RETURN       0x0B
 
 
@@ -76,7 +76,7 @@ void
 n_decode_jump_unless(NInstruction, uint8_t* cond, int16_t* offset);
 
 void
-n_decode_new_bundle(NInstruction, uint16_t* size);
+n_decode_new_bundle(NInstruction, uint8_t* dest, uint16_t* size);
 
 void
 n_decode_return(NInstruction, uint8_t* src);
@@ -112,7 +112,7 @@ NInstruction
 n_op_jump_unless(uint8_t cond, int16_t offset);
 
 NInstruction
-n_op_new_bundle(uint16_t size);
+n_op_new_bundle(uint8_t dest, uint16_t size);
 
 NInstruction
 n_op_return(uint8_t src);

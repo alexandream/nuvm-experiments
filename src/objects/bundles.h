@@ -25,4 +25,7 @@ n_bundle_set(NBundle*, NValue symbol, NValue value, NError*);
 uint16_t
 n_bundle_size(NBundle*);
 
+bool
+n_is_bundle(NValue value);
+
 #endif

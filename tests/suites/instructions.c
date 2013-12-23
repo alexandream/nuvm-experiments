@@ -203,14 +203,19 @@ TEST(op_jump_unless_encoding) {
 
 
 TEST(op_new_bundle_encoding) {
-  NInstruction inst = n_op_new_bundle(0x1234);
+  NInstruction inst = n_op_new_bundle(0x42, 0x1234);
   uint16_t size;
+  uint8_t dest;
 
   EXPECT_MSG(inst.base.opcode == N_OP_NEW_BUNDLE,
 	"Expected opcode %u, got %u.",
 	N_OP_NEW_BUNDLE, inst.base.opcode);
 
-  n_decode_new_bundle(inst, &size);
+  n_decode_new_bundle(inst, &dest, &size);
+  EXPECT_MSG(dest == 0x42,
+	"Expected dest to be 0x42, got 0x%02X.",
+	dest);
+
   EXPECT_MSG(size == 0x1234,
 	"Expected size to be 0x1234, got 0x%04X.",
 	size);

@@ -66,6 +66,7 @@ n_bundle_new(uint16_t size, NError* error) {
 		n_error_set_msg(error, "self");
 		return NULL;
 	}
+	self->parent.type_id = _type_id;
 	self->closed = false;
 	self->next_slot = 0;
 
@@ -138,6 +139,12 @@ n_bundle_set(NBundle* self, NValue symbol, NValue value, NError* error) {
 uint16_t
 n_bundle_size(NBundle* self) {
 	return n_value_array_size(&self->slots);
+}
+
+
+bool
+n_is_bundle(NValue value) {
+	return n_typeof(value) == _type_id;
 }
 
 

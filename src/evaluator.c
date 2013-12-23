@@ -6,6 +6,7 @@
 
 #include "evaluator.h"
 #include "instruction.h"
+#include "objects/bundles.h"
 #include "objects/primitives.h"
 #include "objects/procedures.h"
 
@@ -47,6 +48,15 @@ static NValue
 _get_local(NEvaluator*, uint8_t);
 
 static uint32_t
+_op_bundle_close(NEvaluator* self, NInstruction inst);
+
+static uint32_t
+_op_bundle_get(NEvaluator* self, NInstruction inst);
+
+static uint32_t
+_op_bundle_set(NEvaluator* self, NInstruction inst);
+
+static uint32_t
 _op_call(NEvaluator* self, NInstruction inst);
 
 static uint32_t
@@ -66,6 +76,9 @@ _op_jump_if(NEvaluator* self, NInstruction inst);
 
 static uint32_t
 _op_jump_unless(NEvaluator* self, NInstruction inst);
+
+static uint32_t
+_op_new_bundle(NEvaluator* self, NInstruction inst);
 
 static uint32_t
 _op_return(NEvaluator*, NInstruction, bool* halt, NValue* result);
@@ -274,9 +287,6 @@ _get_local(NEvaluator* self, uint8_t index) {
 }
 
 
-
-
-
 static void
 _pop_stack_frame(NEvaluator* self) {
 	NProcedure* caller = n_unwrap_pointer(_get_frame_caller(self));
@@ -286,6 +296,65 @@ _pop_stack_frame(NEvaluator* self) {
 	self->code_pointer = code_pointer;
 	self->current_procedure = caller;
 	self->current_module = n_procedure_get_module(caller);
+}
+
+
+static uint32_t
+_op_bundle_close(NEvaluator* self, NInstruction inst) {
+	uint8_t local;
+	NBundle* bundle;
+	NValue value;
+
+	n_decode_bundle_close(inst, &local);
+	value = _get_local(self, local);
+	assert(n_is_bundle(value));
+
+	bundle = n_unwrap_pointer(value);
+	n_bundle_close(bundle);
+
+	return self->code_pointer +1;
+}
+
+
+static uint32_t
+_op_bundle_get(NEvaluator* self, NInstruction inst) {
+	uint8_t l_dest, l_bundle, l_symbol;
+	NValue v_bundle, v_symbol, output;
+	NBundle* bundle;
+
+	n_decode_bundle_get(inst, &l_dest, &l_bundle, &l_symbol);
+	v_bundle = _get_local(self, l_bundle);
+	v_symbol = _get_local(self, l_symbol);
+
+	assert(n_is_bundle(v_bundle));
+	assert(n_is_symbol(v_symbol));
+
+	bundle = n_unwrap_pointer(v_bundle);
+	output = n_bundle_get(bundle, v_symbol, NULL);
+	_set_local(self, l_dest, output);
+
+	return self->code_pointer + 1;
+}
+
+
+static uint32_t
+_op_bundle_set(NEvaluator* self, NInstruction inst) {
+	uint8_t l_bundle, l_symbol, l_value;
+	NValue v_bundle, v_symbol, value;
+	NBundle* bundle;
+
+	n_decode_bundle_set(inst, &l_bundle, &l_symbol, &l_value);
+	value    = _get_local(self, l_value);
+	v_bundle = _get_local(self, l_bundle);
+	v_symbol = _get_local(self, l_symbol);
+
+	assert(n_is_bundle(v_bundle));
+	assert(n_is_symbol(v_symbol));
+
+	bundle = n_unwrap_pointer(v_bundle);
+	n_bundle_set(bundle, v_symbol, value, NULL);
+
+	return self->code_pointer + 1;
 }
 
 
@@ -458,6 +527,19 @@ _op_jump_unless(NEvaluator* self, NInstruction inst) {
 
 
 static uint32_t
+_op_new_bundle(NEvaluator* self, NInstruction inst) {
+	uint8_t dest;
+	uint16_t size;
+	NBundle* bundle;
+
+	n_decode_new_bundle(inst, &dest, &size);
+	bundle = n_bundle_new(size, NULL);
+	_set_local(self, dest, n_wrap_pointer(bundle));
+	return self->code_pointer + 1;
+}
+
+
+static uint32_t
 _op_return(NEvaluator* self, NInstruction inst, bool* halt, NValue* result) {
 	uint8_t source;
 	NValue caller = _get_frame_caller(self);
@@ -585,6 +667,15 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 		               self->code_pointer,
 		               NULL); /* TODO: Handle errors here. */
 	switch(inst.base.opcode) {
+		case N_OP_BUNDLE_CLOSE:
+			next_instruction = _op_bundle_close(self, inst);
+			break;
+		case N_OP_BUNDLE_GET:
+			next_instruction = _op_bundle_get(self, inst);
+			break;
+		case N_OP_BUNDLE_SET:
+			next_instruction = _op_bundle_set(self, inst);
+			break;
 		case N_OP_CALL:
 			next_instruction = _op_call(self, inst);
 			break;
@@ -605,6 +696,9 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 			break;
 		case N_OP_JUMP_UNLESS:
 			next_instruction = _op_jump_unless(self, inst);
+			break;
+		case N_OP_NEW_BUNDLE:
+			next_instruction = _op_new_bundle(self, inst);
 			break;
 		case N_OP_RETURN:
 			next_instruction = _op_return(self, inst, halt, result);

@@ -6,10 +6,12 @@
 #include "error.h"
 #include "value.h"
 
+#include "symbol-pool.h"
 #include "evaluator.h"
 #include "module.h"
 #include "memory.h"
 
+#include "objects/bundles.h"
 #include "objects/primitives.h"
 #include "objects/procedures.h"
 
@@ -56,6 +58,66 @@ toggle_bool(void*, NValue* args, uint8_t nargs, NError*);
 static NValue
 wrap_input(void*, NValue* arg, uint8_t nargs, NError*);
 
+
+TEST(bundle_packing) {
+	NError error;
+	NValue s1 = n_symbol_pool_get_symbol("s1", NULL),
+	       s2 = n_symbol_pool_get_symbol("s2", NULL),
+	       s3 = n_symbol_pool_get_symbol("s3", NULL),
+	       s4 = n_symbol_pool_get_symbol("s4", NULL);
+
+	NValue v1 = n_wrap_fixnum(1),
+	       v2 = n_wrap_fixnum(2),
+	       v3 = n_wrap_fixnum(3),
+	       v4 = n_wrap_fixnum(4);
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(10, 0, 20, NULL);
+
+	NProcedure* main;
+	NValue result;
+	NBundle* bundle;
+
+	n_module_set_instruction(mod,  0, n_op_new_bundle(0, 4), NULL);
+	n_module_set_instruction(mod,  1, n_op_global_ref(1, 1), NULL);
+	n_module_set_instruction(mod,  2, n_op_global_ref(2, 5), NULL);
+	n_module_set_instruction(mod,  3, n_op_bundle_set(0, 1, 2), NULL);
+	n_module_set_instruction(mod,  4, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod,  5, n_op_global_ref(2, 6), NULL);
+	n_module_set_instruction(mod,  6, n_op_bundle_set(0, 1, 2), NULL);
+	n_module_set_instruction(mod,  7, n_op_global_ref(1, 3), NULL);
+	n_module_set_instruction(mod,  8, n_op_global_ref(2, 7), NULL);
+	n_module_set_instruction(mod,  9, n_op_bundle_set(0, 1, 2), NULL);
+	n_module_set_instruction(mod, 10, n_op_global_ref(1, 4), NULL);
+	n_module_set_instruction(mod, 11, n_op_global_ref(2, 8), NULL);
+	n_module_set_instruction(mod, 12, n_op_bundle_set(0, 1, 2), NULL);
+	n_module_set_instruction(mod, 13, n_op_bundle_close(0), NULL);
+	n_module_set_instruction(mod, 14, n_op_return(0), NULL);
+
+	main = n_procedure_new(mod, 0, 3, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(main), NULL);
+	n_module_set_register(mod, 1, s1, NULL);
+	n_module_set_register(mod, 2, s2, NULL);
+	n_module_set_register(mod, 3, s3, NULL);
+	n_module_set_register(mod, 4, s4, NULL);
+	n_module_set_register(mod, 5, v1, NULL);
+	n_module_set_register(mod, 6, v2, NULL);
+	n_module_set_register(mod, 7, v3, NULL);
+	n_module_set_register(mod, 8, v4, NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	ASSERT(error.code == N_E_OK);
+	ASSERT(n_is_bundle(result));
+
+	bundle = n_unwrap_pointer(result);
+	EXPECT(n_is_equal(n_bundle_get(bundle, s1, NULL), v1));
+	EXPECT(n_is_equal(n_bundle_get(bundle, s2, NULL), v2));
+	EXPECT(n_is_equal(n_bundle_get(bundle, s3, NULL), v3));
+	EXPECT(n_is_equal(n_bundle_get(bundle, s4, NULL), v4));
+}
 
 
 TEST(choose_between_two_global_values_using_if) {
