@@ -39,6 +39,29 @@ TEST(op_bundle_close_encoding) {
 }
 
 
+TEST(op_bundle_set_encoding) {
+  NInstruction inst = n_op_bundle_set(0x12, 0x34, 0x56);
+  uint8_t bundle, symbol, value;
+
+  EXPECT_MSG(inst.base.opcode == N_OP_BUNDLE_SET,
+	"Expected opcode %u, got %u.",
+	N_OP_BUNDLE_SET, inst.base.opcode);
+
+  n_decode_bundle_set(inst, &bundle, &symbol, &value);
+  EXPECT_MSG(bundle == 0x12,
+	"Expected bundle to be 0x12, got 0x%02X.",
+	bundle);
+
+  EXPECT_MSG(symbol == 0x34,
+	"Expected symbol to be 0x34, got 0x%02X.",
+	symbol);
+
+  EXPECT_MSG(value == 0x56,
+	"Expected value to be 0x56, got 0x%02X.",
+	value);
+}
+
+
 TEST(op_call_encoding) {
 	test_op_call_encoding(0, 1, 2);
 	test_op_call_encoding(4, 5, 6);

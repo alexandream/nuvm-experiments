@@ -20,6 +20,17 @@ n_decode_bundle_close(NInstruction inst, uint8_t *bundle) {
 
 
 void
+n_decode_bundle_set(NInstruction inst,
+                    uint8_t* bundle,
+                    uint8_t* symbol,
+                    uint8_t* value) {
+	*bundle = inst.base.arg1;
+	*symbol = inst.base.arg2;
+	*value  = inst.base.arg3;
+}
+
+
+void
 n_decode_call(NInstruction inst,
               uint8_t* dest,
               uint8_t* callee,
@@ -100,6 +111,12 @@ n_decode_return(NInstruction inst, uint8_t* src) {
 NInstruction
 n_op_bundle_close(uint8_t bundle) {
 	return n_instruction(N_OP_BUNDLE_CLOSE, bundle, 0, 0);
+}
+
+
+NInstruction
+n_op_bundle_set(uint8_t bundle, uint8_t symbol, uint8_t value) {
+	return n_instruction(N_OP_BUNDLE_SET, bundle, symbol, value);
 }
 
 

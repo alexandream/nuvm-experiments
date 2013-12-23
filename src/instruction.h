@@ -43,6 +43,12 @@ void
 n_decode_bundle_close(NInstruction, uint8_t *bundle);
 
 void
+n_decode_bundle_set(NInstruction,
+                    uint8_t* bundle,
+                    uint8_t* symbol,
+                    uint8_t* value);
+
+void
 n_decode_call(NInstruction, uint8_t* dest, uint8_t* callee, uint8_t* nargs);
 
 void
@@ -71,6 +77,9 @@ n_decode_return(NInstruction, uint8_t* src);
 
 NInstruction
 n_op_bundle_close(uint8_t bundle);
+
+NInstruction
+n_op_bundle_set(uint8_t bundle, uint8_t symbol, uint8_t value);
 
 NInstruction
 n_op_call(uint8_t dest, uint8_t callee, uint8_t nargs);
