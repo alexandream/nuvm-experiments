@@ -120,6 +120,68 @@ TEST(bundle_packing) {
 }
 
 
+TEST(bundle_unpacking) {
+	NError error;
+	NValue s1 = n_symbol_pool_get_symbol("s1", NULL),
+	       s2 = n_symbol_pool_get_symbol("s2", NULL),
+	       s3 = n_symbol_pool_get_symbol("s3", NULL),
+	       s4 = n_symbol_pool_get_symbol("s4", NULL);
+
+	NValue v1 = n_wrap_fixnum(1),
+	       v2 = n_wrap_fixnum(2),
+	       v3 = n_wrap_fixnum(3),
+	       v4 = n_wrap_fixnum(4);
+
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(6, 0, 20, NULL);
+	NBundle* bundle = n_bundle_new(4, NULL);
+
+	NProcedure* main;
+	NValue result;
+
+	n_bundle_set(bundle, s1, v1, NULL);
+	n_bundle_set(bundle, s2, v2, NULL);
+	n_bundle_set(bundle, s3, v3, NULL);
+	n_bundle_set(bundle, s4, v4, NULL);
+	n_bundle_close(bundle);
+
+	n_module_set_instruction(mod,  0, n_op_global_ref(0, 5), NULL);
+	n_module_set_instruction(mod,  1, n_op_global_ref(1, 1), NULL);
+	n_module_set_instruction(mod,  2, n_op_bundle_get(1, 0, 1), NULL);
+	n_module_set_instruction(mod,  3, n_op_global_set(1, 1), NULL);
+	n_module_set_instruction(mod,  4, n_op_global_ref(1, 2), NULL);
+	n_module_set_instruction(mod,  5, n_op_bundle_get(1, 0, 1), NULL);
+	n_module_set_instruction(mod,  6, n_op_global_set(2, 1), NULL);
+	n_module_set_instruction(mod,  7, n_op_global_ref(1, 3), NULL);
+	n_module_set_instruction(mod,  8, n_op_bundle_get(1, 0, 1), NULL);
+	n_module_set_instruction(mod,  9, n_op_global_set(3, 1), NULL);
+	n_module_set_instruction(mod, 10, n_op_global_ref(1, 4), NULL);
+	n_module_set_instruction(mod, 11, n_op_bundle_get(1, 0, 1), NULL);
+	n_module_set_instruction(mod, 12, n_op_global_set(4, 1), NULL);
+	n_module_set_instruction(mod, 13, n_op_return(0), NULL);
+
+	main = n_procedure_new(mod, 0, 3, NULL);
+
+	n_module_set_register(mod, 0, n_wrap_pointer(main), NULL);
+	n_module_set_register(mod, 1, s1, NULL);
+	n_module_set_register(mod, 2, s2, NULL);
+	n_module_set_register(mod, 3, s3, NULL);
+	n_module_set_register(mod, 4, s4, NULL);
+	n_module_set_register(mod, 5, n_wrap_pointer(bundle), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	ASSERT(error.code == N_E_OK);
+
+	bundle = n_unwrap_pointer(result);
+	EXPECT(n_is_equal(n_module_get_register(mod, 1, NULL), v1));
+	EXPECT(n_is_equal(n_module_get_register(mod, 2, NULL), v2));
+	EXPECT(n_is_equal(n_module_get_register(mod, 3, NULL), v3));
+	EXPECT(n_is_equal(n_module_get_register(mod, 4, NULL), v4));
+}
+
+
 TEST(choose_between_two_global_values_using_if) {
 	NValue f12345 = n_wrap_fixnum(12345);
 	NValue f54321 = n_wrap_fixnum(54321);
