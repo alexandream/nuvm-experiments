@@ -34,9 +34,9 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   - Create loader function for loading shared objects from libs
     folder;
-  - Create version checker function for modules to check
+  x Create version checker function for modules to check
     compatibility;
-  - Create dynamic mapper to fill the pointers to host functions;
+  x Create dynamic mapper to fill the pointers to host functions;
   - Create encoders and decoders for load instruction;
   - Create behavior for load instruction;
   - Write a simple module having the "to_string" function: it takes a
