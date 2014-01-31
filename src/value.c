@@ -7,6 +7,8 @@
 #include "type-info.h"
 #include "memory.h"
 
+#include "objects/strings.h"
+
 #define HALF_TAG_POINTER 0x0000u
 #define TAG_FIXNUM       0xFFFFFFFFu
 #define TAG_SYMBOL       0xFFFFFFFEu
@@ -164,6 +166,21 @@ bool
 n_is_undefined(NValue value) {
 	return n_typeof(value) == _undefined_type_id;
 }
+
+
+NValue
+n_to_string(NValue value) {
+	NTypeRegistry* registry = n_type_registry_get_default();
+	NType* type = n_type_registry_fetch_type(registry, n_typeof(value));
+
+	/* FIXME: Should manage the error result on string constructor and what
+	   to do when type->to_string returns NULL */
+	char* repr_bytes = type->to_string(type, value);
+	NString* repr_string = n_string_wrap(repr_bytes, NULL);
+
+	return n_wrap_pointer(repr_string);
+}
+
 
 
 int32_t n_typeof(NValue value) {

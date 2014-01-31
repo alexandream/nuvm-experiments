@@ -35,8 +35,39 @@ n_init_strings() {
 
 NString*
 n_string_new(const char* contents, NError* error) {
+	NError inner_error;
 	NString* self;
+	char* dup_contents;
+	
+	if (contents != NULL) {
+		dup_contents = duplicate_string(contents);
+		if (dup_contents == NULL) {
+			n_error_set(error, N_E_BAD_ALLOCATION);
+			n_error_set_msg(error, "contents");
+			return NULL;
+		}
+	}
+	else {
+		dup_contents = NULL;
+	}
 
+	if (error == NULL) {
+		error = &inner_error;
+	}
+	
+	self = n_string_wrap(dup_contents, error);
+	if (error->code != N_E_OK) {
+		n_free(dup_contents);
+		self = NULL;
+	}
+
+	return self;
+}
+
+
+NString*
+n_string_wrap(char* contents, NError* error) {
+	NString* self;
 	n_error_clear(error);
 	if (contents == NULL) {
 		n_error_set(error, N_E_INVALID_ARGUMENT);
@@ -52,13 +83,7 @@ n_string_new(const char* contents, NError* error) {
 	}
 
 	self->parent.type_id = _type_id;
-	self->contents = duplicate_string(contents);
-	if (self->contents == NULL) {
-		n_error_set(error, N_E_BAD_ALLOCATION);
-		n_error_set_msg(error, "contents");
-		return NULL;
-	}
-
+	self->contents = contents;
 	self->length = strlen(contents);
 	return self;
 }

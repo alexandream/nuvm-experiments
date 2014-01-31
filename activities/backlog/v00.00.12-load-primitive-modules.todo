@@ -28,12 +28,15 @@ Target Description:
   folder. Eventually we'll generalize this to handle more cases and be
   pluggable for different hosts.
 
-Activity start:  xxxx-xx-xx xx:xx
+Activity start:  2014-01-30 00:11
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
   - Create loader function for loading shared objects from libs
     folder;
+  - Create version checker function for modules to check
+    compatibility;
+  - Create dynamic mapper to fill the pointers to host functions;
   - Create encoders and decoders for load instruction;
   - Create behavior for load instruction;
   - Write a simple module having the "to_string" function: it takes a

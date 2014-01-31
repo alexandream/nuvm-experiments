@@ -69,10 +69,9 @@ n_is_undefined(NValue value);
 bool
 n_is_equal(NValue value1, NValue value2);
 
+NValue
+n_to_string(NValue value);
+
 int32_t
 n_typeof(NValue value);
 #endif
-
-
-bool
-n_is_symbol(NValue value);

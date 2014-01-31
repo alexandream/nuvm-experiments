@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "type-info.h"
@@ -19,6 +20,10 @@ struct NTypeRegistry {
 
 static NTypeRegistry* _default_registry = NULL;
 
+
+static char*
+_default_to_string_impl(const NType*, NValue);
+
 NTypeRegistry*
 n_type_registry_get_default() {
 	if (_default_registry == NULL) {
@@ -30,6 +35,7 @@ n_type_registry_get_default() {
 void
 n_type_init(NType* self, const char* name) {
 	self->name = name;
+	self->to_string = _default_to_string_impl;
 }
 
 
@@ -84,9 +90,15 @@ n_type_registry_add_type(NTypeRegistry* self, NType* type, NError* error) {
 
 int32_t
 n_type_registry_count_types(NTypeRegistry* self) {
-	n_type_array_get(&self->types, 0);
 	return n_type_array_count(&self->types);
 }
+
+
+NType*
+n_type_registry_fetch_type(NTypeRegistry*self, int32_t id) {
+	return n_type_array_get(&self->types, id);
+}
+
 
 NType*
 n_type_registry_find_type(NTypeRegistry* self,
@@ -109,4 +121,19 @@ bool
 n_type_registry_has_type(NTypeRegistry* self, const char* name) {
 	int id;
 	return n_type_registry_find_type(self, name, &id) != NULL;
+}
+
+
+
+static char*
+_default_to_string_impl(const NType* type, NValue value) {
+	int length = strlen(type->name) + 20;
+	char* result = malloc(sizeof(char) * length);
+	if (n_is_pointer(value)) {
+		sprintf(result, "%s at %p", type->name, n_unwrap_pointer(value));
+	}
+	else {
+		sprintf(result, "%s", type->name);
+	}
+	return result;
 }

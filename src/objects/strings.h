@@ -16,6 +16,9 @@ n_is_string(NValue val);
 NString*
 n_string_new(const char* contents, NError*);
 
+NString*
+n_string_wrap(char* contents, NError*);
+
 const char*
 n_string_contents(NString*);
 
