@@ -3,12 +3,14 @@
 #include <stdio.h>
 
 #include "memory.h"
+#include "loader.h"
 
 #include "evaluator.h"
 #include "instruction.h"
 #include "objects/bundles.h"
 #include "objects/primitives.h"
 #include "objects/procedures.h"
+#include "objects/strings.h"
 
 
 #define ARRAY_TYPE_NAME     NStack
@@ -46,42 +48,6 @@ _get_global(NEvaluator*, uint16_t);
 
 static NValue
 _get_local(NEvaluator*, uint8_t);
-
-static uint32_t
-_op_bundle_close(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_bundle_get(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_bundle_set(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_call(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_call_sva(NEvaluator*, NInstruction);
-
-static uint32_t
-_op_global_ref(NEvaluator*, NInstruction);
-
-static uint32_t
-_op_global_set(NEvaluator*, NInstruction);
-
-static uint32_t
-_op_jump(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_jump_if(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_jump_unless(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_new_bundle(NEvaluator* self, NInstruction inst);
-
-static uint32_t
-_op_return(NEvaluator*, NInstruction, bool* halt, NValue* result);
 
 static NValue
 _run_procedure(NEvaluator*, NProcedure*, NError*);
@@ -527,6 +493,33 @@ _op_jump_unless(NEvaluator* self, NInstruction inst) {
 
 
 static uint32_t
+_op_load(NEvaluator* self, NInstruction inst) {
+	uint8_t dest_local;
+	uint8_t string_local;
+	NValue string_val;
+	const char* string;
+	NValue loaded_value;
+
+	uint32_t result = self->code_pointer +1;
+
+	n_decode_load(inst, &dest_local, &string_local);
+
+	string_val = _get_local(self, string_local);
+
+	if (!n_is_string(string_val)) {
+		/* FIXME: Should be throwing an error here, but opcodes can't
+		 * report errors yet. */
+	}
+	string = n_string_contents((NString*)n_unwrap_pointer(string_val));
+	/* FIXME: Again, this needs error reporting on opcodes. */
+	loaded_value = n_load(string, NULL);
+	_set_local(self, dest_local, loaded_value);
+
+	return result;
+}
+
+
+static uint32_t
 _op_new_bundle(NEvaluator* self, NInstruction inst) {
 	uint8_t dest;
 	uint16_t size;
@@ -696,6 +689,9 @@ _step(NEvaluator* self, NValue* result, bool* halt, NError* error) {
 			break;
 		case N_OP_JUMP_UNLESS:
 			next_instruction = _op_jump_unless(self, inst);
+			break;
+		case N_OP_LOAD:
+			next_instruction = _op_load(self, inst);
 			break;
 		case N_OP_NEW_BUNDLE:
 			next_instruction = _op_new_bundle(self, inst);

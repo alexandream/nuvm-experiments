@@ -14,6 +14,7 @@
 #include "objects/bundles.h"
 #include "objects/primitives.h"
 #include "objects/procedures.h"
+#include "objects/strings.h"
 
 static NValue
 add_many_fixnums(void* data, NValue* args, uint8_t n_args, NError*);
@@ -351,6 +352,33 @@ TEST(swap_two_global_values) {
 }
 
 
+TEST(load_stdlib_core) {
+	NError error;
+	NEvaluator* eval = n_evaluator_new(NULL);
+	NModule* mod = n_module_new(2, 0, 3, NULL);
+	NProcedure* proc;
+	NString* string;
+	NValue result;
+
+	n_module_set_instruction(mod, 0, n_op_global_ref(0, 1), NULL);
+	n_module_set_instruction(mod, 1, n_op_load(0, 0), NULL);
+	n_module_set_instruction(mod, 2, n_op_return(0), NULL);
+
+	proc = n_procedure_new(mod, 0, 1, NULL);
+	n_module_set_register(mod, 0, n_wrap_pointer(proc), NULL);
+
+	string = n_string_new("core", NULL);
+	n_module_set_register(mod, 1, n_wrap_pointer(string), NULL);
+
+	n_evaluator_setup(eval, mod);
+
+	result = n_evaluator_run(eval, &error);
+	EXPECT(error.code == N_E_OK);
+	EXPECT(n_is_bundle(result));
+
+	n_module_destroy(mod);
+	n_evaluator_destroy(eval);
+}
 /* ----- Auxiliary functions ----- */
 static NValue
 add_many_fixnums(void* data, NValue* args, uint8_t n_args, NError* error) {

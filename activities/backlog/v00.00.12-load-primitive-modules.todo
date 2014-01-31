@@ -22,5 +22,5 @@ Target Tasks:
   x Create "core" module having at least the "to_string" procedure;
   x Create basic loader for "core" module;
   x Create encoders and decoders for "load" instruction;
-  - Create behaviour for "load" instruction;
+  x Create behaviour for "load" instruction;
 
