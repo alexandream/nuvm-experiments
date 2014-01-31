@@ -19,6 +19,8 @@ Activity start:  2014-01-30 00:11
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Create "core" module having at least the "to_string" procedure;
+  x Create "core" module having at least the "to_string" procedure;
   - Create basic loader for "core" module;
+  - Create encoders and decoders for "load" instruction;
+  - Create behaviour for "load" instruction;
 

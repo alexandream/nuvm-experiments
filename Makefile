@@ -3,7 +3,7 @@ CC=clang
 CFLAGS=-pedantic -Wall -std=c89 -g
 LIBS=
 
-SOURCE_FILES=$(wildcard src/*.c src/objects/*.c src/util/*.c)
+SOURCE_FILES=$(wildcard src/*.c src/objects/*.c src/util/*.c src/stdlib/*.c)
 #OBJ_FILES=$(SOURCE_FILES:src/%.c=build/nuvm/%.o)
 
 TESTED_OBJ_FILES=$(SOURCE_FILES:src/%.c=build/tested/%.o)
