@@ -2,45 +2,23 @@ Target Version:
   v00.00.12
 
 Target Description:
-  Now we pave the way to have a real loader on the machine, by adding
-  support to loading native modules -- that is, modules implemented by
-  shared objects implemented in the host language.
+  Now we pave the way to have the ability to load code into the
+  machine by adding support for a static compiled, native code,
+  module.
 
-  This is how we'll add support to the initial core functions of our
-  machine (like printing and reading input from console). This is also
-  where we start adding the biggest chunk of platform dependent code
-  yet. Current implementation will focus on my development machine,
-  running Linux, but the plan is to make this somewhat cross platform
-  later.
+  This is, of course, nowhere near the intent of loading external
+  features, but it gives us the instruction necessary for loading and
+  a way to import primitive procedures into our programs.
 
-  Representation of a native module is simple: We have a shared object
-  that exposes a single function representing its entry point.  This
-  entry point function is supposed to return a value usable by the
-  machine -- usually a bundle mapping symbols to other values.
-
-  Together with the representation of a native module we add a new
-  instruction, load, that takes the index of a local it'll use to
-  store the loaded value and a local having a string naming what
-  entity must be loaded.
-
-  For now, there'll be a simple hard coded implementation of a loader
-  function that'll load shared objects by file name on a predefined
-  folder. Eventually we'll generalize this to handle more cases and be
-  pluggable for different hosts.
+  That'll help in two fronts. As the basis for the future loaders
+  which will be more useful, but also being able to load primitive
+  procedures into a program with an instruction means we can start
+  focusing on defining an external representation of programs.
 
 Activity start:  2014-01-30 00:11
 Activity finish: xxxx-xx-xx xx:xx
 
 Target Tasks: 
-  - Create loader function for loading shared objects from libs
-    folder;
-  x Create version checker function for modules to check
-    compatibility;
-  x Create dynamic mapper to fill the pointers to host functions;
-  - Create encoders and decoders for load instruction;
-  - Create behavior for load instruction;
-  - Write a simple module having the "to_string" function: it takes a
-    value and returns a string representation of that value;
-  - Write a sample program checking the result of to_string on various
-    types;
+  - Create "core" module having at least the "to_string" procedure;
+  - Create basic loader for "core" module;
 

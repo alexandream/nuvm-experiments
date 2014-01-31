@@ -28,3 +28,8 @@ n_plugin_init(uint8_t* version, void* context_storage, char* error_msg) {
 
 	return true;
 }
+
+NValue
+n_plugin_load(const char* name, NError* error) {
+	return N_UNDEFINED;
+}
