@@ -13,6 +13,7 @@ static NValue core_bundle;
 static NValue
 _to_string(void*, NValue* args, uint8_t nargs, NError*);
 
+
 NValue
 n_load_stdlib_core() {
 	/* FIXME: Should be checking errors here. */

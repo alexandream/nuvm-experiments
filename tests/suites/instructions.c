@@ -18,6 +18,9 @@ test_op_jump_if_encoding(uint8_t condition, int16_t offset);
 static void
 test_op_jump_unless_encoding(uint8_t condition, int16_t offset);
 
+static void
+test_op_load_encoding(uint8_t dest, uint8_t string);
+
 
 TEST(instructions_fit_32_bits) {
 	EXPECT(sizeof(NInstruction) == 4);
@@ -202,6 +205,15 @@ TEST(op_jump_unless_encoding) {
 }
 
 
+TEST(op_load_encoding) {
+	test_op_load_encoding(0, 255);
+	test_op_load_encoding(4, 64);
+	test_op_load_encoding(16, 16);
+	test_op_load_encoding(64, 4);
+	test_op_load_encoding(255, 0);
+}
+
+
 TEST(op_new_bundle_encoding) {
   NInstruction inst = n_op_new_bundle(0x42, 0x1234);
   uint16_t size;
@@ -350,11 +362,36 @@ test_op_jump_unless_encoding(uint8_t condition, int16_t offset) {
 	n_decode_jump_unless(inst, &out_condition, &out_offset);
 
 	EXPECT_MSG(out_condition == condition,
-		"JUMP-UNLESS returned wrong opcode %u "
+		"JUMP-UNLESS returned wrong condition %u "
 		"when built with condition %d and offset %d.",
 		out_condition, condition, offset);
 	EXPECT_MSG(out_offset == offset,
-		"JUMP-UNLESS returned wrong opcode %u "
+		"JUMP-UNLESS returned wrong offset %u "
 		"when built with condition %d and offset %d.",
 		out_offset, condition, offset);
+}
+
+
+static void
+test_op_load_encoding(uint8_t dest, uint8_t string) {
+	uint8_t out_dest, out_string;
+
+	NInstruction inst = n_op_load(dest, string);
+
+	EXPECT_MSG(inst.base.opcode == N_OP_LOAD,
+		"LOAD returned wrong opcode %u "
+		"when built with destination %u and string %u.",
+		inst.base.opcode, dest, string);
+
+	n_decode_load(inst, &out_dest, &out_string);
+
+	EXPECT_MSG(out_dest == dest,
+		"LOAD returned wrong destination when build with "
+		"condition %u and string %u. Expected %u, got %u",
+		dest, string, dest, out_dest);
+
+	EXPECT_MSG(out_string == string,
+		"LOAD returned wrong string when built with "
+		"condition %u and string %u. Expected %u, got %u",
+		dest, string, string, out_string);
 }

@@ -21,6 +21,6 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   x Create "core" module having at least the "to_string" procedure;
   x Create basic loader for "core" module;
-  - Create encoders and decoders for "load" instruction;
+  x Create encoders and decoders for "load" instruction;
   - Create behaviour for "load" instruction;
 
