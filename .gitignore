@@ -26,4 +26,5 @@
 *~
 
 # Test support files.
+/atest
 /runner.c
