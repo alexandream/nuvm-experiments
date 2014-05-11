@@ -3,6 +3,8 @@ CC=clang
 CFLAGS=-pedantic -Wall -std=c89 -g
 LIBS=
 
+ATEST_ROOT=atest
+
 NUVM_ASM_SOURCE=$(wildcard asm/*.c)
 NUVM_ASM_OBJS=$(NUVM_ASM_SOURCE:asm/%.c=build/asm/%.o)
 NUVM_ASM_CFLAGS=$(CFLAGS)
@@ -14,6 +16,7 @@ NUVM_COMMON_CFLAGS=$(CFLAGS)
 TEST_SOURCE=$(wildcard tests/suites/*.c)
 TEST_OBJS=$(TEST_SOURCE:test/suites/%.c=build/tests/%.o)
 TEST_CFLAGS=$(CFLAGS)
+TEST_LIBS=$(LIBS)
 
 all: build/asm/libnuvm-asm.a build/common/libnuvm-common.a
 
@@ -30,17 +33,50 @@ build/common/libnuvm-common.a: $(NUVM_COMMON_OBJS)
 	@ar rcs $@ $^
 
 
+# This is simply a shortcut so that I can update my testing framework inside
+# this other project's tree. The library 'atest' could be updated and installed
+# and then only used as a dependency here, but I'm kinda developing both
+# concurrently.
+# TODO (build): This should be gone in a "distribution" build.
+build/atest/libatest.a: FORCE
+	@cd $(ATEST_ROOT) && make --silent
+	@cp $(ATEST_ROOT)/build/libatest.a build/atest/libatest.a
+	@cp $(ATEST_ROOT)/src/atest.h tests/atest.h
+
+
 # How to build the object files to be tested; the -MM -MT line invokes the
 # compiler's automatic header file dependency tracking for object files.
-build/common/%.o: common/%.c
+build/common/%.o: src/common/%.c
 	@${CC} -c $< -o $@ $(NUVM_COMMON_CFLAGS)
 	@${CC} -MM -MT $@ $(NUVM_COMMON_CFLAGS) $< > $(@:.o=.d)
 
-build/asm/%.o: asm/%.c
+build/asm/%.o: src/asm/%.c
 	@${CC} -c $< -o $@ $(NUVM_ASM_CFLAGS)
 	@${CC} -MM -MT $@ $(NUVM_ASM_CFLAGS) $< > $(@:.o=.d)
 
 
+# How to build the test targets for each module
+build/tests/runner.o: tests/runner.c
+	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
+
+build/tests/common: build/atest/libatest.a build/common/libnuvm-common.a \
+	                build/tests/runner.o $(TEST_COMMON_OBJS)
+	@$(CC) -o build/tests/common $^ $(TEST_LIBS)
+
+build/tests/asm: build/atest/libatest.a build/common/libnuvm-common.a \
+                 build/asm/libnuvm-asm.a build/tests/runner.o \
+                 $(TEST_ASM_OBJS)
+	@$(CC) -o build/tests/asm $^ $(TEST_LIBS)
+
+
+# How to build each of the test suites.
+build/tests/%.o: tests/suites/%.c
+	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
+
+
 # Clean up after ourselves.
-clean:
-	@rm -f $(shell find build/ -name '*.o' -o -name '*.a' -o -name '*.d')
+clean: FORCE
+	@rm -f $(shell find build/ -name '*.o' -o -name '*.a' -o -name '*.d') .bogus
+	@rm -f $(shell find build/ -type f -a -executable) .bogus
+
+FORCE:
