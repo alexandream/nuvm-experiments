@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <assert.h>
 #include <string.h>
 
@@ -6,7 +7,7 @@
 #include "byte-streams.h"
 
 static void
-safe_read(void* dst, void* src, int64_t size, int64_t* i, size_t part_size);
+safe_read(void* dst, uint8_t* src, int64_t size, int64_t* i, size_t part_size);
 
 
 uint8_t
@@ -69,18 +70,17 @@ n_read_uint64(uint8_t* stream, int64_t size, int64_t* i) {
  * enough bytes to fulfill the copy. Otherwise, the index /i/ is set to -1 and
  * no copy is performed. */
 static void
-safe_read(void* dst, void* src, int64_t size, int64_t* i, size_t part_size) {
+safe_read(void* dst, uint8_t* src, int64_t size, int64_t* i, size_t part_size) {
 	bool is_safe;
 	assert(size >= 0 && *i >= 0);
 
 	/* FIXME: Check for overflow */
 	is_safe = (*i + part_size) <= size;
 	if (is_safe) {
-		memcpy(dst, src, part_size);
+		memcpy(dst, src + *i, part_size);
 		*i += part_size;
 	}
 	else {
 		*i = -1;
 	}
 }
-
