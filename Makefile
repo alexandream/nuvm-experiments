@@ -13,10 +13,12 @@ NUVM_COMMON_SOURCE=$(wildcard common/*.c)
 NUVM_COMMON_OBJS=$(NUVM_COMMON_SOURCE:common/%.c=build/common/%.o)
 NUVM_COMMON_CFLAGS=$(CFLAGS)
 
-TEST_SOURCE=$(wildcard tests/suites/*.c)
-TEST_OBJS=$(TEST_SOURCE:test/suites/%.c=build/tests/%.o)
-TEST_CFLAGS=$(CFLAGS)
-TEST_LIBS=$(LIBS)
+TEST_CFLAGS=$(CFLAGS) -I "src"
+TEST_LIBS=$(LIBS) -Lbuild/atest -latest
+
+TEST_COMMON_SOURCE=$(wildcard tests/suites/common/*.c)
+TEST_COMMON_OBJS=$(TEST_COMMON_SOURCE:tests/suites/%.c=build/tests/%.o)
+TEST_COMMON_CFLAGS=$(TEST_CFLAGS) -I "src/common"
 
 all: build/asm/libnuvm-asm.a build/common/libnuvm-common.a
 
@@ -59,20 +61,30 @@ build/asm/%.o: src/asm/%.c
 build/tests/runner.o: tests/runner.c
 	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
 
-build/tests/common: build/atest/libatest.a build/common/libnuvm-common.a \
-	                build/tests/runner.o $(TEST_COMMON_OBJS)
-	@$(CC) -o build/tests/common $^ $(TEST_LIBS)
+build/tests/run-common: build/atest/libatest.a build/common/libnuvm-common.a \
+	                    build/tests/runner.o $(TEST_COMMON_OBJS)
+	@$(CC) -o build/tests/run-common $^ $(TEST_LIBS)
 
-build/tests/asm: build/atest/libatest.a build/common/libnuvm-common.a \
-                 build/asm/libnuvm-asm.a build/tests/runner.o \
+build/tests/run-asm: build/atest/libatest.a build/common/libnuvm-common.a \
+                     build/asm/libnuvm-asm.a build/tests/runner.o \
                  $(TEST_ASM_OBJS)
-	@$(CC) -o build/tests/asm $^ $(TEST_LIBS)
+	@$(CC) -o build/tests/run-asm $^ $(TEST_LIBS)
 
 
 # How to build each of the test suites.
-build/tests/%.o: tests/suites/%.c
-	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
+build/tests/common/%.o: tests/suites/common/%.c
+	@$(CC) -c $< -o $@ $(TEST_COMMON_CFLAGS)
 
+
+# Auxiliary targets that builds and tests everything, takes an ENV var so that
+# I can sometimes say which specific test to run, instead of running the full
+# battery of tests.
+test: build/tests/run-common build/tests/run-asm
+	@echo Running Common Tests
+	@./build/tests/run-common $(TEST)
+	@echo
+	@echo Running Assembler Tests
+	@./build/tests/run-asm $(TEST)
 
 # Clean up after ourselves.
 clean: FORCE
