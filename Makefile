@@ -3,7 +3,7 @@ CC=clang
 CFLAGS=-pedantic -Wall -std=c89 -g
 LIBS=
 
-ATEST_ROOT=atest
+ATEST_ROOT=../atest/build
 
 NUVM_ASM_SOURCE=$(wildcard asm/*.c)
 NUVM_ASM_OBJS=$(NUVM_ASM_SOURCE:asm/%.c=build/asm/%.o)
@@ -13,8 +13,8 @@ NUVM_COMMON_SOURCE=$(wildcard src/common/*.c)
 NUVM_COMMON_OBJS=$(NUVM_COMMON_SOURCE:src/common/%.c=build/common/%.o)
 NUVM_COMMON_CFLAGS=$(CFLAGS)
 
-TEST_CFLAGS=$(CFLAGS) -I "src"
-TEST_LIBS=$(LIBS) -Lbuild/atest -latest
+TEST_CFLAGS=$(CFLAGS) -I "src" -I $(ATEST_ROOT)
+TEST_LIBS=$(LIBS) -L$(ATEST_ROOT) -latest
 
 TEST_COMMON_SOURCE=$(wildcard tests/suites/common/*.c)
 TEST_COMMON_OBJS=$(TEST_COMMON_SOURCE:tests/suites/%.c=build/tests/%.o)
@@ -36,16 +36,6 @@ build/common/libnuvm-common.a: $(NUVM_COMMON_OBJS)
 	@ar rcs $@ $^
 
 
-# This is simply a shortcut so that I can update my testing framework inside
-# this other project's tree. The library 'atest' could be updated and installed
-# and then only used as a dependency here, but I'm kinda developing both
-# concurrently.
-# TODO (build): This should be gone in a "distribution" build.
-build/atest/libatest.a: FORCE
-	@cd $(ATEST_ROOT) && make --silent
-	@cp $(ATEST_ROOT)/build/libatest.a build/atest/libatest.a
-	@cp $(ATEST_ROOT)/src/atest.h tests/atest.h
-
 
 # How to build the object files to be tested; the -MM -MT line invokes the
 # compiler's automatic header file dependency tracking for object files.
@@ -62,11 +52,11 @@ build/asm/%.o: src/asm/%.c
 build/tests/runner.o: tests/runner.c
 	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
 
-build/tests/run-common: build/atest/libatest.a build/common/libnuvm-common.a \
+build/tests/run-common: build/common/libnuvm-common.a \
 	                    build/tests/runner.o $(TEST_COMMON_OBJS)
 	@$(CC) -o build/tests/run-common $^ $(TEST_COMMON_LIBS)
 
-build/tests/run-asm: build/atest/libatest.a build/common/libnuvm-common.a \
+build/tests/run-asm: build/common/libnuvm-common.a \
                      build/asm/libnuvm-asm.a build/tests/runner.o \
                  $(TEST_ASM_OBJS)
 	@$(CC) -o build/tests/run-asm $^ $(TEST_LIBS)
