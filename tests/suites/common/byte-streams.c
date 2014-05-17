@@ -12,6 +12,17 @@ _check_rw_int16_works(int64_t i, int64_t j);
 static void
 _check_rw_uint16_works(int64_t i, int64_t j);
 
+static void
+_check_rw_int32_works(int64_t i, int64_t j);
+
+static void
+_check_rw_uint32_works(int64_t i, int64_t j);
+
+static void
+_check_rw_int64_works(int64_t i, int64_t j);
+
+static void
+_check_rw_uint64_works(int64_t i, int64_t j);
 
 static uint8_t
 ISTREAM[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
@@ -69,13 +80,6 @@ TEST(rw_m_f_byte_works) {
 }
 
 
-TEST(reading_byte_past_end_fails) {
-	int64_t i = ISIZE;
-	n_read_byte(ISTREAM, ISIZE, &i);
-	ASSERT(i == -1);
-}
-
-
 TEST(rw_i_i_int16_works) {
 	_check_rw_int16_works(0, 0);
 }
@@ -118,17 +122,6 @@ TEST(rw_m_m_int16_works) {
 
 TEST(rw_m_f_int16_works) {
 	_check_rw_int16_works(7, ISIZE - sizeof(int16_t));
-}
-
-
-TEST(reading_int16_past_end_fails) {
-	int64_t i = ISIZE;
-	n_read_int16(ISTREAM, ISIZE, &i);
-	EXPECT(i == -1);
-
-	i = ISIZE -1;
-	n_read_int16(ISTREAM, ISIZE, &i);
-	EXPECT(i == -1);
 }
 
 
@@ -177,16 +170,184 @@ TEST(rw_m_f_uint16_works) {
 }
 
 
-TEST(reading_uint16_past_end_fails) {
-	int64_t i = ISIZE;
-	n_read_uint16(ISTREAM, ISIZE, &i);
-	EXPECT(i == -1);
-
-	i = ISIZE -1;
-	n_read_uint16(ISTREAM, ISIZE, &i);
-	EXPECT(i == -1);
+TEST(rw_i_i_int32_works) {
+	_check_rw_int32_works(0, 0);
 }
 
+
+TEST(rw_i_m_int32_works) {
+	_check_rw_int32_works(0, 6);
+}
+
+
+TEST(rw_i_f_int32_works) {
+	_check_rw_int32_works(0, ISIZE - sizeof(int32_t));
+}
+
+
+TEST(rw_m_i_int32_works) {
+	_check_rw_int32_works(6, 0);
+}
+
+
+TEST(rw_m_m_int32_works) {
+	_check_rw_int32_works(6, 6);
+}
+
+
+TEST(rw_m_f_int32_works) {
+	_check_rw_int32_works(6, ISIZE - sizeof(int32_t));
+}
+
+
+TEST(rw_f_i_int32_works) {
+	_check_rw_int32_works(ISIZE - sizeof(int32_t), 0);
+}
+
+
+TEST(rw_f_m_int32_works) {
+	_check_rw_int32_works(ISIZE - sizeof(int32_t), 6);
+}
+
+
+TEST(rw_f_f_int32_works) {
+	_check_rw_int32_works(ISIZE - sizeof(int32_t), ISIZE - sizeof(int32_t));
+}
+
+
+TEST(rw_i_i_uint32_works) {
+	_check_rw_uint32_works(0, 0);
+}
+
+
+TEST(rw_i_m_uint32_works) {
+	_check_rw_uint32_works(0, 6);
+}
+
+
+TEST(rw_i_f_uint32_works) {
+	_check_rw_uint32_works(0, ISIZE - sizeof(uint32_t));
+}
+
+
+TEST(rw_m_i_uint32_works) {
+	_check_rw_uint32_works(6, 0);
+}
+
+
+TEST(rw_m_m_uint32_works) {
+	_check_rw_uint32_works(6, 6);
+}
+
+
+TEST(rw_m_f_uint32_works) {
+	_check_rw_uint32_works(6, ISIZE - sizeof(uint32_t));
+}
+
+
+TEST(rw_f_i_uint32_works) {
+	_check_rw_uint32_works(ISIZE - sizeof(uint32_t), 0);
+}
+
+
+TEST(rw_f_m_uint32_works) {
+	_check_rw_uint32_works(ISIZE - sizeof(uint32_t), 6);
+}
+
+
+TEST(rw_f_f_uint32_works) {
+	_check_rw_uint32_works(ISIZE - sizeof(uint32_t), ISIZE - sizeof(uint32_t));
+}
+
+
+TEST(rw_i_i_int64_works) {
+	_check_rw_int64_works(0, 0);
+}
+
+
+TEST(rw_i_m_int64_works) {
+	_check_rw_int64_works(0, 6);
+}
+
+
+TEST(rw_i_f_int64_works) {
+	_check_rw_int64_works(0, ISIZE - sizeof(int64_t));
+}
+
+
+TEST(rw_m_i_int64_works) {
+	_check_rw_int64_works(6, 0);
+}
+
+
+TEST(rw_m_m_int64_works) {
+	_check_rw_int64_works(6, 6);
+}
+
+
+TEST(rw_m_f_int64_works) {
+	_check_rw_int64_works(6, ISIZE - sizeof(int64_t));
+}
+
+
+TEST(rw_f_i_int64_works) {
+	_check_rw_int64_works(ISIZE - sizeof(int64_t), 0);
+}
+
+
+TEST(rw_f_m_int64_works) {
+	_check_rw_int64_works(ISIZE - sizeof(int64_t), 6);
+}
+
+
+TEST(rw_f_f_int64_works) {
+	_check_rw_int64_works(ISIZE - sizeof(int64_t), ISIZE - sizeof(int64_t));
+}
+
+
+TEST(rw_i_i_uint64_works) {
+	_check_rw_uint64_works(0, 0);
+}
+
+
+TEST(rw_i_m_uint64_works) {
+	_check_rw_uint64_works(0, 6);
+}
+
+
+TEST(rw_i_f_uint64_works) {
+	_check_rw_uint64_works(0, ISIZE - sizeof(uint64_t));
+}
+
+
+TEST(rw_m_i_uint64_works) {
+	_check_rw_uint64_works(6, 0);
+}
+
+
+TEST(rw_m_m_uint64_works) {
+	_check_rw_uint64_works(6, 6);
+}
+
+
+TEST(rw_m_f_uint64_works) {
+	_check_rw_uint64_works(6, ISIZE - sizeof(uint64_t));
+}
+
+
+TEST(rw_f_i_uint64_works) {
+	_check_rw_uint64_works(ISIZE - sizeof(uint64_t), 0);
+}
+
+
+TEST(rw_f_m_uint64_works) {
+	_check_rw_uint64_works(ISIZE - sizeof(uint64_t), 6);
+}
+
+
+TEST(rw_f_f_uint64_works) {
+	_check_rw_uint64_works(ISIZE - sizeof(uint64_t), ISIZE - sizeof(uint64_t));
+}
 
 
 static void
@@ -233,5 +394,53 @@ _check_rw_uint16_works(int64_t i, int64_t j) {
 	uint8_t size = n_write_uint16(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(uint16_t);
+	_check_rw_asserts(i, j, initial_i, initial_j, size, psize);
+}
+
+
+static void
+_check_rw_int32_works(int64_t i, int64_t j) {
+	int64_t initial_i = i;
+	int64_t initial_j = j;
+	int32_t result = n_read_int32(ISTREAM, ISIZE, &i);
+	uint8_t size = n_write_int32(OSTREAM, sizeof(OSTREAM), &j, result);
+
+	uint8_t psize = sizeof(int32_t);
+	_check_rw_asserts(i, j, initial_i, initial_j, size, psize);
+}
+
+
+static void
+_check_rw_uint32_works(int64_t i, int64_t j) {
+	int64_t initial_i = i;
+	int64_t initial_j = j;
+	uint32_t result = n_read_uint32(ISTREAM, ISIZE, &i);
+	uint8_t size = n_write_uint32(OSTREAM, sizeof(OSTREAM), &j, result);
+
+	uint8_t psize = sizeof(uint32_t);
+	_check_rw_asserts(i, j, initial_i, initial_j, size, psize);
+}
+
+
+static void
+_check_rw_int64_works(int64_t i, int64_t j) {
+	int64_t initial_i = i;
+	int64_t initial_j = j;
+	int64_t result = n_read_int64(ISTREAM, ISIZE, &i);
+	uint8_t size = n_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
+
+	uint8_t psize = sizeof(int64_t);
+	_check_rw_asserts(i, j, initial_i, initial_j, size, psize);
+}
+
+
+static void
+_check_rw_uint64_works(int64_t i, int64_t j) {
+	int64_t initial_i = i;
+	int64_t initial_j = j;
+	uint64_t result = n_read_int64(ISTREAM, ISIZE, &i);
+	uint8_t size = n_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
+
+	uint8_t psize = sizeof(uint64_t);
 	_check_rw_asserts(i, j, initial_i, initial_j, size, psize);
 }
