@@ -1,26 +1,194 @@
 #define AT_SUITE_NAME Tokenizer
 #include "../../test-suite.h"
 
-static n_word
-_get_word_from_string(const char* input);
+static void 
+WITH_STREAM(const char* str);
 
+static void
+END_STREAM();
 
-TEST(get_word_ignores_spaces) {
-	n_word word = _get_word_from_string("  \n\t\t  ");
-	ASSERT(word.length == 0);
-	n_destroy_word(word);
+#define ASSERT_EOF() do {\
+	n_token_t token = n_get_next_token(STREAM);\
+	ASSERT_MSG(token.type == N_TK_EOF,\
+		MF("Expected EOF, got token type %u with lexeme %s.",\
+		   token.type, token.lexeme));\
+} while(0)
+
+#define ASSERT_TOKEN(_type, _lexeme) do{\
+	uint8_t type = _type;\
+	const char* lexeme = _lexeme;\
+	n_token_t token = n_get_next_token(STREAM);\
+	ASSERT_MSG(token.type == type,\
+		MF("Expected token type %d with lexeme \"%s\". "\
+		   "Got token type %d with lexeme \"%s\"",\
+		   type, lexeme, token.type, token.lexeme));\
+} while(0)
+
+static n_stream_t* STREAM = NULL;
+
+TEST(ignores_only_spaces) {
+	WITH_STREAM("  \n \t \n \n \t  ");
+	ASSERT_EOF();
 }
 
-TEST(get_word_accepts_identifiers) {
-	ASSERT(0);
+TEST(reads_word_identifier) {
+	WITH_STREAM("hello");
+	ASSERT_TOKEN_MATCH(N_TK_IDENTIFIER, "hello");
+	ASSERT_EOF();
 }
 
 
+TEST(reads_case_sensitive_identifier) {
+	WITH_STREAM("hElLo");
+	ASSERT_TOKEN_MATCH(N_TK_IDENTIFIER, "hElLo");
+	ASSERT_EOF();
+}
 
-static n_word
-_get_word_from_string(const char* input) {
-	n_stream* stream = n_new_string_stream(input);
-	n_word word = n_get_next_word(stream);
-	n_destroy_stream(stream);
-	return word;
+
+TEST(reads_identifier_with_digits) {
+	WITH_STREAM("h1234");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "h1234");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_identifier_with_hyphen) {
+	WITH_STREAM("hello-world");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello-world");
+	ASSERT_EOF();
+}
+
+
+TEST(ignores_spaces) {
+	WITH_STREAM(" \n\t h1234 \t\n ");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "h1234");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_many_identifiers) {
+	WITH_STREAM("  hello world-o \t g00   ");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "world-o");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "g00");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_decimal_number) {
+	WITH_STREAM(" 10588 ");
+	ASSERT_TOKEN(N_TK_DECNUM, "10588");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_negative_decimal_number) {
+	WITH_STREAM("-123456789");
+	ASSERT_TOKEN(N_TK_DECNUM, "-123456789");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_single_digit_decimal_number) {
+	WITH_STREAM("8");
+	ASSERT_TOKEN(N_TK_DECNUM, "8");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_hexadecimal_number) {
+	WITH_STREAM("0x12345678");
+	ASSERT_TOKEN(N_TK_HEXNUM, "0x12345678");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_hexadecimal_number_high_digits) {
+	WITH_STREAM("0xdeadbeef");
+	ASSERT_TOKEN(N_TK_HEXNUM, "0xdeadbeef");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_hexadecimal_number_case_sensitive_high_digits) {
+	WITH_STREAM("0xDeadBeef");
+	ASSERT_TOKEN(N_TK_HEXNUM, "0xDeadBeef");
+	ASSERT_EOF();
+}
+
+TEST(reads_hexadecimal_single_digit) {
+	WITH_STREAM("0xA");
+	ASSERT_TOKEN(N_TK_HEXNUM, "0xA");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_empty_string) {
+	WITH_STREAM("\"\"");
+	ASSERT_TOKEN(N_TK_STRING, "\"\"");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_string) {
+	WITH_STREAM("\"hello\"");
+	ASSERT_TOKEN(N_TK_STRING, "\"hello\"");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_string_with_spaces) {
+	WITH_STREAM("\"  hello, world   \"");
+	ASSERT_TOKEN(N_TK_STRING, "\"  hello, world   \"");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_string_with_inner_quotes) {
+	WITH_STREAM("\"  hello, \\\"world  \"");
+	ASSERT_TOKEN(N_TK_STRING, "\"  hello, \\\"world  \"");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_label_def) {
+	WITH_STREAM("my-label:");
+	ASSERT_TOKEN(N_TK_LABEL_DEF, "my-label:");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_label_ref) {
+	WITH_STREAM("@their-code");
+	ASSERT_TOKEN(N_TK_LABEL_REF, "@their-code");
+	ASSERT_EOF();
+}
+
+
+/* N_TK_EOF
+   N_TK_KW_VERSION
+   N_TK_KW_GLOBALS_COUNT
+   N_TK_KW_CONSTANTS
+   N_TK_KW_CODE
+   N_TK_KW_STRING
+   N_TK_KW_INT32
+   N_TK_KW_DOUBLE
+   N_TK_KW_CHARACTER
+   N_TK_KW_PROCEDURE */
+
+
+static void 
+WITH_STREAM(const char* str) {
+	END_STREAM();
+	STREAM = n_new_string_stream(str);
+	ASSERT(STREAM != NULL);
+}
+
+
+static void
+END_STREAM() {
+	if (STREAM) {
+		n_destroy_stream(STREAM);
+		STREAM = NULL;
+	}
 }

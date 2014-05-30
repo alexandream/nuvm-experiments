@@ -13,5 +13,5 @@
 #define EXPECT_MSG at_expect_msg
 #define ASSERT     at_assert
 #define ASSERT_MSG at_assert_msg
-#define AF         at_allocf
+#define MF         at_allocf
 #endif
