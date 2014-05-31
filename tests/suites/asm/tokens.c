@@ -1,4 +1,4 @@
-#define AT_SUITE_NAME Tokenizer
+#define AT_SUITE_NAME Tokens
 #include "../../test-suite.h"
 
 #include "streams.h"

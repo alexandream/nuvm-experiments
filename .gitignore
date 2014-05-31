@@ -21,6 +21,9 @@
 # Build byproducts
 /build/*
 
+# Brainstorming files.
+/dump/*
+
 # Vim backup files.
 *.swp
 *~
