@@ -4,14 +4,18 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include "atest.h"
+#include <atest.h>
 
-#define TEST AT_TEST
-#define STEST AT_STEST
+#ifndef SUITE_NAME
+#define SUITE_NAME Untitled
+#endif
 
-#define EXPECT     at_expect
-#define EXPECT_MSG at_expect_msg
-#define ASSERT     at_assert
-#define ASSERT_MSG at_assert_msg
+#define TEST(name) AT_TEST(SUITE_NAME, name)
+
+#define EXPECT(cond)          at_expect(at_result, cond)
+#define EXPECT_MSG(cond, msg) at_expect_msg(at_result, cond, msg)
+#define ASSERT(cond)          at_assert(at_result, cond)
+#define ASSERT_MSG(cond, msg) at_assert_msg(at_result, cond, msg)
+
 #define MF         at_allocf
 #endif
