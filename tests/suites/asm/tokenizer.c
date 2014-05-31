@@ -1,6 +1,9 @@
 #define AT_SUITE_NAME Tokenizer
 #include "../../test-suite.h"
 
+#include "streams.h"
+#include "tokens.h"
+
 static void 
 WITH_STREAM(const char* str);
 
@@ -15,7 +18,7 @@ END_STREAM();
 } while(0)
 
 #define ASSERT_TOKEN(_type, _lexeme) do{\
-	uint8_t type = _type;\
+	n_token_type_t type = _type;\
 	const char* lexeme = _lexeme;\
 	n_token_t token = n_get_next_token(STREAM);\
 	ASSERT_MSG(token.type == type,\
@@ -33,14 +36,14 @@ TEST(ignores_only_spaces) {
 
 TEST(reads_word_identifier) {
 	WITH_STREAM("hello");
-	ASSERT_TOKEN_MATCH(N_TK_IDENTIFIER, "hello");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_case_sensitive_identifier) {
 	WITH_STREAM("hElLo");
-	ASSERT_TOKEN_MATCH(N_TK_IDENTIFIER, "hElLo");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "hElLo");
 	ASSERT_EOF();
 }
 
@@ -165,23 +168,11 @@ TEST(reads_label_ref) {
 }
 
 
-/* N_TK_EOF
-   N_TK_KW_VERSION
-   N_TK_KW_GLOBALS_COUNT
-   N_TK_KW_CONSTANTS
-   N_TK_KW_CODE
-   N_TK_KW_STRING
-   N_TK_KW_INT32
-   N_TK_KW_DOUBLE
-   N_TK_KW_CHARACTER
-   N_TK_KW_PROCEDURE */
-
 
 static void 
 WITH_STREAM(const char* str) {
 	END_STREAM();
 	STREAM = n_new_string_stream(str);
-	ASSERT(STREAM != NULL);
 }
 
 
