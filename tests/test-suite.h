@@ -10,7 +10,12 @@
 #define SUITE_NAME Untitled
 #endif
 
-#define TEST(name) AT_TEST(SUITE_NAME, name)
+#define CONSTRUCTOR AT_CONSTRUCTOR(SUITE_NAME)
+#define SETUP       AT_SETUP(SUITE_NAME)
+#define TEARDOWN    AT_TEARDOWN(SUITE_NAME)
+#define TEST(name)  AT_TEST(SUITE_NAME, name)
+
+#define SIGNAL_CONSTRUCTOR_ERROR() return
 
 #define EXPECT(cond)          at_expect(at_result, cond)
 #define EXPECT_MSG(cond, msg) at_expect_msg(at_result, cond, msg)

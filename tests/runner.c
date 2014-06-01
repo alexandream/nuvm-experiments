@@ -5,29 +5,14 @@
 #include "test-suite.h"
 
 ATResultList* at_run_all_tests(char* test_name) {
-	char buffer[1024];
-	int i, j, case_count, suite_count;
-	ATCase* tcase;
-	ATResult* result;
+	int i, suite_count;
 	ATSuite* suite;
 	ATResultList* result_list = at_new_result_list();
 
 	suite_count = at_count_suites();
 	for (i = 0; i < suite_count; i++) {
 		suite = at_get_nth_suite(i);
-		case_count = at_count_cases(suite);
-		for (j = 0; j < case_count; j++) {
-			bool run_test = true;
-			tcase = at_get_nth_case(suite, j);
-			if (test_name != NULL) {
-				sprintf(buffer, "%s.%s", suite->name, tcase->name);
-				run_test = strcmp(buffer, test_name) == 0;
-			}
-			if (run_test) {
-				result = at_execute_case(suite, tcase);
-				at_append_result(result_list, result);
-			}
-		}
+		at_execute_suite(suite, result_list);
 	}
 	return result_list;
 }

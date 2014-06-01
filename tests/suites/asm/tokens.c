@@ -1,4 +1,4 @@
-#define AT_SUITE_NAME Tokens
+#define SUITE_NAME Tokens
 #include "../../test-suite.h"
 
 #include "streams.h"
@@ -172,7 +172,7 @@ TEST(reads_label_ref) {
 static void 
 WITH_STREAM(const char* str) {
 	END_STREAM();
-	STREAM = n_new_string_stream(str);
+	STREAM = n_new_stream_from_string(str);
 }
 
 

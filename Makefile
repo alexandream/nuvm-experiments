@@ -1,6 +1,6 @@
 CC=clang
 
-CFLAGS=-pedantic -Wall -std=c89 -g
+CFLAGS=-pedantic -Wall -std=c89 -g -I "src" -Werror
 LIBS=
 
 ATEST_ROOT=../atest/build
@@ -13,7 +13,7 @@ NUVM_COMMON_SOURCE=$(wildcard src/common/*.c)
 NUVM_COMMON_OBJS=$(NUVM_COMMON_SOURCE:src/common/%.c=build/common/%.o)
 NUVM_COMMON_CFLAGS=$(CFLAGS)
 
-TEST_CFLAGS=$(CFLAGS) -I "src" -I $(ATEST_ROOT)
+TEST_CFLAGS=$(CFLAGS) -I $(ATEST_ROOT)
 TEST_LIBS=$(LIBS) -L$(ATEST_ROOT) -latest
 
 TEST_COMMON_SOURCE=$(wildcard tests/suites/common/*.c)
