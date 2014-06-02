@@ -16,15 +16,16 @@ n_stream_t* EMPTY_STREAM;
 n_stream_t* SHORT_STREAM;
 n_stream_t* LONG_STREAM;
 
+/* Write to the used files to guarantee they'll have the expected contents. */
 CONSTRUCTOR {
 	FILE* file;
 	int i;
-	file = fopen("empty-file", "w");
+	file = fopen("build/empty-file", "w");
 	if (file == NULL) SIGNAL_CONSTRUCTOR_ERROR();
 
 	fclose(file);
 
-	file = fopen("short-file", "w");
+	file = fopen("build/short-file", "w");
 	if (file == NULL) SIGNAL_CONSTRUCTOR_ERROR();
 
 	if (fputs(BASE_PATTERN, file) < 0) {
@@ -32,7 +33,7 @@ CONSTRUCTOR {
 	}
 	fclose(file);
 
-	file = fopen("long-file", "w");
+	file = fopen("build/long-file", "w");
 	if (file == NULL) SIGNAL_CONSTRUCTOR_ERROR();
 
 	for (i = 0; i < LONG_STREAM_ITERATIONS; i++) {
@@ -46,9 +47,9 @@ CONSTRUCTOR {
 
 
 SETUP {
-	EMPTY_STREAM = n_new_stream_from_path("empty-file");
-	SHORT_STREAM = n_new_stream_from_path("short-file");
-	LONG_STREAM  = n_new_stream_from_path("long-file");
+	EMPTY_STREAM = n_new_stream_from_path("build/empty-file");
+	SHORT_STREAM = n_new_stream_from_path("build/short-file");
+	LONG_STREAM  = n_new_stream_from_path("build/long-file");
 }
 
 
@@ -61,20 +62,32 @@ TEARDOWN {
 
 /* Test Cases */
 
-TEST(empty_stream_has_correct_details) {
+TEST(empty_stream_has_correct_length) {
 	ASSERT(n_stream_length(EMPTY_STREAM) == 0);
+}
+
+
+TEST(short_stream_has_correct_length) {
+	ASSERT(n_stream_length(SHORT_STREAM) == BASE_LENGTH);
+}
+
+
+TEST(long_stream_has_correct_length) {
+	ASSERT(n_stream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH);
+}
+
+
+TEST(empty_stream_has_correct_eof) {
 	ASSERT(n_stream_eof(EMPTY_STREAM) == true);
 }
 
 
-TEST(short_stream_has_correct_details) {
-	ASSERT(n_stream_length(SHORT_STREAM) == BASE_LENGTH);
+TEST(short_stream_has_correct_eof) {
 	ASSERT(n_stream_eof(SHORT_STREAM) == false);
 }
 
 
-TEST(long_stream_has_correct_details) {
-	ASSERT(n_stream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH);
+TEST(long_stream_has_correct_eof) {
 	ASSERT(n_stream_eof(LONG_STREAM) == false);
 }
 
@@ -82,12 +95,48 @@ TEST(long_stream_has_correct_details) {
 TEST(peek_on_empty_stream_signals_eof) {
 	bool end = false;
 	n_stream_peek(EMPTY_STREAM, &end);
-	ASSERT(end);
+	ASSERT(end == true);
 }
 
 
 TEST(read_on_empty_stream_signals_eof) {
 	bool end = false;
 	n_stream_read(EMPTY_STREAM, &end);
-	ASSERT(end);
+	ASSERT(end == true);
+}
+
+
+TEST(first_peek_on_stream_returns_first_entry) {
+	bool end = false;
+	char entry = n_stream_peek(SHORT_STREAM, &end);
+	ASSERT(end == false);
+	ASSERT(entry == 'A');
+}
+
+
+TEST(first_read_on_stream_returns_first_entry) {
+	bool end = false;
+	char entry = n_stream_read(SHORT_STREAM, &end);
+	ASSERT(end == false);
+	ASSERT(entry == 'A');
+}
+
+
+TEST(second_peek_on_stream_returns_first_entry) {
+	bool end = false;
+	char first_entry = n_stream_peek(SHORT_STREAM, &end);
+	char entry = n_stream_peek(SHORT_STREAM, &end);
+	ASSERT(end == false);
+	ASSERT(entry == first_entry);
+	ASSERT(entry == 'A');
+}
+
+
+TEST(second_read_on_stream_returns_second_entry) {
+	bool end = false;
+	char first_entry = n_stream_read(SHORT_STREAM, &end);
+	char entry = n_stream_read(SHORT_STREAM, &end);
+	ASSERT(end == false);
+	ASSERT(entry != first_entry);
+	ASSERT(entry == 'B');
 }
