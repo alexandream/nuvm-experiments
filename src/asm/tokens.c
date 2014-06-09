@@ -18,7 +18,8 @@ typedef struct {
 typedef enum {
 	S_UNKNOWN = 0,
 	S_INIT,
-	S_IDENTIFIER
+	S_IDENTIFIER,
+	S_LEADING_ZERO
 } tk_state_t;
 
 
@@ -65,6 +66,9 @@ n_get_next_token(n_stream_t* stream) {
 				if (isalpha(chr)) {
 					state = S_IDENTIFIER;
 				}
+				else if (chr == '0') {
+					state = S_LEADING_ZERO;
+				}
 				else {
 					state = S_UNKNOWN;
 				}
@@ -72,6 +76,12 @@ n_get_next_token(n_stream_t* stream) {
 			case S_IDENTIFIER:
 				feed_store(&store, chr, &overflow);
 				if (!isalnum(chr) && chr != '-') {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_LEADING_ZERO:
+				feed_store(&store, chr, &overflow);
+				if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
@@ -110,6 +120,8 @@ compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
 		case S_IDENTIFIER:
 			return N_TK_IDENTIFIER;
+		case S_LEADING_ZERO:
+			return N_TK_DECNUM;
 		default:
 			return N_TK_UNKNOWN;
 	}

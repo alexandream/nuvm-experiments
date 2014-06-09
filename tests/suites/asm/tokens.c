@@ -92,6 +92,12 @@ TEST(reads_many_identifiers) {
 }
 
 
+TEST(reads_zero_decimal_number) {
+	WITH_STREAM("  0 ");
+	ASSERT_TOKEN(N_TK_DECNUM, "0");
+	ASSERT_EOF();
+}
+
 TEST(reads_decimal_number) {
 	WITH_STREAM(" 10588 ");
 	ASSERT_TOKEN(N_TK_DECNUM, "10588");
