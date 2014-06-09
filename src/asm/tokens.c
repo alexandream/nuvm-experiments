@@ -19,7 +19,8 @@ typedef enum {
 	S_UNKNOWN = 0,
 	S_INIT,
 	S_IDENTIFIER,
-	S_LEADING_ZERO
+	S_LEADING_ZERO,
+	S_DECIMAL_NUMBER
 } tk_state_t;
 
 
@@ -69,6 +70,9 @@ n_get_next_token(n_stream_t* stream) {
 				else if (chr == '0') {
 					state = S_LEADING_ZERO;
 				}
+				else if (isdigit(chr) || chr == '-') {
+					state = S_DECIMAL_NUMBER;
+				}
 				else {
 					state = S_UNKNOWN;
 				}
@@ -80,6 +84,15 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_LEADING_ZERO:
+				feed_store(&store, chr, &overflow);
+				if (isdigit(chr)) {
+					state = S_DECIMAL_NUMBER;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_DECIMAL_NUMBER:
 				feed_store(&store, chr, &overflow);
 				if (!isdigit(chr)) {
 					state = S_UNKNOWN;
@@ -120,7 +133,8 @@ compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
 		case S_IDENTIFIER:
 			return N_TK_IDENTIFIER;
-		case S_LEADING_ZERO:
+		case S_LEADING_ZERO: /* fall-through */
+		case S_DECIMAL_NUMBER:
 			return N_TK_DECNUM;
 		default:
 			return N_TK_UNKNOWN;

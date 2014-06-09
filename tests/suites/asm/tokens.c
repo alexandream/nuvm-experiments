@@ -98,6 +98,14 @@ TEST(reads_zero_decimal_number) {
 	ASSERT_EOF();
 }
 
+
+TEST(reads_decimal_number_with_leading_zero) {
+	WITH_STREAM(" 01234 ");
+	ASSERT_TOKEN(N_TK_DECNUM, "01234");
+	ASSERT_EOF();
+}
+
+
 TEST(reads_decimal_number) {
 	WITH_STREAM(" 10588 ");
 	ASSERT_TOKEN(N_TK_DECNUM, "10588");
