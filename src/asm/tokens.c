@@ -22,7 +22,10 @@ typedef enum {
 	S_LEADING_ZERO,
 	S_DECIMAL_NUMBER,
 	S_HEXADECIMAL_PREFIX,
-	S_HEXADECIMAL_NUMBER
+	S_HEXADECIMAL_NUMBER,
+	S_LABEL_DEFINITION,
+	S_LABEL_REFERENCE,
+	S_LABEL_IDENTIFIER
 } tk_state_t;
 
 
@@ -63,9 +66,9 @@ n_get_next_token(n_stream_t* stream) {
 	ignore_whitespace(stream, &eof);
 	chr = n_stream_peek(stream, &eof);
 	while (!eof && !overflow) {
+		feed_store(&store, chr, &overflow);
 		switch (state) {
 			case S_INIT:
-				feed_store(&store, chr, &overflow);
 				if (isalpha(chr)) {
 					state = S_IDENTIFIER;
 				}
@@ -75,18 +78,24 @@ n_get_next_token(n_stream_t* stream) {
 				else if (isdigit(chr) || chr == '-') {
 					state = S_DECIMAL_NUMBER;
 				}
+				else if (chr == '@') {
+					state = S_LABEL_REFERENCE;
+				}
 				else {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_IDENTIFIER:
-				feed_store(&store, chr, &overflow);
 				if (!isalnum(chr) && chr != '-') {
-					state = S_UNKNOWN;
+					if (chr == ':') {
+						state = S_LABEL_DEFINITION;
+					}
+					else {
+						state = S_UNKNOWN;
+					}
 				}
 				break;
 			case S_LEADING_ZERO:
-				feed_store(&store, chr, &overflow);
 				if (isdigit(chr)) {
 					state = S_DECIMAL_NUMBER;
 				}
@@ -98,13 +107,11 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_DECIMAL_NUMBER:
-				feed_store(&store, chr, &overflow);
 				if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_HEXADECIMAL_PREFIX:
-				feed_store(&store, chr, &overflow);
 				if (isxdigit(chr)) {
 					state = S_HEXADECIMAL_NUMBER;
 				}
@@ -113,13 +120,27 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_HEXADECIMAL_NUMBER:
-				feed_store(&store, chr, &overflow);
 				if (!isxdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
+			case S_LABEL_DEFINITION:
+				state = S_UNKNOWN;
+				break;
+			case S_LABEL_REFERENCE:
+				if (isalpha(chr)) {
+					state = S_LABEL_IDENTIFIER;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_LABEL_IDENTIFIER:
+				if (!isalnum(chr) && chr != '-') {
+					state = S_UNKNOWN;
+				}
+				break;
 			case S_UNKNOWN:
-				feed_store(&store, chr, &overflow);
 				break;
 		}
 		n_stream_read(stream, &eof);
@@ -158,6 +179,10 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_DECNUM;
 		case S_HEXADECIMAL_NUMBER:
 			return N_TK_HEXNUM;
+		case S_LABEL_DEFINITION:
+			return N_TK_LABEL_DEF;
+		case S_LABEL_IDENTIFIER:
+			return N_TK_LABEL_REF;
 		default:
 			return N_TK_UNKNOWN;
 	}
