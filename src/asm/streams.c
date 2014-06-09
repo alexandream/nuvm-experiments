@@ -134,6 +134,9 @@ n_stream_length(n_stream_t* self) {
 char
 n_stream_peek(n_stream_t* self, bool* end) {
 	char result = '\0';
+	if (self->cursor == self->size) {
+		self->eof = true;
+	}
 	if (!self->eof) {
 		result = self->buffer[self->cursor];
 	}
@@ -145,11 +148,7 @@ n_stream_peek(n_stream_t* self, bool* end) {
 char
 n_stream_read(n_stream_t* self, bool* end) {
 	char result = n_stream_peek(self, end);
-	if (self->cursor == self->size) {
-		self->eof = true;
-		*end = true;
-	}
-	else {
+	if (!self->eof) {
 		self->cursor += 1;
 	}
 

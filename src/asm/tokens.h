@@ -4,7 +4,9 @@
 #include "streams.h"
 
 typedef enum {
-	N_TK_EOF,
+	N_TK_EOF = 0,
+	N_TK_UNKNOWN,
+	N_TK_TOO_BIG,
 
 	N_TK_DECNUM,
 	N_TK_HEXNUM,
@@ -28,7 +30,7 @@ typedef struct n_token_t n_token_t;
 
 struct n_token_t {
 	n_token_type_t type;
-	const char* lexeme;
+	char* lexeme;
 };
 
 
@@ -37,4 +39,5 @@ n_destroy_token(n_token_t token);
 
 n_token_t
 n_get_next_token(n_stream_t* stream);
+
 #endif

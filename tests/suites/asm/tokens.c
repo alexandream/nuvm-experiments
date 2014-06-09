@@ -1,8 +1,13 @@
 #define SUITE_NAME Tokens
+#include <string.h>
+
 #include "../../test-suite.h"
 
 #include "streams.h"
 #include "tokens.h"
+
+static bool
+STRINGS_EQUAL(const char* str1, const char* str2);
 
 static void 
 WITH_STREAM(const char* str);
@@ -21,18 +26,27 @@ END_STREAM();
 	n_token_type_t type = _type;\
 	const char* lexeme = _lexeme;\
 	n_token_t token = n_get_next_token(STREAM);\
-	ASSERT_MSG(token.type == type,\
-		MF("Expected token type %d with lexeme \"%s\". "\
-		   "Got token type %d with lexeme \"%s\"",\
+	ASSERT_MSG(token.type == type && STRINGS_EQUAL(token.lexeme, lexeme),\
+		MF("Expected token type %d with lexeme %s. "\
+		   "Got token type %d with lexeme %s",\
 		   type, lexeme, token.type, token.lexeme));\
 } while(0)
 
 static n_stream_t* STREAM = NULL;
 
+
 TEST(ignores_only_spaces) {
 	WITH_STREAM("  \n \t \n \n \t  ");
 	ASSERT_EOF();
 }
+
+
+TEST(reads_single_character_identifier) {
+	WITH_STREAM("h");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "h");
+	ASSERT_EOF();
+}
+
 
 TEST(reads_word_identifier) {
 	WITH_STREAM("hello");
@@ -168,7 +182,6 @@ TEST(reads_label_ref) {
 }
 
 
-
 static void 
 WITH_STREAM(const char* str) {
 	END_STREAM();
@@ -182,4 +195,10 @@ END_STREAM() {
 		n_destroy_stream(STREAM);
 		STREAM = NULL;
 	}
+}
+
+static bool
+STRINGS_EQUAL(const char* str1, const char* str2) {
+	return (str1 == NULL && str2 == NULL) ||
+	       (str1 != NULL && str2 != NULL && strcmp(str1, str2) == 0);
 }
