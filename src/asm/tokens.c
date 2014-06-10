@@ -59,7 +59,8 @@ n_get_next_token(n_stream_t* stream) {
 	store_t store;
 	n_token_t result;
 	bool eof = false,
-		 overflow = false;
+		 overflow = false,
+	     complete = false;
 	int consumed_size = 0;
 	char chr;
 	tk_state_t state = S_INIT;
@@ -157,9 +158,11 @@ n_get_next_token(n_stream_t* stream) {
 			case S_UNKNOWN:
 				break;
 		}
-		n_stream_read(stream, &eof);
-		consumed_size++;
-		chr = n_stream_peek(stream, &eof);
+		if (!complete) {
+			n_stream_read(stream, &eof);
+			consumed_size++;
+			chr = n_stream_peek(stream, &eof);
+		}
 		if (isspace(chr)) {
 			break;
 		}
