@@ -18,14 +18,17 @@ typedef struct {
 typedef enum {
 	S_UNKNOWN = 0,
 	S_INIT,
-	S_IDENTIFIER,
-	S_LEADING_ZERO,
+
 	S_DECIMAL_NUMBER,
-	S_HEXADECIMAL_PREFIX,
 	S_HEXADECIMAL_NUMBER,
+	S_HEXADECIMAL_PREFIX,
+	S_IDENTIFIER,
 	S_LABEL_DEFINITION,
+	S_LABEL_IDENTIFIER,
 	S_LABEL_REFERENCE,
-	S_LABEL_IDENTIFIER
+	S_LEADING_ZERO,
+	S_STRING_CONTENTS,
+	S_STRING_END
 } tk_state_t;
 
 
@@ -77,6 +80,9 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				else if (isdigit(chr) || chr == '-') {
 					state = S_DECIMAL_NUMBER;
+				}
+				else if (chr == '"') {
+					state = S_STRING_CONTENTS;
 				}
 				else if (chr == '@') {
 					state = S_LABEL_REFERENCE;
@@ -140,6 +146,14 @@ n_get_next_token(n_stream_t* stream) {
 					state = S_UNKNOWN;
 				}
 				break;
+			case S_STRING_CONTENTS:
+				if (chr == '"') {
+					state = S_STRING_END;
+				}
+				break;
+			case S_STRING_END:
+				state = S_UNKNOWN;
+				break;
 			case S_UNKNOWN:
 				break;
 		}
@@ -183,6 +197,8 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_LABEL_DEF;
 		case S_LABEL_IDENTIFIER:
 			return N_TK_LABEL_REF;
+		case S_STRING_END:
+			return N_TK_STRING;
 		default:
 			return N_TK_UNKNOWN;
 	}
