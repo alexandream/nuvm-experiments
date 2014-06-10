@@ -59,7 +59,7 @@ n_get_next_token(n_stream_t* stream) {
 	store_t store;
 	n_token_t result;
 	bool eof = false,
-		 overflow = false,
+	     overflow = false,
 	     complete = false;
 	int consumed_size = 0;
 	char chr;
@@ -69,7 +69,7 @@ n_get_next_token(n_stream_t* stream) {
 
 	ignore_whitespace(stream, &eof);
 	chr = n_stream_peek(stream, &eof);
-	while (!eof && !overflow) {
+	while (!eof && !overflow && !complete) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
 			case S_INIT:
@@ -93,7 +93,10 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_IDENTIFIER:
-				if (!isalnum(chr) && chr != '-') {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (!isalnum(chr) && chr != '-') {
 					if (chr == ':') {
 						state = S_LABEL_DEFINITION;
 					}
@@ -103,7 +106,10 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_LEADING_ZERO:
-				if (isdigit(chr)) {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (isdigit(chr)) {
 					state = S_DECIMAL_NUMBER;
 				}
 				else if (chr == 'x') {
@@ -114,12 +120,18 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_DECIMAL_NUMBER:
-				if (!isdigit(chr)) {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_HEXADECIMAL_PREFIX:
-				if (isxdigit(chr)) {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (isxdigit(chr)) {
 					state = S_HEXADECIMAL_NUMBER;
 				}
 				else {
@@ -127,15 +139,26 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_HEXADECIMAL_NUMBER:
-				if (!isxdigit(chr)) {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (!isxdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_LABEL_DEFINITION:
-				state = S_UNKNOWN;
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
 				break;
 			case S_LABEL_REFERENCE:
-				if (isalpha(chr)) {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (isalpha(chr)) {
 					state = S_LABEL_IDENTIFIER;
 				}
 				else {
@@ -143,28 +166,40 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_LABEL_IDENTIFIER:
-				if (!isalnum(chr) && chr != '-') {
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else if (!isalnum(chr) && chr != '-') {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_STRING_CONTENTS:
-				if (chr == '"') {
+				if (chr == '\n') {
+					state = S_UNKNOWN;
+					complete = true;
+				}
+				else if (chr == '"') {
 					state = S_STRING_END;
 				}
 				break;
 			case S_STRING_END:
-				state = S_UNKNOWN;
+				if (isspace(chr)) {
+					complete = true;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
 				break;
 			case S_UNKNOWN:
+				if (isspace(chr)) {
+					complete = true;
+				}
 				break;
 		}
 		if (!complete) {
 			n_stream_read(stream, &eof);
 			consumed_size++;
 			chr = n_stream_peek(stream, &eof);
-		}
-		if (isspace(chr)) {
-			break;
 		}
 	}
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
