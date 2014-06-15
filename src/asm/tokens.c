@@ -87,6 +87,27 @@ n_destroy_token(n_token_t token) {
 }
 
 
+/* The function below implements the following lexer, in POSIX Extended Regular
+ * Expressions Syntax and top-to-bottom precedence:
+ *
+ *  [CLG]:[0-9]+                             N_TK_REGISTER
+ *  [a-zA-Z][a-zA-Z0-9-]*                    N_TK_IDENTIFIER
+ *  [a-zA-Z][a-zA-Z0-9-]*:                   N_TK_LABEL_DEF
+ *  "(\\.|[^\"])"                            N_TK_STRING
+ *  0|(-?[1-9][0-9]*)                        N_TK_DEC_INTEGER
+ *  0x[0-9A-F]+                              N_TK_HEX_INTEGER
+ *  (0|(-?[1-9][0-9]*))\.[0-9]+              N_TK_REAL
+ *  \..*                                     N_TK_UNRECOGNIZED_KW
+ *
+ *  Unrecognized Keywords are further passed into the function
+ *  compute_token_type_from_keyword to decide which valid keyword token, if any
+ *  is represented by the lexeme.
+ *
+ *  A graphical representation of the Finite State Machine implemented by this
+ *  function is given in
+ *
+ *    docs/diagrams/tokenizer-state-machine.{svg,dia}
+ */
 n_token_t
 n_get_next_token(n_stream_t* stream) {
 	char buffer[LEXEME_BUFFER_SIZE + 1];
