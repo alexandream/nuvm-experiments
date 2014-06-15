@@ -50,7 +50,7 @@ typedef enum {
 	S_REGISTER_LEAD,
 	S_REGISTER_PREFIX,
 
-	S_STRING_CONTENTS,
+	S_STRING_OPENED,
 	S_STRING_END,
 
 	S_KEYWORD,
@@ -120,7 +120,7 @@ n_get_next_token(n_stream_t* stream) {
 					state = S_DECIMAL_NUMBER;
 				}
 				else if (chr == '"') {
-					state = S_STRING_CONTENTS;
+					state = S_STRING_OPENED;
 					handling_spaces = true;
 				}
 				else {
@@ -195,7 +195,7 @@ n_get_next_token(n_stream_t* stream) {
 					state = S_UNKNOWN;
 				}
 				break;
-			case S_STRING_CONTENTS:
+			case S_STRING_OPENED:
 				if (chr == '\n') {
 					state = S_UNKNOWN;
 					complete = true;
@@ -262,9 +262,9 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_IDENTIFIER;
 		case S_LEADING_ZERO: /* fall-through */
 		case S_DECIMAL_NUMBER:
-			return N_TK_DECNUM;
+			return N_TK_DEC_INTEGER;
 		case S_HEXADECIMAL_NUMBER:
-			return N_TK_HEXNUM;
+			return N_TK_HEX_INTEGER;
 		case S_LABEL_DEFINITION:
 			return N_TK_LABEL_DEF;
 		case S_STRING_END:

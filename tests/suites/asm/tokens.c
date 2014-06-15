@@ -113,64 +113,64 @@ TEST(reads_many_identifiers) {
 }
 
 
-TEST(reads_zero_decimal_number) {
+TEST(reads_zero_decimal_integer) {
 	WITH_STREAM("  0 ");
-	ASSERT_TOKEN(N_TK_DECNUM, "0");
+	ASSERT_TOKEN(N_TK_DEC_INTEGER, "0");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_decimal_number_with_leading_zero) {
+TEST(reads_decimal_integer_with_leading_zero) {
 	WITH_STREAM(" 01234 ");
-	ASSERT_TOKEN(N_TK_DECNUM, "01234");
+	ASSERT_TOKEN(N_TK_DEC_INTEGER, "01234");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_decimal_number) {
+TEST(reads_decimal_integer) {
 	WITH_STREAM(" 10588 ");
-	ASSERT_TOKEN(N_TK_DECNUM, "10588");
+	ASSERT_TOKEN(N_TK_DEC_INTEGER, "10588");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_negative_decimal_number) {
+TEST(reads_negative_decimal_integer) {
 	WITH_STREAM("-123456789");
-	ASSERT_TOKEN(N_TK_DECNUM, "-123456789");
+	ASSERT_TOKEN(N_TK_DEC_INTEGER, "-123456789");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_single_digit_decimal_number) {
+TEST(reads_single_digit_decimal_integer) {
 	WITH_STREAM("8");
-	ASSERT_TOKEN(N_TK_DECNUM, "8");
+	ASSERT_TOKEN(N_TK_DEC_INTEGER, "8");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_hexadecimal_number) {
+TEST(reads_hexadecimal_integer) {
 	WITH_STREAM("0x12345678");
-	ASSERT_TOKEN(N_TK_HEXNUM, "0x12345678");
+	ASSERT_TOKEN(N_TK_HEX_INTEGER, "0x12345678");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_hexadecimal_number_high_digits) {
+TEST(reads_hexadecimal_integer_high_digits) {
 	WITH_STREAM("0xdeadbeef");
-	ASSERT_TOKEN(N_TK_HEXNUM, "0xdeadbeef");
+	ASSERT_TOKEN(N_TK_HEX_INTEGER, "0xdeadbeef");
 	ASSERT_EOF();
 }
 
 
-TEST(reads_hexadecimal_number_case_sensitive_high_digits) {
+TEST(reads_hexadecimal_integer_case_sensitive_high_digits) {
 	WITH_STREAM("0xDeadBeef");
-	ASSERT_TOKEN(N_TK_HEXNUM, "0xDeadBeef");
+	ASSERT_TOKEN(N_TK_HEX_INTEGER, "0xDeadBeef");
 	ASSERT_EOF();
 }
 
 TEST(reads_hexadecimal_single_digit) {
 	WITH_STREAM("0xA");
-	ASSERT_TOKEN(N_TK_HEXNUM, "0xA");
+	ASSERT_TOKEN(N_TK_HEX_INTEGER, "0xA");
 	ASSERT_EOF();
 }
 
@@ -319,6 +319,28 @@ TEST(reads_unrecognized_keyword) {
 	ASSERT_TOKEN(N_TK_UNRECOGNIZED_KW, ".whatever-we-want-2");
 	ASSERT_EOF();
 }
+
+
+TEST(reads_real_zero) {
+	WITH_STREAM("0.0");
+	ASSERT_TOKEN(N_TK_REAL, "0.0");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_real_positive_number) {
+	WITH_STREAM("3.1415927");
+	ASSERT_TOKEN(N_TK_REAL, "3.1415927");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_real_negative_number) {
+	WITH_STREAM("-10.588");
+	ASSERT_TOKEN(N_TK_REAL, "-10.588");
+	ASSERT_EOF();
+}
+
 
 
 static void 
