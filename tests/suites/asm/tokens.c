@@ -189,6 +189,111 @@ TEST(reads_label_def) {
 }
 
 
+TEST(reads_local_register_reference_zero) {
+	WITH_STREAM("L:0");
+	ASSERT_TOKEN(N_TK_REGISTER, "L:0");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_global_register_reference_zero) {
+	WITH_STREAM("G:0");
+	ASSERT_TOKEN(N_TK_REGISTER, "G:0");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_constant_register_reference_zero) {
+	WITH_STREAM("C:0");
+	ASSERT_TOKEN(N_TK_REGISTER, "C:0");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_local_register_reference) {
+	WITH_STREAM("L:1234");
+	ASSERT_TOKEN(N_TK_REGISTER, "L:1234");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_global_register_reference) {
+	WITH_STREAM("G:4321");
+	ASSERT_TOKEN(N_TK_REGISTER, "G:4321");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_constant_register_reference) {
+	WITH_STREAM("C:987");
+	ASSERT_TOKEN(N_TK_REGISTER, "C:987");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_character) {
+	WITH_STREAM(".character");
+	ASSERT_TOKEN(N_TK_KW_CHARACTER, ".character");
+	ASSERT_EOF();
+}
+
+TEST(reads_keyword_code) {
+	WITH_STREAM(".code");
+	ASSERT_TOKEN(N_TK_KW_CODE, ".code");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_constants) {
+	WITH_STREAM(".constants");
+	ASSERT_TOKEN(N_TK_KW_CONSTANTS, ".constants");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_double) {
+	WITH_STREAM(".double");
+	ASSERT_TOKEN(N_TK_KW_DOUBLE, ".double");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_globals_count) {
+	WITH_STREAM(".globals-count");
+	ASSERT_TOKEN(N_TK_KW_GLOBALS_COUNT, ".globals-count");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_int32) {
+	WITH_STREAM(".int32");
+	ASSERT_TOKEN(N_TK_KW_INT32, ".int32");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_procedure) {
+	WITH_STREAM(".procedure");
+	ASSERT_TOKEN(N_TK_KW_PROCEDURE, ".procedure");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_string) {
+	WITH_STREAM(".string");
+	ASSERT_TOKEN(N_TK_KW_STRING, ".string");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_keyword_version) {
+	WITH_STREAM(".version");
+	ASSERT_TOKEN(N_TK_KW_VERSION, ".version");
+	ASSERT_EOF();
+}
+
+
+
 static void 
 WITH_STREAM(const char* str) {
 	END_STREAM();

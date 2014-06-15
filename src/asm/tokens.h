@@ -5,13 +5,13 @@
 
 typedef enum {
 	N_TK_EOF = 0,
-	N_TK_UNKNOWN,
 	N_TK_TOO_BIG,
 
 	N_TK_DECNUM,
 	N_TK_HEXNUM,
 	N_TK_IDENTIFIER,
 	N_TK_LABEL_DEF,
+	N_TK_REGISTER,
 	N_TK_STRING,
 
 	N_TK_KW_CHARACTER,
@@ -22,7 +22,9 @@ typedef enum {
 	N_TK_KW_INT32,
 	N_TK_KW_PROCEDURE,
 	N_TK_KW_STRING,
-	N_TK_KW_VERSION
+	N_TK_KW_VERSION,
+
+	N_TK_UNKNOWN = -1
 } n_token_type_t;
 
 typedef struct n_token_t n_token_t;
