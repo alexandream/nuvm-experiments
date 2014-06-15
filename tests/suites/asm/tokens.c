@@ -76,6 +76,27 @@ TEST(reads_identifier_with_hyphen) {
 }
 
 
+TEST(reads_identifier_with_starting_local_register_lead) {
+	WITH_STREAM("Lambda");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "Lambda");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_identifier_with_starting_global_register_lead) {
+	WITH_STREAM("Gambling");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "Gambling");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_identifier_with_starting_constant_register_lead) {
+	WITH_STREAM("Command");
+	ASSERT_TOKEN(N_TK_IDENTIFIER, "Command");
+	ASSERT_EOF();
+}
+
+
 TEST(ignores_spaces) {
 	WITH_STREAM(" \n\t h1234 \t\n ");
 	ASSERT_TOKEN(N_TK_IDENTIFIER, "h1234");

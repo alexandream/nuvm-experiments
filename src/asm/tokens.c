@@ -26,8 +26,14 @@ typedef enum {
 	S_IDENTIFIER,
 	S_LABEL_DEFINITION,
 
+	S_REGISTER,
+	S_REGISTER_LEAD,
+	S_REGISTER_PREFIX,
+
 	S_STRING_CONTENTS,
 	S_STRING_END,
+
+	S_KEYWORD,
 
 	S_UNKNOWN = -1
 } tk_state_t;
@@ -75,7 +81,10 @@ n_get_next_token(n_stream_t* stream) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
 			case S_INIT:
-				if (isalpha(chr)) {
+				if (chr == 'L' || chr == 'G' || chr == 'C') {
+					state = S_REGISTER_LEAD;
+				}
+				else if (isalpha(chr)) {
 					state = S_IDENTIFIER;
 				}
 				else if (chr == '0') {
@@ -134,6 +143,27 @@ n_get_next_token(n_stream_t* stream) {
 			case S_LABEL_DEFINITION:
 				state = S_UNKNOWN;
 				break;
+			case S_REGISTER_LEAD:
+				if (isalnum(chr) && chr != '-') {
+					state = S_IDENTIFIER;
+				}
+				else if (chr == ':') {
+					state = S_REGISTER_PREFIX;
+				}
+				break;
+			case S_REGISTER_PREFIX:
+				if (isdigit(chr)) {
+					state = S_REGISTER;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_REGISTER:
+				if (!isdigit(chr)) {
+					state = S_UNKNOWN;
+				}
+				break;
 			case S_STRING_CONTENTS:
 				if (chr == '\n') {
 					state = S_UNKNOWN;
@@ -181,6 +211,7 @@ n_get_next_token(n_stream_t* stream) {
 static n_token_type_t
 compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
+		case S_REGISTER_LEAD: /* fall-through */
 		case S_IDENTIFIER:
 			return N_TK_IDENTIFIER;
 		case S_LEADING_ZERO: /* fall-through */
@@ -192,6 +223,8 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_LABEL_DEF;
 		case S_STRING_END:
 			return N_TK_STRING;
+		case S_REGISTER:
+			return N_TK_REGISTER;
 		default:
 			return N_TK_UNKNOWN;
 	}
