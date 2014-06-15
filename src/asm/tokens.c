@@ -72,6 +72,45 @@ compute_token_type_from_state(tk_state_t state);
 static void
 feed_store(store_t* buffer, char chr, bool* overflow);
 
+static tk_state_t
+handle_S_INIT(char chr, bool* handling_spaces);
+
+static tk_state_t
+handle_S_IDENTIFIER(char chr);
+
+static tk_state_t
+handle_S_LEADING_ZERO(char chr);
+
+static tk_state_t
+handle_S_DECIMAL_NUMBER(char chr);
+
+static tk_state_t
+handle_S_HEXADECIMAL_PREFIX(char chr);
+
+static tk_state_t
+handle_S_HEXADECIMAL_NUMBER(char chr);
+
+static tk_state_t
+handle_S_REAL_PREFIX(char chr);
+
+static tk_state_t
+handle_S_REAL(char chr);
+
+static tk_state_t
+handle_S_KEYWORD(char chr);
+
+static tk_state_t
+handle_S_REGISTER_LEAD(char chr);
+
+static tk_state_t
+handle_S_REGISTER_PREFIX(char chr);
+
+static tk_state_t
+handle_S_REGISTER(char chr);
+
+static tk_state_t
+handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete);
+
 static void
 ignore_whitespace(n_stream_t* stream, bool* end);
 
@@ -129,128 +168,47 @@ n_get_next_token(n_stream_t* stream) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
 			case S_INIT:
-				if (chr == 'L' || chr == 'G' || chr == 'C') {
-					state = S_REGISTER_LEAD;
-				}
-				else if (isalpha(chr)) {
-					state = S_IDENTIFIER;
-				}
-				else if (chr == '.') {
-					state = S_KEYWORD;
-				}
-				else if (chr == '0') {
-					state = S_LEADING_ZERO;
-				}
-				else if (isdigit(chr) || chr == '-') {
-					state = S_DECIMAL_NUMBER;
-				}
-				else if (chr == '"') {
-					state = S_STRING_OPENED;
-					handling_spaces = true;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_INIT(chr, &handling_spaces);
 				break;
 			case S_IDENTIFIER:
-				if (!isalnum(chr) && chr != '-') {
-					if (chr == ':') {
-						state = S_LABEL_DEFINITION;
-					}
-					else {
-						state = S_UNKNOWN;
-					}
-				}
+				state = handle_S_IDENTIFIER(chr);
 				break;
 			case S_LEADING_ZERO:
-				if (isdigit(chr)) {
-					state = S_DECIMAL_NUMBER;
-				}
-				else if (chr == 'x') {
-					state = S_HEXADECIMAL_PREFIX;
-				}
-				else if (chr == '.') {
-					state = S_REAL_PREFIX;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_LEADING_ZERO(chr);
 				break;
 			case S_DECIMAL_NUMBER:
-				if (chr == '.') {
-					state = S_REAL_PREFIX;
-				}
-				else if (!isdigit(chr)) {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_DECIMAL_NUMBER(chr);
 				break;
 			case S_HEXADECIMAL_PREFIX:
-				if (isxdigit(chr)) {
-					state = S_HEXADECIMAL_NUMBER;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_HEXADECIMAL_PREFIX(chr);
 				break;
 			case S_HEXADECIMAL_NUMBER:
-				if (!isxdigit(chr)) {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_HEXADECIMAL_NUMBER(chr);
 				break;
 			case S_REAL_PREFIX:
-				if (isdigit(chr)) {
-					state = S_REAL;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_REAL_PREFIX(chr);
 				break;
 			case S_REAL:
-				if (!isdigit(chr)) {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_REAL(chr);
 				break;
 			case S_KEYWORD:
-				if (!islower(chr) && !isdigit(chr) && chr != '-') {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_KEYWORD(chr);
 				break;
 			case S_LABEL_DEFINITION:
 				state = S_UNKNOWN;
 				break;
 			case S_REGISTER_LEAD:
-				if (isalnum(chr) && chr != '-') {
-					state = S_IDENTIFIER;
-				}
-				else if (chr == ':') {
-					state = S_REGISTER_PREFIX;
-				}
+				state = handle_S_REGISTER_LEAD(chr);
 				break;
 			case S_REGISTER_PREFIX:
-				if (isdigit(chr)) {
-					state = S_REGISTER;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_REGISTER_PREFIX(chr);
 				break;
 			case S_REGISTER:
-				if (!isdigit(chr)) {
-					state = S_UNKNOWN;
-				}
+				state = handle_S_REGISTER(chr);
 				break;
 			case S_STRING_OPENED:
-				if (chr == '\n') {
-					state = S_UNKNOWN;
-					complete = true;
-				}
-				else if (chr == '\\') {
-					state = S_STRING_ESCAPE;
-				}
-				else if (chr == '"') {
-					state = S_STRING_END;
-					handling_spaces = false;
-				}
+				state =
+					handle_S_STRING_OPENED(chr, &handling_spaces, &complete);
 				break;
 			case S_STRING_ESCAPE:
 				state = S_STRING_OPENED;
@@ -340,6 +298,162 @@ feed_store(store_t* buffer, char chr, bool* overflow) {
 		buffer->store[buffer->size] = chr;
 		buffer->size++;
 	}
+}
+
+
+static tk_state_t
+handle_S_INIT(char chr, bool* handling_spaces) {
+	if (chr == 'L' || chr == 'G' || chr == 'C') {
+		return S_REGISTER_LEAD;
+	}
+	if (isalpha(chr)) {
+		return S_IDENTIFIER;
+	}
+	if (chr == '.') {
+		return S_KEYWORD;
+	}
+	if (chr == '0') {
+		return S_LEADING_ZERO;
+	}
+	if (isdigit(chr) || chr == '-') {
+		return S_DECIMAL_NUMBER;
+	}
+	if (chr == '"') {
+		*handling_spaces = true;
+		return S_STRING_OPENED;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_IDENTIFIER(char chr) {
+	if (isalnum(chr) || chr == '-') {
+		return S_IDENTIFIER;
+	}
+	if (chr == ':') {
+		return S_LABEL_DEFINITION;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_LEADING_ZERO(char chr) {
+	if (isdigit(chr)) {
+		return S_DECIMAL_NUMBER;
+	}
+	if (chr == 'x') {
+		return S_HEXADECIMAL_PREFIX;
+	}
+	if (chr == '.') {
+		return S_REAL_PREFIX;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_DECIMAL_NUMBER(char chr) {
+	if (chr == '.') {
+		return S_REAL_PREFIX;
+	}
+	if (isdigit(chr)) {
+		return S_DECIMAL_NUMBER;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_HEXADECIMAL_PREFIX(char chr) {
+	if (isxdigit(chr)) {
+		return S_HEXADECIMAL_NUMBER;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_HEXADECIMAL_NUMBER(char chr) {
+	if (isxdigit(chr)) {
+		return S_HEXADECIMAL_NUMBER;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_REAL_PREFIX(char chr) {
+	if (isdigit(chr)) {
+		return S_REAL;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_REAL(char chr) {
+	if (isdigit(chr)) {
+		return S_REAL;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_KEYWORD(char chr) {
+	if (islower(chr) || isdigit(chr) || chr == '-') {
+		return S_KEYWORD;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_REGISTER_LEAD(char chr) {
+	if (isalnum(chr) || chr == '-') {
+		return S_IDENTIFIER;
+	}
+	if (chr == ':') {
+		return S_REGISTER_PREFIX;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_REGISTER_PREFIX(char chr) {
+	if (isdigit(chr)) {
+		return S_REGISTER;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_REGISTER(char chr) {
+	if (isdigit(chr)) {
+		return S_REGISTER;
+	}
+	return S_UNKNOWN;
+}
+
+
+static tk_state_t
+handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete) {
+	if (chr == '\n') {
+		*complete = true;
+		return S_UNKNOWN;
+	}
+	if (chr == '\\') {
+		return S_STRING_ESCAPE;
+	}
+	if (chr == '"') {
+		*handling_spaces = false;
+		return S_STRING_END;
+	}
+	return S_STRING_OPENED;
 }
 
 
