@@ -314,6 +314,12 @@ TEST(reads_keyword_version) {
 }
 
 
+TEST(reads_unrecognized_keyword) {
+	WITH_STREAM(".whatever-we-want-2");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_KW, ".whatever-we-want-2");
+	ASSERT_EOF();
+}
+
 
 static void 
 WITH_STREAM(const char* str) {

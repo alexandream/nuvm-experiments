@@ -24,6 +24,8 @@ typedef enum {
 	N_TK_KW_STRING,
 	N_TK_KW_VERSION,
 
+	N_TK_UNRECOGNIZED_KW,
+
 	N_TK_UNKNOWN = -1
 } n_token_type_t;
 

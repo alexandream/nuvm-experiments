@@ -1,5 +1,6 @@
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "tokens.h"
 
@@ -10,10 +11,29 @@
 #endif
 
 typedef struct {
+	char* keyword;
+	n_token_type_t token_type;
+} keyword_table_t;
+
+static keyword_table_t KEYWORD_TABLE[] = {
+	{ ".character",     N_TK_KW_CHARACTER },
+	{ ".code",          N_TK_KW_CODE },
+	{ ".constants",     N_TK_KW_CONSTANTS },
+	{ ".double",        N_TK_KW_DOUBLE },
+	{ ".globals-count", N_TK_KW_GLOBALS_COUNT },
+	{ ".int32",         N_TK_KW_INT32 },
+	{ ".procedure",     N_TK_KW_PROCEDURE },
+	{ ".string",        N_TK_KW_STRING },
+	{ ".version",       N_TK_KW_VERSION },
+	{   NULL,           N_TK_UNRECOGNIZED_KW }
+};
+
+typedef struct {
 	char* store;
 	uint16_t size;
 	uint16_t capacity;
 } store_t;
+
 
 typedef enum {
 	S_INIT,
@@ -38,6 +58,9 @@ typedef enum {
 	S_UNKNOWN = -1
 } tk_state_t;
 
+
+static n_token_type_t
+compute_token_type_from_keyword(const char* keyword);
 
 static n_token_type_t
 compute_token_type_from_state(tk_state_t state);
@@ -86,6 +109,9 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				else if (isalpha(chr)) {
 					state = S_IDENTIFIER;
+				}
+				else if (chr == '.') {
+					state = S_KEYWORD;
 				}
 				else if (chr == '0') {
 					state = S_LEADING_ZERO;
@@ -137,6 +163,11 @@ n_get_next_token(n_stream_t* stream) {
 				break;
 			case S_HEXADECIMAL_NUMBER:
 				if (!isxdigit(chr)) {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_KEYWORD:
+				if (!islower(chr) && !isdigit(chr) && chr != '-') {
 					state = S_UNKNOWN;
 				}
 				break;
@@ -192,6 +223,9 @@ n_get_next_token(n_stream_t* stream) {
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
 		buffer[consumed_size] = '\0';
 		result.type = compute_token_type_from_state(state);
+		if (result.type == N_TK_UNRECOGNIZED_KW) {
+			result.type = compute_token_type_from_keyword(buffer);
+		}
 		result.lexeme = strdup(buffer);
 	}
 	else if (eof) {
@@ -207,6 +241,18 @@ n_get_next_token(n_stream_t* stream) {
 }
 
 
+static n_token_type_t
+compute_token_type_from_keyword(const char* keyword) {
+	int i = 0;
+
+	while (true) {
+		const char *test_keyword = KEYWORD_TABLE[i].keyword;
+		if (test_keyword == NULL || strcmp(test_keyword, keyword) == 0) {
+			return KEYWORD_TABLE[i].token_type;
+		}
+		else i++;
+	}
+}
 
 static n_token_type_t
 compute_token_type_from_state(tk_state_t state) {
@@ -225,6 +271,8 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_STRING;
 		case S_REGISTER:
 			return N_TK_REGISTER;
+		case S_KEYWORD:
+			return N_TK_UNRECOGNIZED_KW;
 		default:
 			return N_TK_UNKNOWN;
 	}
