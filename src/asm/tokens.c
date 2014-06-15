@@ -43,6 +43,9 @@ typedef enum {
 	S_HEXADECIMAL_PREFIX,
 	S_LEADING_ZERO,
 
+	S_REAL_PREFIX,
+	S_REAL,
+
 	S_IDENTIFIER,
 	S_LABEL_DEFINITION,
 
@@ -144,12 +147,18 @@ n_get_next_token(n_stream_t* stream) {
 				else if (chr == 'x') {
 					state = S_HEXADECIMAL_PREFIX;
 				}
+				else if (chr == '.') {
+					state = S_REAL_PREFIX;
+				}
 				else {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_DECIMAL_NUMBER:
-				if (!isdigit(chr)) {
+				if (chr == '.') {
+					state = S_REAL_PREFIX;
+				}
+				else if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
@@ -163,6 +172,19 @@ n_get_next_token(n_stream_t* stream) {
 				break;
 			case S_HEXADECIMAL_NUMBER:
 				if (!isxdigit(chr)) {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_REAL_PREFIX:
+				if (isdigit(chr)) {
+					state = S_REAL;
+				}
+				else {
+					state = S_UNKNOWN;
+				}
+				break;
+			case S_REAL:
+				if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
@@ -263,6 +285,8 @@ compute_token_type_from_state(tk_state_t state) {
 		case S_LEADING_ZERO: /* fall-through */
 		case S_DECIMAL_NUMBER:
 			return N_TK_DEC_INTEGER;
+		case S_REAL:
+			return N_TK_REAL;
 		case S_HEXADECIMAL_NUMBER:
 			return N_TK_HEX_INTEGER;
 		case S_LABEL_DEFINITION:
