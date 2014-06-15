@@ -189,13 +189,6 @@ TEST(reads_label_def) {
 }
 
 
-TEST(reads_label_ref) {
-	WITH_STREAM("@their-code");
-	ASSERT_TOKEN(N_TK_LABEL_REF, "@their-code");
-	ASSERT_EOF();
-}
-
-
 static void 
 WITH_STREAM(const char* str) {
 	END_STREAM();

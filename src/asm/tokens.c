@@ -16,19 +16,20 @@ typedef struct {
 } store_t;
 
 typedef enum {
-	S_UNKNOWN = 0,
 	S_INIT,
 
 	S_DECIMAL_NUMBER,
 	S_HEXADECIMAL_NUMBER,
 	S_HEXADECIMAL_PREFIX,
+	S_LEADING_ZERO,
+
 	S_IDENTIFIER,
 	S_LABEL_DEFINITION,
-	S_LABEL_IDENTIFIER,
-	S_LABEL_REFERENCE,
-	S_LEADING_ZERO,
+
 	S_STRING_CONTENTS,
-	S_STRING_END
+	S_STRING_END,
+
+	S_UNKNOWN = -1
 } tk_state_t;
 
 
@@ -63,6 +64,7 @@ n_get_next_token(n_stream_t* stream) {
 	     complete = false;
 	int consumed_size = 0;
 	char chr;
+	bool handling_spaces = false;
 	tk_state_t state = S_INIT;
 
 	init_store(&store, buffer, LEXEME_BUFFER_SIZE);
@@ -84,19 +86,14 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				else if (chr == '"') {
 					state = S_STRING_CONTENTS;
-				}
-				else if (chr == '@') {
-					state = S_LABEL_REFERENCE;
+					handling_spaces = true;
 				}
 				else {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_IDENTIFIER:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (!isalnum(chr) && chr != '-') {
+				if (!isalnum(chr) && chr != '-') {
 					if (chr == ':') {
 						state = S_LABEL_DEFINITION;
 					}
@@ -106,10 +103,7 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_LEADING_ZERO:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (isdigit(chr)) {
+				if (isdigit(chr)) {
 					state = S_DECIMAL_NUMBER;
 				}
 				else if (chr == 'x') {
@@ -120,18 +114,12 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_DECIMAL_NUMBER:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (!isdigit(chr)) {
+				if (!isdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_HEXADECIMAL_PREFIX:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (isxdigit(chr)) {
+				if (isxdigit(chr)) {
 					state = S_HEXADECIMAL_NUMBER;
 				}
 				else {
@@ -139,39 +127,12 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				break;
 			case S_HEXADECIMAL_NUMBER:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (!isxdigit(chr)) {
+				if (!isxdigit(chr)) {
 					state = S_UNKNOWN;
 				}
 				break;
 			case S_LABEL_DEFINITION:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
-				break;
-			case S_LABEL_REFERENCE:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (isalpha(chr)) {
-					state = S_LABEL_IDENTIFIER;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
-				break;
-			case S_LABEL_IDENTIFIER:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else if (!isalnum(chr) && chr != '-') {
-					state = S_UNKNOWN;
-				}
+				state = S_UNKNOWN;
 				break;
 			case S_STRING_CONTENTS:
 				if (chr == '\n') {
@@ -180,26 +141,22 @@ n_get_next_token(n_stream_t* stream) {
 				}
 				else if (chr == '"') {
 					state = S_STRING_END;
+					handling_spaces = false;
 				}
 				break;
 			case S_STRING_END:
-				if (isspace(chr)) {
-					complete = true;
-				}
-				else {
-					state = S_UNKNOWN;
-				}
+				state = S_UNKNOWN;
 				break;
 			case S_UNKNOWN:
-				if (isspace(chr)) {
-					complete = true;
-				}
 				break;
 		}
 		if (!complete) {
 			n_stream_read(stream, &eof);
 			consumed_size++;
 			chr = n_stream_peek(stream, &eof);
+			if (!handling_spaces && isspace(chr)) {
+				complete = true;
+			}
 		}
 	}
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
@@ -233,8 +190,6 @@ compute_token_type_from_state(tk_state_t state) {
 			return N_TK_HEXNUM;
 		case S_LABEL_DEFINITION:
 			return N_TK_LABEL_DEF;
-		case S_LABEL_IDENTIFIER:
-			return N_TK_LABEL_REF;
 		case S_STRING_END:
 			return N_TK_STRING;
 		default:
