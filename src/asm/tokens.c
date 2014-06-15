@@ -55,6 +55,7 @@ typedef enum {
 
 	S_STRING_OPENED,
 	S_STRING_END,
+	S_STRING_ESCAPE,
 
 	S_KEYWORD,
 
@@ -222,10 +223,16 @@ n_get_next_token(n_stream_t* stream) {
 					state = S_UNKNOWN;
 					complete = true;
 				}
+				else if (chr == '\\') {
+					state = S_STRING_ESCAPE;
+				}
 				else if (chr == '"') {
 					state = S_STRING_END;
 					handling_spaces = false;
 				}
+				break;
+			case S_STRING_ESCAPE:
+				state = S_STRING_OPENED;
 				break;
 			case S_STRING_END:
 				state = S_UNKNOWN;
