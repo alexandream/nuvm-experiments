@@ -11,11 +11,11 @@
 #endif
 
 typedef struct {
-	char* keyword;
+	char* lexeme;
 	n_token_type_t token_type;
-} keyword_table_t;
+} lexeme_table_t;
 
-static keyword_table_t KEYWORD_TABLE[] = {
+static lexeme_table_t KEYWORD_TABLE[] = {
 	{ ".character",     N_TK_KW_CHARACTER },
 	{ ".code",          N_TK_KW_CODE },
 	{ ".constants",     N_TK_KW_CONSTANTS },
@@ -28,6 +28,27 @@ static keyword_table_t KEYWORD_TABLE[] = {
 	{   NULL,           N_TK_UNRECOGNIZED_KW }
 };
 
+static lexeme_table_t OPCODE_TABLE[] = {
+	{ "move",       N_TK_OP_MOVE },
+	{ "global-ref", N_TK_OP_GLOBAL_REF },
+	{ "global-set", N_TK_OP_GLOBAL_SET },
+	{ "jump",       N_TK_OP_JUMP },
+	{ "jump-if",    N_TK_OP_JUMP_IF },
+	{ "eq",         N_TK_OP_EQ },
+	{ "lt",         N_TK_OP_LT },
+	{ "le",         N_TK_OP_LE },
+	{ "gt",         N_TK_OP_GT },
+	{ "ge",         N_TK_OP_GE },
+	{ "not",        N_TK_OP_NOT },
+	{ "or",         N_TK_OP_OR },
+	{ "and",        N_TK_OP_AND },
+	{ "add",        N_TK_OP_ADD },
+	{ "sub",        N_TK_OP_SUB },
+	{ "mul",        N_TK_OP_MUL },
+	{ "div",        N_TK_OP_DIV },
+	{ "load-bool",  N_TK_OP_LOAD_BOOL },
+	{  NULL,        N_TK_UNRECOGNIZED_OPCODE }
+};
 typedef struct {
 	char* store;
 	uint16_t size;
@@ -136,7 +157,7 @@ n_destroy_token(n_token_t token) {
  * Expressions Syntax and top-to-bottom precedence:
  *
  *  [CLG]:[0-9]+                             N_TK_REGISTER
- *  [a-zA-Z][a-zA-Z0-9-]*                    N_TK_IDENTIFIER
+ *  [a-zA-Z][a-zA-Z0-9-]*                    N_TK_UNRECOGNIZED_OPCODE
  *  [a-zA-Z][a-zA-Z0-9-]*:                   N_TK_LABEL_DEF
  *  "(\\.|[^\"])"                            N_TK_STRING
  *  0|(-?[1-9][0-9]*)                        N_TK_DEC_INTEGER
@@ -241,7 +262,7 @@ n_get_next_token(n_stream_t* stream) {
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
 		buffer[consumed_size] = '\0';
 		result.type = compute_token_type_from_state(state);
-		if (result.type == N_TK_IDENTIFIER) {
+		if (result.type == N_TK_UNRECOGNIZED_OPCODE) {
 			result.type = adjust_identifier_token_type(buffer, is_label);
 		}
 		else if (result.type == N_TK_UNRECOGNIZED_KW) {
@@ -263,25 +284,33 @@ n_get_next_token(n_stream_t* stream) {
 
 
 static n_token_type_t
+compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
+	int i = 0;
+
+	while (true) {
+		const char *test_keyword = table[i].lexeme;
+		if (test_keyword == NULL || strcmp(test_keyword, lexeme) == 0) {
+			return table[i].token_type;
+		}
+		else i++;
+	}
+}
+
+
+static n_token_type_t
 adjust_identifier_token_type(const char* lexeme, bool is_label) {
 	if (is_label) {
 		return N_TK_LABEL;
 	}
-	return N_TK_IDENTIFIER;
+	else {
+		return compute_token_type_from_table(lexeme, OPCODE_TABLE);
+	}
 }
 
 
 static n_token_type_t
 compute_token_type_from_keyword(const char* keyword) {
-	int i = 0;
-
-	while (true) {
-		const char *test_keyword = KEYWORD_TABLE[i].keyword;
-		if (test_keyword == NULL || strcmp(test_keyword, keyword) == 0) {
-			return KEYWORD_TABLE[i].token_type;
-		}
-		else i++;
-	}
+	return compute_token_type_from_table(keyword, KEYWORD_TABLE);
 }
 
 static n_token_type_t
@@ -289,7 +318,7 @@ compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
 		case S_REGISTER_LEAD: /* fall-through */
 		case S_IDENTIFIER:
-			return N_TK_IDENTIFIER;
+			return N_TK_UNRECOGNIZED_OPCODE;
 		case S_LEADING_ZERO: /* fall-through */
 		case S_DECIMAL_NUMBER:
 			return N_TK_DEC_INTEGER;

@@ -43,72 +43,72 @@ TEST(ignores_only_spaces) {
 
 TEST(reads_single_character_identifier) {
 	WITH_STREAM("h");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "h");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "h");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_word_identifier) {
 	WITH_STREAM("hello");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "hello");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_case_sensitive_identifier) {
 	WITH_STREAM("hElLo");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "hElLo");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "hElLo");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_identifier_with_digits) {
 	WITH_STREAM("h1234");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "h1234");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "h1234");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_identifier_with_hyphen) {
 	WITH_STREAM("hello-world");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello-world");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "hello-world");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_identifier_with_starting_local_register_lead) {
 	WITH_STREAM("Lambda");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "Lambda");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "Lambda");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_identifier_with_starting_global_register_lead) {
 	WITH_STREAM("Gambling");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "Gambling");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "Gambling");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_identifier_with_starting_constant_register_lead) {
 	WITH_STREAM("Command");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "Command");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "Command");
 	ASSERT_EOF();
 }
 
 
 TEST(ignores_spaces) {
 	WITH_STREAM(" \n\t h1234 \t\n ");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "h1234");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "h1234");
 	ASSERT_EOF();
 }
 
 
 TEST(reads_many_identifiers) {
 	WITH_STREAM("  hello world-o \t g00   ");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "hello");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "world-o");
-	ASSERT_TOKEN(N_TK_IDENTIFIER, "g00");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "hello");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "world-o");
+	ASSERT_TOKEN(N_TK_UNRECOGNIZED_OPCODE, "g00");
 	ASSERT_EOF();
 }
 
@@ -347,6 +347,133 @@ TEST(reads_label_reference) {
 	ASSERT_TOKEN(N_TK_LABEL, "@the-label");
 	ASSERT_EOF();
 }
+
+
+TEST(reads_op_move) {
+	WITH_STREAM("move");
+	ASSERT_TOKEN(N_TK_OP_MOVE, "move");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_global_ref) {
+	WITH_STREAM("global-ref");
+	ASSERT_TOKEN(N_TK_OP_GLOBAL_REF, "global-ref");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_global_set) {
+	WITH_STREAM("global-set");
+	ASSERT_TOKEN(N_TK_OP_GLOBAL_SET, "global-set");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_jump) {
+	WITH_STREAM("jump");
+	ASSERT_TOKEN(N_TK_OP_JUMP, "jump");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_jump_if) {
+	WITH_STREAM("jump-if");
+	ASSERT_TOKEN(N_TK_OP_JUMP_IF, "jump-if");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_eq) {
+	WITH_STREAM("eq");
+	ASSERT_TOKEN(N_TK_OP_EQ, "eq");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_lt) {
+	WITH_STREAM("lt");
+	ASSERT_TOKEN(N_TK_OP_LT, "lt");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_le) {
+	WITH_STREAM("le");
+	ASSERT_TOKEN(N_TK_OP_LE, "le");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_gt) {
+	WITH_STREAM("gt");
+	ASSERT_TOKEN(N_TK_OP_GT, "gt");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_ge) {
+	WITH_STREAM("ge");
+	ASSERT_TOKEN(N_TK_OP_GE, "ge");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_not) {
+	WITH_STREAM("not");
+	ASSERT_TOKEN(N_TK_OP_NOT, "not");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_or) {
+	WITH_STREAM("or");
+	ASSERT_TOKEN(N_TK_OP_OR, "or");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_and) {
+	WITH_STREAM("and");
+	ASSERT_TOKEN(N_TK_OP_AND, "and");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_add) {
+	WITH_STREAM("add");
+	ASSERT_TOKEN(N_TK_OP_ADD, "add");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_sub) {
+	WITH_STREAM("sub");
+	ASSERT_TOKEN(N_TK_OP_SUB, "sub");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_mul) {
+	WITH_STREAM("mul");
+	ASSERT_TOKEN(N_TK_OP_MUL, "mul");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_div) {
+	WITH_STREAM("div");
+	ASSERT_TOKEN(N_TK_OP_DIV, "div");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_load_bool) {
+	WITH_STREAM("load-bool");
+	ASSERT_TOKEN(N_TK_OP_LOAD_BOOL, "load-bool");
+	ASSERT_EOF();
+}
+
 
 
 static void 
