@@ -342,6 +342,12 @@ TEST(reads_real_negative_number) {
 }
 
 
+TEST(reads_label_reference) {
+	WITH_STREAM("@the-label");
+	ASSERT_TOKEN(N_TK_LABEL, "@the-label");
+	ASSERT_EOF();
+}
+
 
 static void 
 WITH_STREAM(const char* str) {

@@ -47,6 +47,7 @@ typedef enum {
 	S_REAL,
 
 	S_IDENTIFIER,
+	S_LABEL_LEAD,
 	S_LABEL_DEFINITION,
 
 	S_REGISTER,
@@ -62,6 +63,8 @@ typedef enum {
 	S_UNKNOWN = -1
 } tk_state_t;
 
+static n_token_type_t
+adjust_identifier_token_type(const char* lexeme, bool is_label);
 
 static n_token_type_t
 compute_token_type_from_keyword(const char* keyword);
@@ -73,10 +76,13 @@ static void
 feed_store(store_t* buffer, char chr, bool* overflow);
 
 static tk_state_t
-handle_S_INIT(char chr, bool* handling_spaces);
+handle_S_INIT(char chr, bool* handling_spaces, bool* is_label);
 
 static tk_state_t
-handle_S_IDENTIFIER(char chr);
+handle_S_IDENTIFIER(char chr, bool is_label);
+
+static tk_state_t
+handle_S_LABEL_LEAD(char chr);
 
 static tk_state_t
 handle_S_LEADING_ZERO(char chr);
@@ -158,6 +164,7 @@ n_get_next_token(n_stream_t* stream) {
 	int consumed_size = 0;
 	char chr;
 	bool handling_spaces = false;
+	bool is_label = false;
 	tk_state_t state = S_INIT;
 
 	init_store(&store, buffer, LEXEME_BUFFER_SIZE);
@@ -168,10 +175,10 @@ n_get_next_token(n_stream_t* stream) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
 			case S_INIT:
-				state = handle_S_INIT(chr, &handling_spaces);
+				state = handle_S_INIT(chr, &handling_spaces, &is_label);
 				break;
 			case S_IDENTIFIER:
-				state = handle_S_IDENTIFIER(chr);
+				state = handle_S_IDENTIFIER(chr, is_label);
 				break;
 			case S_LEADING_ZERO:
 				state = handle_S_LEADING_ZERO(chr);
@@ -196,6 +203,9 @@ n_get_next_token(n_stream_t* stream) {
 				break;
 			case S_LABEL_DEFINITION:
 				state = S_UNKNOWN;
+				break;
+			case S_LABEL_LEAD:
+				state = handle_S_LABEL_LEAD(chr);
 				break;
 			case S_REGISTER_LEAD:
 				state = handle_S_REGISTER_LEAD(chr);
@@ -231,7 +241,10 @@ n_get_next_token(n_stream_t* stream) {
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
 		buffer[consumed_size] = '\0';
 		result.type = compute_token_type_from_state(state);
-		if (result.type == N_TK_UNRECOGNIZED_KW) {
+		if (result.type == N_TK_IDENTIFIER) {
+			result.type = adjust_identifier_token_type(buffer, is_label);
+		}
+		else if (result.type == N_TK_UNRECOGNIZED_KW) {
 			result.type = compute_token_type_from_keyword(buffer);
 		}
 		result.lexeme = strdup(buffer);
@@ -246,6 +259,15 @@ n_get_next_token(n_stream_t* stream) {
 		result.lexeme = buffer;
 	}
 	return result;
+}
+
+
+static n_token_type_t
+adjust_identifier_token_type(const char* lexeme, bool is_label) {
+	if (is_label) {
+		return N_TK_LABEL;
+	}
+	return N_TK_IDENTIFIER;
 }
 
 
@@ -302,7 +324,7 @@ feed_store(store_t* buffer, char chr, bool* overflow) {
 
 
 static tk_state_t
-handle_S_INIT(char chr, bool* handling_spaces) {
+handle_S_INIT(char chr, bool* handling_spaces, bool* is_label) {
 	if (chr == 'L' || chr == 'G' || chr == 'C') {
 		return S_REGISTER_LEAD;
 	}
@@ -322,16 +344,21 @@ handle_S_INIT(char chr, bool* handling_spaces) {
 		*handling_spaces = true;
 		return S_STRING_OPENED;
 	}
+	if (chr == '@') {
+		*is_label = true;
+		return S_LABEL_LEAD;
+	}
+
 	return S_UNKNOWN;
 }
 
 
 static tk_state_t
-handle_S_IDENTIFIER(char chr) {
+handle_S_IDENTIFIER(char chr, bool is_label) {
 	if (isalnum(chr) || chr == '-') {
 		return S_IDENTIFIER;
 	}
-	if (chr == ':') {
+	if (!is_label && chr == ':') {
 		return S_LABEL_DEFINITION;
 	}
 	return S_UNKNOWN;
@@ -454,6 +481,15 @@ handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete) {
 		return S_STRING_END;
 	}
 	return S_STRING_OPENED;
+}
+
+
+static tk_state_t
+handle_S_LABEL_LEAD(char chr) {
+	if (isalpha(chr)) {
+		return S_IDENTIFIER;
+	}
+	return S_UNKNOWN;
 }
 
 
