@@ -279,6 +279,13 @@ TEST(reads_keyword_double) {
 }
 
 
+TEST(reads_keyword_entry_point) {
+	WITH_STREAM(".entry-point");
+	ASSERT_TOKEN(N_TK_KW_ENTRY_POINT, ".entry-point");
+	ASSERT_EOF();
+}
+
+
 TEST(reads_keyword_globals_count) {
 	WITH_STREAM(".globals-count");
 	ASSERT_TOKEN(N_TK_KW_GLOBALS_COUNT, ".globals-count");

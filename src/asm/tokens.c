@@ -20,6 +20,7 @@ static lexeme_table_t KEYWORD_TABLE[] = {
 	{ ".code",          N_TK_KW_CODE },
 	{ ".constants",     N_TK_KW_CONSTANTS },
 	{ ".double",        N_TK_KW_DOUBLE },
+	{ ".entry-point",   N_TK_KW_ENTRY_POINT },
 	{ ".globals-count", N_TK_KW_GLOBALS_COUNT },
 	{ ".int32",         N_TK_KW_INT32 },
 	{ ".procedure",     N_TK_KW_PROCEDURE },
