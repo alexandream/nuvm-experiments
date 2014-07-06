@@ -16,20 +16,22 @@ static void
 END_STREAM();
 
 #define ASSERT_EOF() do {\
-	ni_token_t token = ni_get_next_token(STREAM);\
-	ASSERT_MSG(token.type == NI_TK_EOF,\
+	char buffer[256+1];\
+	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
+	ASSERT_MSG(token == NI_TK_EOF,\
 		MF("Expected EOF, got token type %u with lexeme %s.",\
-		   token.type, token.lexeme));\
+		   token, buffer));\
 } while(0)
 
 #define ASSERT_TOKEN(_type, _lexeme) do{\
+	char buffer[256+1];\
 	ni_token_type_t type = _type;\
 	const char* lexeme = _lexeme;\
-	ni_token_t token = ni_get_next_token(STREAM);\
-	ASSERT_MSG(token.type == type && STRINGS_EQUAL(token.lexeme, lexeme),\
+	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
+	ASSERT_MSG(token == type && STRINGS_EQUAL(buffer, lexeme),\
 		MF("Expected token type %d with lexeme %s. "\
 		   "Got token type %d with lexeme %s",\
-		   type, lexeme, token.type, token.lexeme));\
+		   type, lexeme, token, buffer));\
 } while(0)
 
 static ni_stream_t* STREAM = NULL;

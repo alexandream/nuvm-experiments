@@ -4,8 +4,6 @@
 
 #include "tokens.h"
 
-#include "common/polyfills/strdup.h"
-
 #ifndef LEXEME_BUFFER_SIZE
 #define LEXEME_BUFFER_SIZE 256
 #endif
@@ -175,11 +173,10 @@ ni_destroy_token(ni_token_t token) {
  *
  *    docs/diagrams/tokenizer-state-machine.{svg,dia}
  */
-ni_token_t
-ni_get_next_token(ni_stream_t* stream) {
-	char buffer[LEXEME_BUFFER_SIZE + 1];
+ni_token_type_t
+ni_get_next_token(ni_stream_t* stream, char* buffer, size_t buffer_last_pos) {
 	store_t store;
-	ni_token_t result;
+	ni_token_type_t result;
 	bool eof = false,
 	     overflow = false,
 	     complete = false;
@@ -189,7 +186,7 @@ ni_get_next_token(ni_stream_t* stream) {
 	bool is_label = false;
 	tk_state_t state = S_INIT;
 
-	init_store(&store, buffer, LEXEME_BUFFER_SIZE);
+	init_store(&store, buffer, buffer_last_pos);
 
 	ignore_whitespace(stream, &eof);
 	chr = ni_stream_peek(stream, &eof);
@@ -262,23 +259,20 @@ ni_get_next_token(ni_stream_t* stream) {
 	}
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
 		buffer[consumed_size] = '\0';
-		result.type = compute_token_type_from_state(state);
-		if (result.type == NI_TK_UNRECOGNIZED_OPCODE) {
-			result.type = adjust_identifier_token_type(buffer, is_label);
+		result = compute_token_type_from_state(state);
+		if (result == NI_TK_UNRECOGNIZED_OPCODE) {
+			result = adjust_identifier_token_type(buffer, is_label);
 		}
-		else if (result.type == NI_TK_UNRECOGNIZED_KW) {
-			result.type = compute_token_type_from_keyword(buffer);
+		else if (result == NI_TK_UNRECOGNIZED_KW) {
+			result = compute_token_type_from_keyword(buffer);
 		}
-		result.lexeme = strdup(buffer);
 	}
 	else if (eof) {
-		result.type = NI_TK_EOF;
-		result.lexeme = NULL;
+		result = NI_TK_EOF;
 	}
 	else /* overflow */ {
-		buffer[LEXEME_BUFFER_SIZE] = '\0';
-		result.type = NI_TK_TOO_BIG;
-		result.lexeme = buffer;
+		buffer[buffer_last_pos] = '\0';
+		result = NI_TK_TOO_BIG;
 	}
 	return result;
 }

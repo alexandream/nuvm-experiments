@@ -1,6 +1,8 @@
 #ifndef __N__ASM__TOKENS__H__
 #define __N__ASM__TOKENS__H__
 
+#include <stddef.h>
+
 #include "streams.h"
 
 typedef enum {
@@ -60,7 +62,6 @@ typedef enum {
 } ni_token_type_t;
 
 typedef struct ni_token_t ni_token_t;
-typedef struct ni_lexer_t ni_lexer_t;
 
 struct ni_token_t {
 	ni_token_type_t type;
@@ -71,7 +72,7 @@ struct ni_token_t {
 void
 ni_destroy_token(ni_token_t token);
 
-ni_token_t
-ni_get_next_token(ni_stream_t* stream);
+ni_token_type_t
+ni_get_next_token(ni_stream_t* stream, char* buffer, size_t bufsize);
 
 #endif
