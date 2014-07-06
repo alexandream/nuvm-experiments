@@ -269,6 +269,7 @@ ni_get_next_token(ni_stream_t* stream, char* buffer, size_t buffer_last_pos) {
 	}
 	else if (eof) {
 		result = NI_TK_EOF;
+		buffer[0] = '\0';
 	}
 	else /* overflow */ {
 		buffer[buffer_last_pos] = '\0';

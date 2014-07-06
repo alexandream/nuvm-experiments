@@ -9,11 +9,8 @@
 static bool
 STRINGS_EQUAL(const char* str1, const char* str2);
 
-static void 
-WITH_STREAM(const char* str);
-
 static void
-END_STREAM();
+WITH_STREAM(const char* str);
 
 #define ASSERT_EOF() do {\
 	char buffer[256+1];\
@@ -485,13 +482,6 @@ TEST(reads_op_load_bool) {
 
 
 
-static void 
-WITH_STREAM(const char* str) {
-	END_STREAM();
-	STREAM = ni_new_stream_from_string(str);
-}
-
-
 static void
 END_STREAM() {
 	if (STREAM) {
@@ -499,6 +489,14 @@ END_STREAM() {
 		STREAM = NULL;
 	}
 }
+
+
+static void
+WITH_STREAM(const char* str) {
+	END_STREAM();
+	STREAM = ni_new_stream_from_string(str);
+}
+
 
 static bool
 STRINGS_EQUAL(const char* str1, const char* str2) {

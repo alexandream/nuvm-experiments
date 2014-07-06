@@ -3,505 +3,102 @@
 
 #include "../../test-suite.h"
 
-#include "streams.h"
-#include "tokens.h"
+#include "lexers.h"
+
+static ni_lexer_t* LEXER = NULL;
+
+static void
+ADVANCE();
 
 static bool
 STRINGS_EQUAL(const char* str1, const char* str2);
 
-static void 
-WITH_STREAM(const char* str);
-
 static void
-END_STREAM();
+WITH_INPUT(const char* str);
 
-#define ASSERT_EOF() do {\
-	char buffer[256+1];\
-	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
-	ASSERT_MSG(token == NI_TK_EOF,\
-		MF("Expected EOF, got token type %u with lexeme %s.",\
-		   token, buffer));\
-} while(0)
 
-#define ASSERT_TOKEN(_type, _lexeme) do{\
-	char buffer[256+1];\
+#define ASSERT_PEEK(_type, _lexeme) do{\
 	ni_token_type_t type = _type;\
 	const char* lexeme = _lexeme;\
-	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
-	ASSERT_MSG(token == type && STRINGS_EQUAL(buffer, lexeme),\
+	ni_token_t token = ni_lexer_peek(LEXER);\
+	ASSERT_MSG(token.type == type && STRINGS_EQUAL(token.lexeme, lexeme),\
 		MF("Expected token type %d with lexeme %s. "\
 		   "Got token type %d with lexeme %s",\
-		   type, lexeme, token, buffer));\
+		   type, lexeme, token.type, token.lexeme));\
 } while(0)
 
-static ni_stream_t* STREAM = NULL;
 
-
-TEST(ignores_only_spaces) {
-	WITH_STREAM("  \n \t \n \n \t  ");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_single_character_identifier) {
-	WITH_STREAM("h");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "h");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_word_identifier) {
-	WITH_STREAM("hello");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "hello");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_case_sensitive_identifier) {
-	WITH_STREAM("hElLo");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "hElLo");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_identifier_with_digits) {
-	WITH_STREAM("h1234");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "h1234");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_identifier_with_hyphen) {
-	WITH_STREAM("hello-world");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "hello-world");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_identifier_with_starting_local_register_lead) {
-	WITH_STREAM("Lambda");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "Lambda");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_identifier_with_starting_global_register_lead) {
-	WITH_STREAM("Gambling");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "Gambling");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_identifier_with_starting_constant_register_lead) {
-	WITH_STREAM("Command");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "Command");
-	ASSERT_EOF();
-}
-
-
-TEST(ignores_spaces) {
-	WITH_STREAM(" \n\t h1234 \t\n ");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "h1234");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_many_identifiers) {
-	WITH_STREAM("  hello world-o \t g00   ");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "hello");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "world-o");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_OPCODE, "g00");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_zero_decimal_integer) {
-	WITH_STREAM("  0 ");
-	ASSERT_TOKEN(NI_TK_DEC_INTEGER, "0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_decimal_integer_with_leading_zero) {
-	WITH_STREAM(" 01234 ");
-	ASSERT_TOKEN(NI_TK_DEC_INTEGER, "01234");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_decimal_integer) {
-	WITH_STREAM(" 10588 ");
-	ASSERT_TOKEN(NI_TK_DEC_INTEGER, "10588");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_negative_decimal_integer) {
-	WITH_STREAM("-123456789");
-	ASSERT_TOKEN(NI_TK_DEC_INTEGER, "-123456789");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_single_digit_decimal_integer) {
-	WITH_STREAM("8");
-	ASSERT_TOKEN(NI_TK_DEC_INTEGER, "8");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_hexadecimal_integer) {
-	WITH_STREAM("0x12345678");
-	ASSERT_TOKEN(NI_TK_HEX_INTEGER, "0x12345678");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_hexadecimal_integer_high_digits) {
-	WITH_STREAM("0xdeadbeef");
-	ASSERT_TOKEN(NI_TK_HEX_INTEGER, "0xdeadbeef");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_hexadecimal_integer_case_sensitive_high_digits) {
-	WITH_STREAM("0xDeadBeef");
-	ASSERT_TOKEN(NI_TK_HEX_INTEGER, "0xDeadBeef");
-	ASSERT_EOF();
-}
-
-TEST(reads_hexadecimal_single_digit) {
-	WITH_STREAM("0xA");
-	ASSERT_TOKEN(NI_TK_HEX_INTEGER, "0xA");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_empty_string) {
-	WITH_STREAM("\"\"");
-	ASSERT_TOKEN(NI_TK_STRING, "\"\"");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_string) {
-	WITH_STREAM("\"hello\"");
-	ASSERT_TOKEN(NI_TK_STRING, "\"hello\"");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_string_with_spaces) {
-	WITH_STREAM("\"  hello, world   \"");
-	ASSERT_TOKEN(NI_TK_STRING, "\"  hello, world   \"");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_string_with_inner_quotes) {
-	WITH_STREAM("\"  hello, \\\"world  \"");
-	ASSERT_TOKEN(NI_TK_STRING, "\"  hello, \\\"world  \"");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_label_def) {
-	WITH_STREAM("my-label:");
-	ASSERT_TOKEN(NI_TK_LABEL_DEF, "my-label:");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_local_register_reference_zero) {
-	WITH_STREAM("L:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "L:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_global_register_reference_zero) {
-	WITH_STREAM("G:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "G:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_constant_register_reference_zero) {
-	WITH_STREAM("C:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "C:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_local_register_reference) {
-	WITH_STREAM("L:1234");
-	ASSERT_TOKEN(NI_TK_REGISTER, "L:1234");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_global_register_reference) {
-	WITH_STREAM("G:4321");
-	ASSERT_TOKEN(NI_TK_REGISTER, "G:4321");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_constant_register_reference) {
-	WITH_STREAM("C:987");
-	ASSERT_TOKEN(NI_TK_REGISTER, "C:987");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_character) {
-	WITH_STREAM(".character");
-	ASSERT_TOKEN(NI_TK_KW_CHARACTER, ".character");
-	ASSERT_EOF();
-}
-
-TEST(reads_keyword_code) {
-	WITH_STREAM(".code");
-	ASSERT_TOKEN(NI_TK_KW_CODE, ".code");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_constants) {
-	WITH_STREAM(".constants");
-	ASSERT_TOKEN(NI_TK_KW_CONSTANTS, ".constants");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_double) {
-	WITH_STREAM(".double");
-	ASSERT_TOKEN(NI_TK_KW_DOUBLE, ".double");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_entry_point) {
-	WITH_STREAM(".entry-point");
-	ASSERT_TOKEN(NI_TK_KW_ENTRY_POINT, ".entry-point");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_globals_count) {
-	WITH_STREAM(".globals-count");
-	ASSERT_TOKEN(NI_TK_KW_GLOBALS_COUNT, ".globals-count");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_int32) {
-	WITH_STREAM(".int32");
-	ASSERT_TOKEN(NI_TK_KW_INT32, ".int32");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_procedure) {
-	WITH_STREAM(".procedure");
-	ASSERT_TOKEN(NI_TK_KW_PROCEDURE, ".procedure");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_string) {
-	WITH_STREAM(".string");
-	ASSERT_TOKEN(NI_TK_KW_STRING, ".string");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_keyword_version) {
-	WITH_STREAM(".version");
-	ASSERT_TOKEN(NI_TK_KW_VERSION, ".version");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_unrecognized_keyword) {
-	WITH_STREAM(".whatever-we-want-2");
-	ASSERT_TOKEN(NI_TK_UNRECOGNIZED_KW, ".whatever-we-want-2");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_real_zero) {
-	WITH_STREAM("0.0");
-	ASSERT_TOKEN(NI_TK_REAL, "0.0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_real_positive_number) {
-	WITH_STREAM("3.1415927");
-	ASSERT_TOKEN(NI_TK_REAL, "3.1415927");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_real_negative_number) {
-	WITH_STREAM("-10.588");
-	ASSERT_TOKEN(NI_TK_REAL, "-10.588");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_label_reference) {
-	WITH_STREAM("@the-label");
-	ASSERT_TOKEN(NI_TK_LABEL, "@the-label");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_move) {
-	WITH_STREAM("move");
-	ASSERT_TOKEN(NI_TK_OP_MOVE, "move");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_global_ref) {
-	WITH_STREAM("global-ref");
-	ASSERT_TOKEN(NI_TK_OP_GLOBAL_REF, "global-ref");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_global_set) {
-	WITH_STREAM("global-set");
-	ASSERT_TOKEN(NI_TK_OP_GLOBAL_SET, "global-set");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_jump) {
-	WITH_STREAM("jump");
-	ASSERT_TOKEN(NI_TK_OP_JUMP, "jump");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_jump_if) {
-	WITH_STREAM("jump-if");
-	ASSERT_TOKEN(NI_TK_OP_JUMP_IF, "jump-if");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_eq) {
-	WITH_STREAM("eq");
-	ASSERT_TOKEN(NI_TK_OP_EQ, "eq");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_lt) {
-	WITH_STREAM("lt");
-	ASSERT_TOKEN(NI_TK_OP_LT, "lt");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_le) {
-	WITH_STREAM("le");
-	ASSERT_TOKEN(NI_TK_OP_LE, "le");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_gt) {
-	WITH_STREAM("gt");
-	ASSERT_TOKEN(NI_TK_OP_GT, "gt");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_op_ge) {
-	WITH_STREAM("ge");
-	ASSERT_TOKEN(NI_TK_OP_GE, "ge");
-	ASSERT_EOF();
+TEARDOWN {
+	if (LEXER != NULL) {
+		ni_destroy_lexer(LEXER);
+		LEXER = NULL;
+	}
 }
 
 
-TEST(reads_op_not) {
-	WITH_STREAM("not");
-	ASSERT_TOKEN(NI_TK_OP_NOT, "not");
-	ASSERT_EOF();
+TEST(peek_reads_first_token) {
+	WITH_INPUT("hello");
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "hello");
 }
 
 
-TEST(reads_op_or) {
-	WITH_STREAM("or");
-	ASSERT_TOKEN(NI_TK_OP_OR, "or");
-	ASSERT_EOF();
+TEST(peek_reads_eof_on_empty) {
+	WITH_INPUT("");
+	ASSERT_PEEK(NI_TK_EOF, "");
 }
 
 
-TEST(reads_op_and) {
-	WITH_STREAM("and");
-	ASSERT_TOKEN(NI_TK_OP_AND, "and");
-	ASSERT_EOF();
+TEST(double_peek_returns_first_token_twice) {
+	WITH_INPUT("hello world");
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "hello");
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "hello");
 }
 
 
-TEST(reads_op_add) {
-	WITH_STREAM("add");
-	ASSERT_TOKEN(NI_TK_OP_ADD, "add");
-	ASSERT_EOF();
+TEST(peek_advance_peek_reads_first_two_tokens) {
+	WITH_INPUT("hello world");
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "hello");
+	ADVANCE();
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "world");
 }
 
 
-TEST(reads_op_sub) {
-	WITH_STREAM("sub");
-	ASSERT_TOKEN(NI_TK_OP_SUB, "sub");
-	ASSERT_EOF();
+TEST(advance_peek_reads_second_token) {
+	WITH_INPUT("hello world");
+	ADVANCE();
+	ASSERT_PEEK(NI_TK_UNRECOGNIZED_OPCODE, "world");
 }
 
 
-TEST(reads_op_mul) {
-	WITH_STREAM("mul");
-	ASSERT_TOKEN(NI_TK_OP_MUL, "mul");
-	ASSERT_EOF();
+TEST(peek_reads_eof_after_advancing_to_end) {
+	WITH_INPUT("hello");
+	ADVANCE();
+	ASSERT_PEEK(NI_TK_EOF, "");
 }
 
 
-TEST(reads_op_div) {
-	WITH_STREAM("div");
-	ASSERT_TOKEN(NI_TK_OP_DIV, "div");
-	ASSERT_EOF();
+TEST(peek_reads_eof_after_advancing_past_end) {
+	WITH_INPUT("hello");
+	ADVANCE();
+	ADVANCE();
+	ASSERT_PEEK(NI_TK_EOF, "");
 }
 
-
-TEST(reads_op_load_bool) {
-	WITH_STREAM("load-bool");
-	ASSERT_TOKEN(NI_TK_OP_LOAD_BOOL, "load-bool");
-	ASSERT_EOF();
-}
-
-
-
-static void 
-WITH_STREAM(const char* str) {
-	END_STREAM();
-	STREAM = ni_new_stream_from_string(str);
-}
 
 
 static void
-END_STREAM() {
-	if (STREAM) {
-		ni_destroy_stream(STREAM);
-		STREAM = NULL;
-	}
+ADVANCE() {
+	ni_lexer_advance(LEXER);
 }
+
 
 static bool
 STRINGS_EQUAL(const char* str1, const char* str2) {
 	return (str1 == NULL && str2 == NULL) ||
 	       (str1 != NULL && str2 != NULL && strcmp(str1, str2) == 0);
+}
+
+static void
+WITH_INPUT(const char* str) {
+	LEXER = ni_new_lexer(ni_new_stream_from_string(str));
 }
