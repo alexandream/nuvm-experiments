@@ -1,76 +1,77 @@
-#ifndef __N__ASM__TOKENIZER__H__
-#define __N__ASM__TOKENIZER__H__
+#ifndef __N__ASM__TOKENS__H__
+#define __N__ASM__TOKENS__H__
 
 #include "streams.h"
 
 typedef enum {
-	N_TK_EOF = 0,
-	N_TK_TOO_BIG,
+	NI_TK_EOF = 0,
+	NI_TK_TOO_BIG,
 
-	N_TK_DEC_INTEGER,
-	N_TK_HEX_INTEGER,
-	N_TK_REAL,
-	N_TK_UNRECOGNIZED_OPCODE,
-	N_TK_LABEL,
-	N_TK_LABEL_DEF,
-	N_TK_REGISTER,
-	N_TK_STRING,
+	NI_TK_DEC_INTEGER,
+	NI_TK_HEX_INTEGER,
+	NI_TK_REAL,
+	NI_TK_UNRECOGNIZED_OPCODE,
+	NI_TK_LABEL,
+	NI_TK_LABEL_DEF,
+	NI_TK_REGISTER,
+	NI_TK_STRING,
 
-	N_TK_KW_CHARACTER,
-	N_TK_KW_CODE,
-	N_TK_KW_CONSTANTS,
-	N_TK_KW_DOUBLE,
-	N_TK_KW_ENTRY_POINT,
-	N_TK_KW_GLOBALS_COUNT,
-	N_TK_KW_INT32,
-	N_TK_KW_PROCEDURE,
-	N_TK_KW_STRING,
-	N_TK_KW_VERSION,
+	NI_TK_KW_CHARACTER,
+	NI_TK_KW_CODE,
+	NI_TK_KW_CONSTANTS,
+	NI_TK_KW_DOUBLE,
+	NI_TK_KW_ENTRY_POINT,
+	NI_TK_KW_GLOBALS_COUNT,
+	NI_TK_KW_INT32,
+	NI_TK_KW_PROCEDURE,
+	NI_TK_KW_STRING,
+	NI_TK_KW_VERSION,
 
-	N_TK_UNRECOGNIZED_KW,
+	NI_TK_UNRECOGNIZED_KW,
 
-	N_TK_OP_GLOBAL_REF,
-	N_TK_OP_GLOBAL_SET,
-	N_TK_OP_MOVE,
+	NI_TK_OP_GLOBAL_REF,
+	NI_TK_OP_GLOBAL_SET,
+	NI_TK_OP_MOVE,
 
-	N_TK_OP_JUMP,
-	N_TK_OP_JUMP_IF,
+	NI_TK_OP_JUMP,
+	NI_TK_OP_JUMP_IF,
 
-	N_TK_OP_EQ,
-	N_TK_OP_GE,
-	N_TK_OP_GT,
-	N_TK_OP_LE,
-	N_TK_OP_LT,
+	NI_TK_OP_EQ,
+	NI_TK_OP_GE,
+	NI_TK_OP_GT,
+	NI_TK_OP_LE,
+	NI_TK_OP_LT,
 
-	N_TK_OP_NOT,
+	NI_TK_OP_NOT,
 
-	N_TK_OP_AND,
-	N_TK_OP_OR,
+	NI_TK_OP_AND,
+	NI_TK_OP_OR,
 
-	N_TK_OP_ADD,
-	N_TK_OP_DIV,
-	N_TK_OP_MUL,
-	N_TK_OP_SUB,
+	NI_TK_OP_ADD,
+	NI_TK_OP_DIV,
+	NI_TK_OP_MUL,
+	NI_TK_OP_SUB,
 
-	N_TK_OP_LOAD_BOOL,
+	NI_TK_OP_LOAD_BOOL,
 
-	N_TK_OP_RETURN,
+	NI_TK_OP_RETURN,
 
-	N_TK_UNKNOWN = -1
-} n_token_type_t;
+	NI_TK_UNKNOWN = -1
+} ni_token_type_t;
 
-typedef struct n_token_t n_token_t;
+typedef struct ni_token_t ni_token_t;
+typedef struct ni_lexer_t ni_lexer_t;
 
-struct n_token_t {
-	n_token_type_t type;
+struct ni_token_t {
+	ni_token_type_t type;
 	char* lexeme;
 };
 
 
 void
-n_destroy_token(n_token_t token);
+ni_destroy_token(ni_token_t token);
 
-n_token_t
-n_get_next_token(n_stream_t* stream);
+ni_token_t
+ni_get_next_token(ni_stream_t* stream);
 
 #endif

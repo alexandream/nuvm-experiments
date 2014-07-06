@@ -11,7 +11,7 @@ _safe_read(void* dst, uint8_t* src, int64_t size, int64_t* i, size_t part_size);
 
 
 uint8_t
-n_read_byte(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_byte(uint8_t* stream, int64_t size, int64_t* i) {
 	uint8_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(uint8_t));
 	return result;
@@ -19,7 +19,7 @@ n_read_byte(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_byte(uint8_t* dst, int64_t size, int64_t* index, uint8_t input) {
+ni_write_byte(uint8_t* dst, int64_t size, int64_t* index, uint8_t input) {
 	dst[*index] = input;
 	*index += sizeof(uint8_t);
 	return sizeof(uint8_t);
@@ -27,7 +27,7 @@ n_write_byte(uint8_t* dst, int64_t size, int64_t* index, uint8_t input) {
 
 
 uint16_t
-n_read_uint16(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_uint16(uint8_t* stream, int64_t size, int64_t* i) {
 	uint16_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(uint16_t));
 	return result;
@@ -35,7 +35,7 @@ n_read_uint16(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_uint16(uint8_t* dst, int64_t size, int64_t* index, uint16_t input) {
+ni_write_uint16(uint8_t* dst, int64_t size, int64_t* index, uint16_t input) {
 	memcpy(dst + *index, (void*) &input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);
@@ -43,7 +43,7 @@ n_write_uint16(uint8_t* dst, int64_t size, int64_t* index, uint16_t input) {
 
 
 int16_t
-n_read_int16(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_int16(uint8_t* stream, int64_t size, int64_t* i) {
 	int16_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(int16_t));
 	return result;
@@ -51,7 +51,7 @@ n_read_int16(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_int16(uint8_t* dst, int64_t size, int64_t* index, int16_t input) {
+ni_write_int16(uint8_t* dst, int64_t size, int64_t* index, int16_t input) {
 	memcpy(dst + *index, (void*) &input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);
@@ -59,7 +59,7 @@ n_write_int16(uint8_t* dst, int64_t size, int64_t* index, int16_t input) {
 
 
 int32_t
-n_read_int32(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_int32(uint8_t* stream, int64_t size, int64_t* i) {
 	int32_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(result));
 	return result;
@@ -67,7 +67,7 @@ n_read_int32(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_int32(uint8_t* dst, int64_t size, int64_t* index, int32_t input) {
+ni_write_int32(uint8_t* dst, int64_t size, int64_t* index, int32_t input) {
 	memcpy(dst + *index, (void*)&input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);
@@ -75,7 +75,7 @@ n_write_int32(uint8_t* dst, int64_t size, int64_t* index, int32_t input) {
 
 
 uint32_t
-n_read_uint32(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_uint32(uint8_t* stream, int64_t size, int64_t* i) {
 	uint32_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(result));
 	return result;
@@ -83,7 +83,7 @@ n_read_uint32(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_uint32(uint8_t* dst, int64_t size, int64_t* index, uint32_t input) {
+ni_write_uint32(uint8_t* dst, int64_t size, int64_t* index, uint32_t input) {
 	memcpy(dst + *index, (void*)&input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);
@@ -91,7 +91,7 @@ n_write_uint32(uint8_t* dst, int64_t size, int64_t* index, uint32_t input) {
 
 
 int64_t
-n_read_int64(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_int64(uint8_t* stream, int64_t size, int64_t* i) {
 	int64_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(result));
 	return result;
@@ -99,7 +99,7 @@ n_read_int64(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_int64(uint8_t* dst, int64_t size, int64_t* index, int64_t input) {
+ni_write_int64(uint8_t* dst, int64_t size, int64_t* index, int64_t input) {
 	memcpy(dst + *index, (void*)&input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);
@@ -107,7 +107,7 @@ n_write_int64(uint8_t* dst, int64_t size, int64_t* index, int64_t input) {
 
 
 uint64_t
-n_read_uint64(uint8_t* stream, int64_t size, int64_t* i) {
+ni_read_uint64(uint8_t* stream, int64_t size, int64_t* i) {
 	uint64_t result;
 	_safe_read((void*) &result, (void*) stream, size, i, sizeof(result));
 	return result;
@@ -115,7 +115,7 @@ n_read_uint64(uint8_t* stream, int64_t size, int64_t* i) {
 
 
 uint8_t
-n_write_uint64(uint8_t* dst, int64_t size, int64_t* index, uint64_t input) {
+ni_write_uint64(uint8_t* dst, int64_t size, int64_t* index, uint64_t input) {
 	memcpy(dst + *index, (void*)&input, sizeof(input));
 	*index += sizeof(input);
 	return sizeof(input);

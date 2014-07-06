@@ -12,43 +12,43 @@
 
 typedef struct {
 	char* lexeme;
-	n_token_type_t token_type;
+	ni_token_type_t token_type;
 } lexeme_table_t;
 
 static lexeme_table_t KEYWORD_TABLE[] = {
-	{ ".character",     N_TK_KW_CHARACTER },
-	{ ".code",          N_TK_KW_CODE },
-	{ ".constants",     N_TK_KW_CONSTANTS },
-	{ ".double",        N_TK_KW_DOUBLE },
-	{ ".entry-point",   N_TK_KW_ENTRY_POINT },
-	{ ".globals-count", N_TK_KW_GLOBALS_COUNT },
-	{ ".int32",         N_TK_KW_INT32 },
-	{ ".procedure",     N_TK_KW_PROCEDURE },
-	{ ".string",        N_TK_KW_STRING },
-	{ ".version",       N_TK_KW_VERSION },
-	{   NULL,           N_TK_UNRECOGNIZED_KW }
+	{ ".character",     NI_TK_KW_CHARACTER },
+	{ ".code",          NI_TK_KW_CODE },
+	{ ".constants",     NI_TK_KW_CONSTANTS },
+	{ ".double",        NI_TK_KW_DOUBLE },
+	{ ".entry-point",   NI_TK_KW_ENTRY_POINT },
+	{ ".globals-count", NI_TK_KW_GLOBALS_COUNT },
+	{ ".int32",         NI_TK_KW_INT32 },
+	{ ".procedure",     NI_TK_KW_PROCEDURE },
+	{ ".string",        NI_TK_KW_STRING },
+	{ ".version",       NI_TK_KW_VERSION },
+	{   NULL,           NI_TK_UNRECOGNIZED_KW }
 };
 
 static lexeme_table_t OPCODE_TABLE[] = {
-	{ "move",       N_TK_OP_MOVE },
-	{ "global-ref", N_TK_OP_GLOBAL_REF },
-	{ "global-set", N_TK_OP_GLOBAL_SET },
-	{ "jump",       N_TK_OP_JUMP },
-	{ "jump-if",    N_TK_OP_JUMP_IF },
-	{ "eq",         N_TK_OP_EQ },
-	{ "lt",         N_TK_OP_LT },
-	{ "le",         N_TK_OP_LE },
-	{ "gt",         N_TK_OP_GT },
-	{ "ge",         N_TK_OP_GE },
-	{ "not",        N_TK_OP_NOT },
-	{ "or",         N_TK_OP_OR },
-	{ "and",        N_TK_OP_AND },
-	{ "add",        N_TK_OP_ADD },
-	{ "sub",        N_TK_OP_SUB },
-	{ "mul",        N_TK_OP_MUL },
-	{ "div",        N_TK_OP_DIV },
-	{ "load-bool",  N_TK_OP_LOAD_BOOL },
-	{  NULL,        N_TK_UNRECOGNIZED_OPCODE }
+	{ "move",       NI_TK_OP_MOVE },
+	{ "global-ref", NI_TK_OP_GLOBAL_REF },
+	{ "global-set", NI_TK_OP_GLOBAL_SET },
+	{ "jump",       NI_TK_OP_JUMP },
+	{ "jump-if",    NI_TK_OP_JUMP_IF },
+	{ "eq",         NI_TK_OP_EQ },
+	{ "lt",         NI_TK_OP_LT },
+	{ "le",         NI_TK_OP_LE },
+	{ "gt",         NI_TK_OP_GT },
+	{ "ge",         NI_TK_OP_GE },
+	{ "not",        NI_TK_OP_NOT },
+	{ "or",         NI_TK_OP_OR },
+	{ "and",        NI_TK_OP_AND },
+	{ "add",        NI_TK_OP_ADD },
+	{ "sub",        NI_TK_OP_SUB },
+	{ "mul",        NI_TK_OP_MUL },
+	{ "div",        NI_TK_OP_DIV },
+	{ "load-bool",  NI_TK_OP_LOAD_BOOL },
+	{  NULL,        NI_TK_UNRECOGNIZED_OPCODE }
 };
 typedef struct {
 	char* store;
@@ -85,13 +85,13 @@ typedef enum {
 	S_UNKNOWN = -1
 } tk_state_t;
 
-static n_token_type_t
+static ni_token_type_t
 adjust_identifier_token_type(const char* lexeme, bool is_label);
 
-static n_token_type_t
+static ni_token_type_t
 compute_token_type_from_keyword(const char* keyword);
 
-static n_token_type_t
+static ni_token_type_t
 compute_token_type_from_state(tk_state_t state);
 
 static void
@@ -140,14 +140,14 @@ static tk_state_t
 handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete);
 
 static void
-ignore_whitespace(n_stream_t* stream, bool* end);
+ignore_whitespace(ni_stream_t* stream, bool* end);
 
 static void
 init_store(store_t* buffer, char* store, uint16_t capacity);
 
 
 void
-n_destroy_token(n_token_t token) {
+ni_destroy_token(ni_token_t token) {
 	if (token.lexeme != NULL) {
 		free(token.lexeme);
 	}
@@ -157,14 +157,14 @@ n_destroy_token(n_token_t token) {
 /* The function below implements the following lexer, in POSIX Extended Regular
  * Expressions Syntax and top-to-bottom precedence:
  *
- *  [CLG]:[0-9]+                             N_TK_REGISTER
- *  [a-zA-Z][a-zA-Z0-9-]*                    N_TK_UNRECOGNIZED_OPCODE
- *  [a-zA-Z][a-zA-Z0-9-]*:                   N_TK_LABEL_DEF
- *  "(\\.|[^\"])"                            N_TK_STRING
- *  0|(-?[1-9][0-9]*)                        N_TK_DEC_INTEGER
- *  0x[0-9A-F]+                              N_TK_HEX_INTEGER
- *  (0|(-?[1-9][0-9]*))\.[0-9]+              N_TK_REAL
- *  \..*                                     N_TK_UNRECOGNIZED_KW
+ *  [CLG]:[0-9]+                             NI_TK_REGISTER
+ *  [a-zA-Z][a-zA-Z0-9-]*                    NI_TK_UNRECOGNIZED_OPCODE
+ *  [a-zA-Z][a-zA-Z0-9-]*:                   NI_TK_LABEL_DEF
+ *  "(\\.|[^\"])"                            NI_TK_STRING
+ *  0|(-?[1-9][0-9]*)                        NI_TK_DEC_INTEGER
+ *  0x[0-9A-F]+                              NI_TK_HEX_INTEGER
+ *  (0|(-?[1-9][0-9]*))\.[0-9]+              NI_TK_REAL
+ *  \..*                                     NI_TK_UNRECOGNIZED_KW
  *
  *  Unrecognized Keywords are further passed into the function
  *  compute_token_type_from_keyword to decide which valid keyword token, if any
@@ -175,11 +175,11 @@ n_destroy_token(n_token_t token) {
  *
  *    docs/diagrams/tokenizer-state-machine.{svg,dia}
  */
-n_token_t
-n_get_next_token(n_stream_t* stream) {
+ni_token_t
+ni_get_next_token(ni_stream_t* stream) {
 	char buffer[LEXEME_BUFFER_SIZE + 1];
 	store_t store;
-	n_token_t result;
+	ni_token_t result;
 	bool eof = false,
 	     overflow = false,
 	     complete = false;
@@ -192,7 +192,7 @@ n_get_next_token(n_stream_t* stream) {
 	init_store(&store, buffer, LEXEME_BUFFER_SIZE);
 
 	ignore_whitespace(stream, &eof);
-	chr = n_stream_peek(stream, &eof);
+	chr = ni_stream_peek(stream, &eof);
 	while (!eof && !overflow && !complete) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
@@ -252,9 +252,9 @@ n_get_next_token(n_stream_t* stream) {
 				break;
 		}
 		if (!complete) {
-			n_stream_read(stream, &eof);
+			ni_stream_read(stream, &eof);
 			consumed_size++;
-			chr = n_stream_peek(stream, &eof);
+			chr = ni_stream_peek(stream, &eof);
 			if (!handling_spaces && isspace(chr)) {
 				complete = true;
 			}
@@ -263,28 +263,28 @@ n_get_next_token(n_stream_t* stream) {
 	if ((eof && consumed_size > 0) || (!eof && !overflow)) {
 		buffer[consumed_size] = '\0';
 		result.type = compute_token_type_from_state(state);
-		if (result.type == N_TK_UNRECOGNIZED_OPCODE) {
+		if (result.type == NI_TK_UNRECOGNIZED_OPCODE) {
 			result.type = adjust_identifier_token_type(buffer, is_label);
 		}
-		else if (result.type == N_TK_UNRECOGNIZED_KW) {
+		else if (result.type == NI_TK_UNRECOGNIZED_KW) {
 			result.type = compute_token_type_from_keyword(buffer);
 		}
 		result.lexeme = strdup(buffer);
 	}
 	else if (eof) {
-		result.type = N_TK_EOF;
+		result.type = NI_TK_EOF;
 		result.lexeme = NULL;
 	}
 	else /* overflow */ {
 		buffer[LEXEME_BUFFER_SIZE] = '\0';
-		result.type = N_TK_TOO_BIG;
+		result.type = NI_TK_TOO_BIG;
 		result.lexeme = buffer;
 	}
 	return result;
 }
 
 
-static n_token_type_t
+static ni_token_type_t
 compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
 	int i = 0;
 
@@ -298,10 +298,10 @@ compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
 }
 
 
-static n_token_type_t
+static ni_token_type_t
 adjust_identifier_token_type(const char* lexeme, bool is_label) {
 	if (is_label) {
-		return N_TK_LABEL;
+		return NI_TK_LABEL;
 	}
 	else {
 		return compute_token_type_from_table(lexeme, OPCODE_TABLE);
@@ -309,34 +309,34 @@ adjust_identifier_token_type(const char* lexeme, bool is_label) {
 }
 
 
-static n_token_type_t
+static ni_token_type_t
 compute_token_type_from_keyword(const char* keyword) {
 	return compute_token_type_from_table(keyword, KEYWORD_TABLE);
 }
 
-static n_token_type_t
+static ni_token_type_t
 compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
 		case S_REGISTER_LEAD: /* fall-through */
 		case S_IDENTIFIER:
-			return N_TK_UNRECOGNIZED_OPCODE;
+			return NI_TK_UNRECOGNIZED_OPCODE;
 		case S_LEADING_ZERO: /* fall-through */
 		case S_DECIMAL_NUMBER:
-			return N_TK_DEC_INTEGER;
+			return NI_TK_DEC_INTEGER;
 		case S_REAL:
-			return N_TK_REAL;
+			return NI_TK_REAL;
 		case S_HEXADECIMAL_NUMBER:
-			return N_TK_HEX_INTEGER;
+			return NI_TK_HEX_INTEGER;
 		case S_LABEL_DEFINITION:
-			return N_TK_LABEL_DEF;
+			return NI_TK_LABEL_DEF;
 		case S_STRING_END:
-			return N_TK_STRING;
+			return NI_TK_STRING;
 		case S_REGISTER:
-			return N_TK_REGISTER;
+			return NI_TK_REGISTER;
 		case S_KEYWORD:
-			return N_TK_UNRECOGNIZED_KW;
+			return NI_TK_UNRECOGNIZED_KW;
 		default:
-			return N_TK_UNKNOWN;
+			return NI_TK_UNKNOWN;
 	}
 }
 
@@ -524,11 +524,11 @@ handle_S_LABEL_LEAD(char chr) {
 
 
 static void
-ignore_whitespace(n_stream_t* stream, bool* end) {
-	char chr = n_stream_peek(stream, end);
+ignore_whitespace(ni_stream_t* stream, bool* end) {
+	char chr = ni_stream_peek(stream, end);
 	while (isspace(chr) && !(*end)) {
-		n_stream_read(stream, end);
-		chr = n_stream_peek(stream, end);
+		ni_stream_read(stream, end);
+		chr = ni_stream_peek(stream, end);
 	}
 }
 

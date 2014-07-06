@@ -3,27 +3,27 @@
 
 #include "common/std-types.h"
 
-typedef struct n_stream_t n_stream_t;
+typedef struct ni_stream_t ni_stream_t;
 
 void
-n_destroy_stream(n_stream_t* self);
+ni_destroy_stream(ni_stream_t* self);
 
-n_stream_t*
-n_new_stream_from_path(const char* path);
+ni_stream_t*
+ni_new_stream_from_path(const char* path);
 
-n_stream_t*
-n_new_stream_from_string(const char* string);
+ni_stream_t*
+ni_new_stream_from_string(const char* string);
 
 bool
-n_stream_eof(n_stream_t* self);
+ni_stream_eof(ni_stream_t* self);
 
 uint32_t
-n_stream_length(n_stream_t* self);
+ni_stream_length(ni_stream_t* self);
 
 char
-n_stream_peek(n_stream_t* self, bool* end);
+ni_stream_peek(ni_stream_t* self, bool* end);
 
 char
-n_stream_read(n_stream_t* self, bool* end);
+ni_stream_read(ni_stream_t* self, bool* end);
 
 #endif

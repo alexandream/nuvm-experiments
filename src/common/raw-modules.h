@@ -6,15 +6,15 @@
 #define MAGIC_MASK   0x000000FFFFFFFFFF
 #define MAGIC_NUMBER 0x0000004D56554E1B
 
-typedef struct n_raw_module_t n_raw_module_t;
-typedef struct n_module_descriptor_t n_module_descriptor_t;
-typedef struct n_constant_entry_t n_constant_entry_t;
+typedef struct ni_raw_module_t ni_raw_module_t;
+typedef struct ni_module_descriptor_t ni_module_descriptor_t;
+typedef struct ni_constant_entry_t ni_constant_entry_t;
 
 
-struct n_raw_module_t {
-	n_module_descriptor_t *descriptor;
+struct ni_raw_module_t {
+	ni_module_descriptor_t *descriptor;
 
-	n_constant_entry_t *constants_index;
+	ni_constant_entry_t *constants_index;
 
 	uint8_t *data_segment;
 	uint8_t *code_segment;
@@ -22,7 +22,7 @@ struct n_raw_module_t {
 };
 
 
-struct n_module_descriptor_t {
+struct ni_module_descriptor_t {
 	uint64_t header;
 	uint64_t host_descriptor;
 
@@ -35,20 +35,20 @@ struct n_module_descriptor_t {
 } __attribute__((packed));
 
 
-struct n_constant_entry_t {
+struct ni_constant_entry_t {
 	uint8_t type_id;
 	uint32_t data_index;
 } __attribute__((packed));
 
 
 static bool
-n_is_valid_header(uint64_t header) {
+ni_is_valid_header(uint64_t header) {
 	return (header & MAGIC_MASK) == MAGIC_NUMBER;
 }
 
 
 static void
-n_read_version(uint64_t header, uint8_t* major, uint8_t* minor, uint8_t* rev) {
+ni_read_version(uint64_t header, uint8_t* major, uint8_t* minor, uint8_t* rev) {
 	*major = (uint8_t) (header >> 40);
 	*minor = (uint8_t) (header >> 48);
 	*rev   = (uint8_t) (header >> 56);
@@ -56,7 +56,7 @@ n_read_version(uint64_t header, uint8_t* major, uint8_t* minor, uint8_t* rev) {
 
 
 static uint64_t
-n_make_header(uint8_t major, uint8_t minor, uint8_t rev) {
+ni_make_header(uint8_t major, uint8_t minor, uint8_t rev) {
 	return MAGIC_NUMBER           |
 	       (uint64_t) rev << 56   |
 	       (uint64_t) minor << 48 |

@@ -375,8 +375,8 @@ static void
 _check_byte(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	int16_t result = n_read_byte(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_byte(OSTREAM, sizeof(OSTREAM), &j, result);
+	int16_t result = ni_read_byte(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_byte(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(uint8_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -386,8 +386,8 @@ static void
 _check_int16(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	int16_t result = n_read_int16(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_int16(OSTREAM, sizeof(OSTREAM), &j, result);
+	int16_t result = ni_read_int16(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_int16(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(int16_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -398,8 +398,8 @@ static void
 _check_uint16(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	uint16_t result = n_read_uint16(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_uint16(OSTREAM, sizeof(OSTREAM), &j, result);
+	uint16_t result = ni_read_uint16(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_uint16(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(uint16_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -410,8 +410,8 @@ static void
 _check_int32(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	int32_t result = n_read_int32(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_int32(OSTREAM, sizeof(OSTREAM), &j, result);
+	int32_t result = ni_read_int32(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_int32(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(int32_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -422,8 +422,8 @@ static void
 _check_uint32(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	uint32_t result = n_read_uint32(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_uint32(OSTREAM, sizeof(OSTREAM), &j, result);
+	uint32_t result = ni_read_uint32(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_uint32(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(uint32_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -434,8 +434,8 @@ static void
 _check_int64(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	int64_t result = n_read_int64(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
+	int64_t result = ni_read_int64(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(int64_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
@@ -446,8 +446,8 @@ static void
 _check_uint64(ATResult* r, int64_t i, int64_t j) {
 	int64_t initial_i = i;
 	int64_t initial_j = j;
-	uint64_t result = n_read_int64(ISTREAM, ISIZE, &i);
-	uint8_t size = n_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
+	uint64_t result = ni_read_int64(ISTREAM, ISIZE, &i);
+	uint8_t size = ni_write_int64(OSTREAM, sizeof(OSTREAM), &j, result);
 
 	uint8_t psize = sizeof(uint64_t);
 	_check_rw_asserts(r, i, j, initial_i, initial_j, size, psize);
