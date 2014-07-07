@@ -79,3 +79,8 @@ n_error_destroy(n_error_t* error) {
 		error_type->destroy_func(error);
 	}
 }
+
+bool
+n_error_ok(n_error_t* error) {
+	return error->type == 0;
+}

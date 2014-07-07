@@ -12,6 +12,8 @@ typedef struct {
 	void* data;
 } n_error_t;
 
+#define N_ERROR_INITIALIZER { 0, NULL }
+
 typedef const char* (*error_print_func_t)(n_error_t*);
 typedef void (*error_destroy_func_t)(n_error_t*);
 
@@ -30,5 +32,6 @@ n_error_print(n_error_t* error);
 void
 n_error_destroy(n_error_t* error);
 
-
+bool
+n_error_ok(n_error_t* error);
 #endif
