@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "common/polyfills/strdup.h"
 
-#include "lexers.h"
+#include "lexer.h"
 #define LEXEME_BUFFER_SIZE 256
 
 static char discard_buffer[LEXEME_BUFFER_SIZE+1];

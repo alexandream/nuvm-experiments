@@ -1,9 +1,9 @@
-#define SUITE_NAME Lexers
+#define SUITE_NAME Lexer
 #include <string.h>
 
 #include "../../test-suite.h"
 
-#include "lexers.h"
+#include "lexer.h"
 
 static ni_lexer_t* LEXER = NULL;
 
