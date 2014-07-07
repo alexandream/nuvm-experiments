@@ -32,19 +32,6 @@ ni_new_lexer(ni_stream_t* input) {
 	return self;
 }
 
-ni_token_t
-ni_lexer_peek(ni_lexer_t* self) {
-	ni_token_t result;
-	if (!self->has_cache) {
-		self->cache =
-			ni_get_next_token(self->input, self->buffer, LEXEME_BUFFER_SIZE);
-		self->has_cache = true;
-	}
-	result.type = self->cache;
-	result.lexeme = strdup(self->buffer);
-
-	return result;
-}
 
 void
 ni_lexer_advance(ni_lexer_t* self) {
@@ -56,3 +43,25 @@ ni_lexer_advance(ni_lexer_t* self) {
 	}
 }
 
+
+ni_token_type_t
+ni_lexer_peek(ni_lexer_t* self) {
+	if (!self->has_cache) {
+		self->cache =
+			ni_get_next_token(self->input, self->buffer, LEXEME_BUFFER_SIZE);
+		self->has_cache = true;
+	}
+	return self->cache;
+}
+
+
+ni_token_t
+ni_lexer_read(ni_lexer_t* self) {
+	ni_token_t result;
+	
+	result.type = ni_lexer_peek(self);
+	result.lexeme = strdup(self->buffer);
+
+	ni_lexer_advance(self);
+	return result;
+}

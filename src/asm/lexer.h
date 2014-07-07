@@ -12,10 +12,13 @@ ni_destroy_lexer(ni_lexer_t* self);
 ni_lexer_t*
 ni_new_lexer(ni_stream_t* input);
 
-ni_token_t
-ni_lexer_peek(ni_lexer_t* self);
-
 void
 ni_lexer_advance(ni_lexer_t* self);
+
+ni_token_type_t
+ni_lexer_peek(ni_lexer_t* self);
+
+ni_token_t
+ni_lexer_read(ni_lexer_t* self);
 
 #endif
