@@ -6,22 +6,22 @@
 
 static char discard_buffer[LEXEME_BUFFER_SIZE+1];
 
-struct ni_lexer_t {
-	ni_stream_t* input;
-	ni_token_type_t cache;
+struct NLexer {
+	NStream* input;
+	NTokenType cache;
 	bool has_cache;
 	char buffer[LEXEME_BUFFER_SIZE+1];
 };
 
 
 void
-ni_destroy_lexer(ni_lexer_t* self) {
+ni_destroy_lexer(NLexer* self) {
 	ni_destroy_stream(self->input);
 }
 
-ni_lexer_t*
-ni_new_lexer(ni_stream_t* input) {
-	ni_lexer_t* self = (ni_lexer_t*) malloc(sizeof(ni_lexer_t));
+NLexer*
+ni_new_lexer(NStream* input) {
+	NLexer* self = (NLexer*) malloc(sizeof(NLexer));
 	if (self == NULL) {
 		return NULL;
 	}
@@ -34,7 +34,7 @@ ni_new_lexer(ni_stream_t* input) {
 
 
 void
-ni_lexer_advance(ni_lexer_t* self) {
+ni_lexer_advance(NLexer* self) {
 	if (!self->has_cache) {
 		ni_get_next_token(self->input, discard_buffer, LEXEME_BUFFER_SIZE);
 	}
@@ -44,8 +44,8 @@ ni_lexer_advance(ni_lexer_t* self) {
 }
 
 
-ni_token_type_t
-ni_lexer_peek(ni_lexer_t* self) {
+NTokenType
+ni_lexer_peek(NLexer* self) {
 	if (!self->has_cache) {
 		self->cache =
 			ni_get_next_token(self->input, self->buffer, LEXEME_BUFFER_SIZE);
@@ -55,9 +55,9 @@ ni_lexer_peek(ni_lexer_t* self) {
 }
 
 
-ni_token_t
-ni_lexer_read(ni_lexer_t* self) {
-	ni_token_t result;
+NToken
+ni_lexer_read(NLexer* self) {
+	NToken result;
 	
 	result.type = ni_lexer_peek(self);
 	result.lexeme = strdup(self->buffer);

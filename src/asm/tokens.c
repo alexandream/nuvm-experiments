@@ -10,7 +10,7 @@
 
 typedef struct {
 	char* lexeme;
-	ni_token_type_t token_type;
+	NTokenType token_type;
 } lexeme_table_t;
 
 static lexeme_table_t KEYWORD_TABLE[] = {
@@ -85,13 +85,13 @@ typedef enum {
 	S_UNKNOWN = -1
 } tk_state_t;
 
-static ni_token_type_t
+static NTokenType
 adjust_identifier_token_type(const char* lexeme, bool is_label);
 
-static ni_token_type_t
+static NTokenType
 compute_token_type_from_keyword(const char* keyword);
 
-static ni_token_type_t
+static NTokenType
 compute_token_type_from_state(tk_state_t state);
 
 static void
@@ -140,21 +140,21 @@ static tk_state_t
 handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete);
 
 static void
-ignore_whitespace(ni_stream_t* stream, bool* end);
+ignore_whitespace(NStream* stream, bool* end);
 
 static void
 init_store(store_t* buffer, char* store, uint16_t capacity);
 
 
 void
-ni_destroy_token(ni_token_t token) {
+ni_destroy_token(NToken token) {
 	if (token.lexeme != NULL) {
 		free(token.lexeme);
 	}
 }
 
 const char*
-ni_get_token_name(ni_token_type_t type) {
+ni_get_token_name(NTokenType type) {
 	switch (type) {
 		case NI_TK_EOF: return "EOF";
 		case NI_TK_TOO_BIG: return "TOO_BIG";
@@ -233,10 +233,10 @@ ni_get_token_name(ni_token_type_t type) {
  *
  *    docs/diagrams/tokenizer-state-machine.{svg,dia}
  */
-ni_token_type_t
-ni_get_next_token(ni_stream_t* stream, char* buffer, size_t buffer_last_pos) {
+NTokenType
+ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
 	store_t store;
-	ni_token_type_t result;
+	NTokenType result;
 	bool eof = false,
 	     overflow = false,
 	     complete = false;
@@ -339,7 +339,7 @@ ni_get_next_token(ni_stream_t* stream, char* buffer, size_t buffer_last_pos) {
 }
 
 
-static ni_token_type_t
+static NTokenType
 compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
 	int i = 0;
 
@@ -353,7 +353,7 @@ compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
 }
 
 
-static ni_token_type_t
+static NTokenType
 adjust_identifier_token_type(const char* lexeme, bool is_label) {
 	if (is_label) {
 		return NI_TK_LABEL;
@@ -364,12 +364,12 @@ adjust_identifier_token_type(const char* lexeme, bool is_label) {
 }
 
 
-static ni_token_type_t
+static NTokenType
 compute_token_type_from_keyword(const char* keyword) {
 	return compute_token_type_from_table(keyword, KEYWORD_TABLE);
 }
 
-static ni_token_type_t
+static NTokenType
 compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
 		case S_REGISTER_LEAD: /* fall-through */
@@ -579,7 +579,7 @@ handle_S_LABEL_LEAD(char chr) {
 
 
 static void
-ignore_whitespace(ni_stream_t* stream, bool* end) {
+ignore_whitespace(NStream* stream, bool* end) {
 	char chr = ni_stream_peek(stream, end);
 	while (isspace(chr) && !(*end)) {
 		ni_stream_read(stream, end);

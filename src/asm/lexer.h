@@ -4,21 +4,21 @@
 #include "streams.h"
 #include "tokens.h"
 
-typedef struct ni_lexer_t ni_lexer_t;
+typedef struct NLexer NLexer;
 
 void
-ni_destroy_lexer(ni_lexer_t* self);
+ni_destroy_lexer(NLexer* self);
 
-ni_lexer_t*
-ni_new_lexer(ni_stream_t* input);
+NLexer*
+ni_new_lexer(NStream* input);
 
 void
-ni_lexer_advance(ni_lexer_t* self);
+ni_lexer_advance(NLexer* self);
 
-ni_token_type_t
-ni_lexer_peek(ni_lexer_t* self);
+NTokenType
+ni_lexer_peek(NLexer* self);
 
-ni_token_t
-ni_lexer_read(ni_lexer_t* self);
+NToken
+ni_lexer_read(NLexer* self);
 
 #endif

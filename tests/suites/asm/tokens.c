@@ -14,24 +14,24 @@ WITH_STREAM(const char* str);
 
 #define ASSERT_EOF() do {\
 	char buffer[256+1];\
-	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
+	NTokenType token = ni_get_next_token(STREAM, buffer, 255);\
 	ASSERT_MSG(token == NI_TK_EOF,\
-		MF("Expected EOF, got token type %u with lexeme %s.",\
-		   token, buffer));\
+		MF("Expected EOF, got token type %s with lexeme %s.",\
+		   ni_get_token_name(token), buffer));\
 } while(0)
 
 #define ASSERT_TOKEN(_type, _lexeme) do{\
 	char buffer[256+1];\
-	ni_token_type_t type = _type;\
+	NTokenType type = _type;\
 	const char* lexeme = _lexeme;\
-	ni_token_type_t token = ni_get_next_token(STREAM, buffer, 255);\
+	NTokenType token = ni_get_next_token(STREAM, buffer, 255);\
 	ASSERT_MSG(token == type && STRINGS_EQUAL(buffer, lexeme),\
-		MF("Expected token type %d with lexeme %s. "\
-		   "Got token type %d with lexeme %s",\
-		   type, lexeme, token, buffer));\
+		MF("Expected token type %s with lexeme %s. "\
+		   "Got token type %s with lexeme %s",\
+		   ni_get_token_name(type), lexeme, ni_get_token_name(token), buffer));\
 } while(0)
 
-static ni_stream_t* STREAM = NULL;
+static NStream* STREAM = NULL;
 
 
 TEST(ignores_only_spaces) {
@@ -479,7 +479,6 @@ TEST(reads_op_load_bool) {
 	ASSERT_TOKEN(NI_TK_OP_LOAD_BOOL, "load-bool");
 	ASSERT_EOF();
 }
-
 
 
 static void

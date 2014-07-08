@@ -12,9 +12,9 @@
 const char* BASE_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n";
 size_t BASE_LENGTH;
 
-ni_stream_t* EMPTY_STREAM;
-ni_stream_t* SHORT_STREAM;
-ni_stream_t* LONG_STREAM;
+NStream* EMPTY_STREAM;
+NStream* SHORT_STREAM;
+NStream* LONG_STREAM;
 
 /* Write to the used files to guarantee they'll have the expected contents. */
 CONSTRUCTOR {

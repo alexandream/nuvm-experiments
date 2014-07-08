@@ -5,7 +5,7 @@
 
 #include "lexer.h"
 
-static ni_lexer_t* LEXER = NULL;
+static NLexer* LEXER = NULL;
 
 static void
 ADVANCE();
@@ -15,8 +15,8 @@ WITH_INPUT(const char* str);
 
 
 #define ASSERT_PEEK(_type) do{\
-	ni_token_type_t type = _type;\
-	ni_token_type_t token = ni_lexer_peek(LEXER);\
+	NTokenType type = _type;\
+	NTokenType token = ni_lexer_peek(LEXER);\
 	ASSERT_MSG(token == type,\
 		MF("Expected token type %d, got token type %d.",\
 		   type, token));\

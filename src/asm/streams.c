@@ -6,7 +6,7 @@
 
 #include "streams.h"
 
-struct ni_stream_t {
+struct NStream {
 	char* buffer;
 	int32_t size;
 	int32_t cursor;
@@ -14,18 +14,18 @@ struct ni_stream_t {
 };
 
 void
-ni_destroy_stream(ni_stream_t* self) {
+ni_destroy_stream(NStream* self) {
 	free(self);
 }
 
 
-ni_stream_t*
+NStream*
 ni_new_stream_from_path(const char* path) {
 	/* TODO: Add error reporting and detailed error checking. */
 	int status;
 	int32_t file_size, i;
 	char* buffer = NULL;
-	ni_stream_t* result = NULL;
+	NStream* result = NULL;
 
 	FILE* file = fopen(path, "rb");
 	if (file == NULL) {
@@ -47,7 +47,7 @@ ni_new_stream_from_path(const char* path) {
 		goto cleanup;
 	}
 
-	result = malloc(sizeof(ni_stream_t));
+	result = malloc(sizeof(NStream));
 	if (result == NULL) {
 		goto cleanup;
 	}
@@ -89,17 +89,17 @@ cleanup:
 }
 
 
-ni_stream_t*
+NStream*
 ni_new_stream_from_string(const char* string) {
 	/* TODO: Add error reporting and detailed error checking. */
 	size_t length = strlen(string);
-	ni_stream_t* result = NULL;
+	NStream* result = NULL;
 	char* buffer = NULL;
 	if (length > INT32_MAX) {
 		return NULL;
 	}
 
-	result = malloc(sizeof(ni_stream_t));
+	result = malloc(sizeof(NStream));
 	if (result == NULL) {
 		return NULL;
 	}
@@ -120,19 +120,19 @@ ni_new_stream_from_string(const char* string) {
 
 
 bool
-ni_stream_eof(ni_stream_t* self) {
+ni_stream_eof(NStream* self) {
 	return self->eof;
 }
 
 
 uint32_t
-ni_stream_length(ni_stream_t* self) {
+ni_stream_length(NStream* self) {
 	return self->size;
 }
 
 
 char
-ni_stream_peek(ni_stream_t* self, bool* end) {
+ni_stream_peek(NStream* self, bool* end) {
 	char result = '\0';
 	if (self->cursor == self->size) {
 		self->eof = true;
@@ -146,7 +146,7 @@ ni_stream_peek(ni_stream_t* self, bool* end) {
 
 
 char
-ni_stream_read(ni_stream_t* self, bool* end) {
+ni_stream_read(NStream* self, bool* end) {
 	char result = ni_stream_peek(self, end);
 	if (!self->eof) {
 		self->cursor += 1;

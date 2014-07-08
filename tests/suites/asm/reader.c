@@ -7,7 +7,7 @@
 #include "lexer.h"
 #include "streams.h"
 void
-ni_read_version(ni_lexer_t* lexer,
+ni_read_version(NLexer* lexer,
                 uint8_t* major,
                 uint8_t* minor,
                 uint8_t* revision,
@@ -15,27 +15,54 @@ ni_read_version(ni_lexer_t* lexer,
 }
 
 void
-ni_read_entry_point(ni_lexer_t* lexer,
+ni_read_entry_point(NLexer* lexer,
                     uint16_t* entry_point,
                     n_error_t* error) {
 }
 
 void
-ni_read_globals_count(ni_lexer_t* lexer,
+ni_read_globals_count(NLexer* lexer,
                       uint16_t* num_globals,
                       n_error_t* error) {
 
 }
 
+void
+ni_read_string_constant(NLexer* lexer,
+                        char** value,
+                        n_error_t* error) { }
+
+void
+ni_read_double_constant(NLexer* lexer,
+                        double* value,
+                        n_error_t* error) { }
+
+void
+ni_read_character_constant(NLexer* lexer,
+						   char** value,
+						   n_error_t* error) { }
+
+void
+ni_read_procedure_constant(NLexer* lexer,
+						   char** label,
+						   uint16_t* num_locals,
+						   n_error_t* error) { }
+
+void
+ni_read_int32_constant(NLexer* lexer,
+                       int32_t* value,
+                       n_error_t* error) { }
+
+
 uint8_t*
 n_asm_build_file(const char* fname) {
-	ni_stream_t* stream = ni_new_stream_from_path(fname);
-	ni_lexer_t* lexer = ni_new_lexer(stream);
+	NStream* stream = ni_new_stream_from_path(fname);
+	NLexer* lexer = ni_new_lexer(stream);
 	
 	uint8_t major, minor, revision;
 	uint16_t num_globals, entry_point;
 
-	ni_token_type_t next_token;
+	NTokenType next_token;
 
 	n_error_t error = { 0, };
 	
@@ -57,30 +84,55 @@ n_asm_build_file(const char* fname) {
 	}
 	{
 
-		char* const_string_val;
 		double const_double_val;
+		char* const_string_val;
 		char* const_proc_label_val;
 		uint16_t const_proc_num_locals_val;
 		int32_t const_int32_val;
 
 		next_token = ni_lexer_peek(lexer);
 		while (next_token != NI_TK_KW_CODE) {
+			const_string_val = NULL;
+			const_proc_label_val = NULL;
 
 			switch(next_token) {
 				case NI_TK_KW_STRING:
-
+					ni_read_string_constant(lexer, &const_string_val, &error);
+					if (!n_error_ok(&error)) goto handle_error;
+					/* TODO: Do something with the string. */
+					free(const_string_val);
 					break;
 				case NI_TK_KW_DOUBLE:
+					ni_read_double_constant(lexer, &const_double_val, &error);
+					if (!n_error_ok(&error)) goto handle_error;
+					/* TODO: Do something with the double. */
 					break;
 				case NI_TK_KW_CHARACTER:
+					ni_read_character_constant(lexer,
+					                           &const_string_val,
+					                           &error);
+					if (!n_error_ok(&error)) goto handle_error;
+					/* TODO: Do something with the character. */
+					free(const_string_val);
 					break;
 				case NI_TK_KW_PROCEDURE:
+					ni_read_procedure_constant(lexer,
+					                           &const_proc_label_val,
+					                           &const_proc_num_locals_val,
+					                           &error);
+					if (!n_error_ok(&error)) goto handle_error;
+					/* TODO: Do something with the procedure data. */
+					free(const_proc_label_val);
 					break;
 				case NI_TK_KW_INT32:
+					ni_read_int32_constant(lexer, &const_int32_val, &error);
+					if (!n_error_ok(&error)) goto handle_error;
+					/* TODO: Do something with the int32. */
 					break;
 				default:
 					/* TODO: Create error: expected constant descriptor keyword,
 					 * got token %s. */
+					goto handle_error;
 					break;
 			}
 			if (!n_error_ok(&error)) goto handle_error;
@@ -124,6 +176,7 @@ n_asm_build_file(const char* fname) {
 				break;
 			default:
 				/* TODO: Create error: expected opcode, got token %s. */
+				goto handle_error;
 				break;
 		}
 		if (!n_error_ok(&error)) goto handle_error;
@@ -132,6 +185,7 @@ n_asm_build_file(const char* fname) {
 
 
 handle_error:
+	/* TODO: Actually handle error and free resources. */
 	return NULL;
 }
 

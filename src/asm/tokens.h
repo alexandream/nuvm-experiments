@@ -59,23 +59,23 @@ typedef enum {
 	NI_TK_OP_RETURN,
 
 	NI_TK_UNKNOWN = -1
-} ni_token_type_t;
+} NTokenType;
 
-typedef struct ni_token_t ni_token_t;
+typedef struct NToken NToken;
 
-struct ni_token_t {
-	ni_token_type_t type;
+struct NToken {
+	NTokenType type;
 	char* lexeme;
 };
 
 
 void
-ni_destroy_token(ni_token_t token);
+ni_destroy_token(NToken token);
 
 const char*
-ni_get_token_name(ni_token_type_t type);
+ni_get_token_name(NTokenType type);
 
-ni_token_type_t
-ni_get_next_token(ni_stream_t* stream, char* buffer, size_t bufsize);
+NTokenType
+ni_get_next_token(NStream* stream, char* buffer, size_t bufsize);
 
 #endif

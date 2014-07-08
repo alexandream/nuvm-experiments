@@ -10,13 +10,13 @@ typedef struct {
 	const char* name;
 	error_print_func_t print_func;
 	error_destroy_func_t destroy_func;
-} ni_error_type_t;
+} NErrorType;
 
 
 
 /* TODO: Make this error type pool dynamic. */
 static uint32_t next_error_type_id = 0;
-static ni_error_type_t error_type_pool[MAX_ERROR_TYPES];
+static NErrorType error_type_pool[MAX_ERROR_TYPES];
 
 
 uint32_t
@@ -36,7 +36,7 @@ uint32_t
 n_register_error_type(const char* name,
                       error_print_func_t print,
                       error_destroy_func_t destroy) {
-	ni_error_type_t* error_type;
+	NErrorType* error_type;
 	uint32_t type_id;
 	if (name == NULL || *name == '\0') {
 		return N_ERROR_TYPE_NOT_FOUND;
@@ -62,7 +62,7 @@ n_register_error_type(const char* name,
 
 const char*
 n_error_print(n_error_t* error) {
-	ni_error_type_t* error_type = &error_type_pool[error->type];
+	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->print_func) {
 		return error_type->print_func(error);
 	}
@@ -74,7 +74,7 @@ n_error_print(n_error_t* error) {
 
 void
 n_error_destroy(n_error_t* error) {
-	ni_error_type_t* error_type = &error_type_pool[error->type];
+	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->destroy_func) {
 		error_type->destroy_func(error);
 	}

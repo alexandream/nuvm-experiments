@@ -6,15 +6,15 @@
 #define MAGIC_MASK   0x000000FFFFFFFFFF
 #define MAGIC_NUMBER 0x0000004D56554E1B
 
-typedef struct ni_raw_module_t ni_raw_module_t;
-typedef struct ni_module_descriptor_t ni_module_descriptor_t;
-typedef struct ni_constant_entry_t ni_constant_entry_t;
+typedef struct NRawModule NRawModule;
+typedef struct NModuleDescriptor NModuleDescriptor;
+typedef struct NConstantEntry NConstantEntry;
 
 
-struct ni_raw_module_t {
-	ni_module_descriptor_t *descriptor;
+struct NRawModule {
+	NModuleDescriptor *descriptor;
 
-	ni_constant_entry_t *constants_index;
+	NConstantEntry *constants_index;
 
 	uint8_t *data_segment;
 	uint8_t *code_segment;
@@ -22,7 +22,7 @@ struct ni_raw_module_t {
 };
 
 
-struct ni_module_descriptor_t {
+struct NModuleDescriptor {
 	uint64_t header;
 	uint64_t host_descriptor;
 
@@ -35,7 +35,7 @@ struct ni_module_descriptor_t {
 } __attribute__((packed));
 
 
-struct ni_constant_entry_t {
+struct NConstantEntry {
 	uint8_t type_id;
 	uint32_t data_index;
 } __attribute__((packed));
