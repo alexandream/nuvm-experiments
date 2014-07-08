@@ -48,6 +48,8 @@ static lexeme_table_t OPCODE_TABLE[] = {
 	{ "load-bool",  NI_TK_OP_LOAD_BOOL },
 	{  NULL,        NI_TK_UNRECOGNIZED_OPCODE }
 };
+
+
 typedef struct {
 	char* store;
 	uint16_t size;
@@ -151,6 +153,64 @@ ni_destroy_token(ni_token_t token) {
 	}
 }
 
+const char*
+ni_get_token_name(ni_token_type_t type) {
+	switch (type) {
+		case NI_TK_EOF: return "EOF";
+		case NI_TK_TOO_BIG: return "TOO_BIG";
+
+		case NI_TK_DEC_INTEGER: return "DEC_INTEGER";
+		case NI_TK_HEX_INTEGER: return "HEX_INTEGER";
+		case NI_TK_REAL: return "REAL";
+		case NI_TK_UNRECOGNIZED_OPCODE: return "UNRECOGNIZED_OPCODE";
+		case NI_TK_LABEL: return "LABEL";
+		case NI_TK_LABEL_DEF: return "LABEL_DEF";
+		case NI_TK_REGISTER: return "REGISTER";
+		case NI_TK_STRING: return "STRING";
+
+		case NI_TK_KW_CHARACTER: return "KW_CHARACTER";
+		case NI_TK_KW_CODE: return "KW_CODE";
+		case NI_TK_KW_CONSTANTS: return "KW_CONSTANTS";
+		case NI_TK_KW_DOUBLE: return "KW_DOUBLE";
+		case NI_TK_KW_ENTRY_POINT: return "KW_ENTRY_POINT";
+		case NI_TK_KW_GLOBALS_COUNT: return "KW_GLOBALS_COUNT";
+		case NI_TK_KW_INT32: return "KW_INT32";
+		case NI_TK_KW_PROCEDURE: return "KW_PROCEDURE";
+		case NI_TK_KW_STRING: return "KW_STRING";
+		case NI_TK_KW_VERSION: return "KW_VERSION";
+
+		case NI_TK_UNRECOGNIZED_KW: return "UNRECOGNIZED_KW";
+
+		case NI_TK_OP_GLOBAL_REF: return "OP_GLOBAL_REF";
+		case NI_TK_OP_GLOBAL_SET: return "OP_GLOBAL_SET";
+		case NI_TK_OP_MOVE: return "OP_MOVE";
+
+		case NI_TK_OP_JUMP: return "OP_JUMP";
+		case NI_TK_OP_JUMP_IF: return "OP_JUMP_IF";
+
+		case NI_TK_OP_EQ: return "OP_EQ";
+		case NI_TK_OP_GE: return "OP_GE";
+		case NI_TK_OP_GT: return "OP_GT";
+		case NI_TK_OP_LE: return "OP_LE";
+		case NI_TK_OP_LT: return "OP_LT";
+
+		case NI_TK_OP_NOT: return "OP_NOT";
+
+		case NI_TK_OP_AND: return "OP_AND";
+		case NI_TK_OP_OR: return "OP_OR";
+
+		case NI_TK_OP_ADD: return "OP_ADD";
+		case NI_TK_OP_DIV: return "OP_DIV";
+		case NI_TK_OP_MUL: return "OP_MUL";
+		case NI_TK_OP_SUB: return "OP_SUB";
+
+		case NI_TK_OP_LOAD_BOOL: return "OP_LOAD_BOOL";
+
+		case NI_TK_OP_RETURN: return "OP_RETURN";
+
+		case NI_TK_UNKNOWN: return "UNKNOWN";
+	}
+}
 
 /* The function below implements the following lexer, in POSIX Extended Regular
  * Expressions Syntax and top-to-bottom precedence:

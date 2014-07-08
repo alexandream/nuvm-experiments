@@ -72,6 +72,9 @@ struct ni_token_t {
 void
 ni_destroy_token(ni_token_t token);
 
+const char*
+ni_get_token_name(ni_token_type_t type);
+
 ni_token_type_t
 ni_get_next_token(ni_stream_t* stream, char* buffer, size_t bufsize);
 
