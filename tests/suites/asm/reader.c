@@ -6,53 +6,6 @@
 #include "reader.h"
 #include "lexer.h"
 #include "streams.h"
-void
-ni_read_version(NLexer* lexer,
-                uint8_t* major,
-                uint8_t* minor,
-                uint8_t* revision,
-                n_error_t* error) {
-}
-
-void
-ni_read_entry_point(NLexer* lexer,
-                    uint16_t* entry_point,
-                    n_error_t* error) {
-}
-
-void
-ni_read_globals_count(NLexer* lexer,
-                      uint16_t* num_globals,
-                      n_error_t* error) {
-
-}
-
-void
-ni_read_string_constant(NLexer* lexer,
-                        char** value,
-                        n_error_t* error) { }
-
-void
-ni_read_double_constant(NLexer* lexer,
-                        double* value,
-                        n_error_t* error) { }
-
-void
-ni_read_character_constant(NLexer* lexer,
-						   char** value,
-						   n_error_t* error) { }
-
-void
-ni_read_procedure_constant(NLexer* lexer,
-						   char** label,
-						   uint16_t* num_locals,
-						   n_error_t* error) { }
-
-void
-ni_read_int32_constant(NLexer* lexer,
-                       int32_t* value,
-                       n_error_t* error) { }
-
 
 uint8_t*
 n_asm_build_file(const char* fname) {
@@ -64,7 +17,7 @@ n_asm_build_file(const char* fname) {
 
 	NTokenType next_token;
 
-	n_error_t error = { 0, };
+	NError error = { 0, };
 	
 	ni_read_version(lexer, &major, &minor, &revision, &error);
 	if (!n_error_ok(&error)) goto handle_error;

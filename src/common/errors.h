@@ -10,12 +10,12 @@
 typedef struct {
 	uint32_t type;
 	void* data;
-} n_error_t;
+} NError;
 
 #define N_ERROR_INITIALIZER { 0, NULL }
 
-typedef const char* (*error_print_func_t)(n_error_t*);
-typedef void (*error_destroy_func_t)(n_error_t*);
+typedef const char* (*error_print_func_t)(NError*);
+typedef void (*error_destroy_func_t)(NError*);
 
 
 uint32_t
@@ -27,11 +27,11 @@ uint32_t
 n_find_error_type(const char* name);
 
 const char*
-n_error_print(n_error_t* error);
+n_error_print(NError* error);
 
 void
-n_error_destroy(n_error_t* error);
+n_error_destroy(NError* error);
 
 bool
-n_error_ok(n_error_t* error);
+n_error_ok(NError* error);
 #endif

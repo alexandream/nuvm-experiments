@@ -61,7 +61,7 @@ n_register_error_type(const char* name,
 
 
 const char*
-n_error_print(n_error_t* error) {
+n_error_print(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->print_func) {
 		return error_type->print_func(error);
@@ -73,7 +73,7 @@ n_error_print(n_error_t* error) {
 
 
 void
-n_error_destroy(n_error_t* error) {
+n_error_destroy(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->destroy_func) {
 		error_type->destroy_func(error);
@@ -81,6 +81,6 @@ n_error_destroy(n_error_t* error) {
 }
 
 bool
-n_error_ok(n_error_t* error) {
+n_error_ok(NError* error) {
 	return error->type == 0;
 }
