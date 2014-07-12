@@ -34,4 +34,7 @@ n_error_destroy(NError* error);
 
 bool
 n_error_ok(NError* error);
+
+void
+n_init_errors();
 #endif

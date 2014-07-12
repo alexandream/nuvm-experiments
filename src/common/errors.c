@@ -15,7 +15,7 @@ typedef struct {
 
 
 /* TODO: Make this error type pool dynamic. */
-static uint32_t next_error_type_id = 0;
+static uint32_t next_error_type_id = 1;
 static NErrorType error_type_pool[MAX_ERROR_TYPES];
 
 
@@ -83,4 +83,12 @@ n_error_destroy(NError* error) {
 bool
 n_error_ok(NError* error) {
 	return error->type == 0;
+}
+
+void
+n_init_errors() {
+	NErrorType* success = &error_type_pool[0];
+	success->name = "net.xndk.nuvm.errors.Ok";
+	success->print_func = NULL;
+	success->destroy_func = NULL;
 }

@@ -24,8 +24,7 @@ TEST_COMMON_LIBS=$(TEST_LIBS) -Lbuild/common -lnuvm-common
 TEST_ASM_SOURCE=$(wildcard tests/suites/asm/*.c)
 TEST_ASM_OBJS=$(TEST_ASM_SOURCE:tests/suites/%.c=build/tests/%.o)
 TEST_ASM_CFLAGS=$(TEST_CFLAGS) -I "src/asm"
-TEST_ASM_LIBS=$(TEST_LIBS) -Lbuild/asm -lnuvm-asm
-
+TEST_ASM_LIBS=$(TEST_LIBS) -Lbuild/asm -lnuvm-asm $(TEST_COMMON_LIBS)
 all: build/asm/libnuvm-asm.a build/common/libnuvm-common.a
 
 
@@ -35,7 +34,7 @@ all: build/asm/libnuvm-asm.a build/common/libnuvm-common.a
 
 
 # The actual final artifacts we're building, separated in static libraries.
-build/asm/libnuvm-asm.a: build/common/libnuvm-common.a $(NUVM_ASM_OBJS) 
+build/asm/libnuvm-asm.a: build/common/libnuvm-common.a $(NUVM_ASM_OBJS)
 	@ar rcs $@ $^
 
 build/common/libnuvm-common.a: $(NUVM_COMMON_OBJS)
@@ -66,7 +65,7 @@ build/tests/run-asm: $(TEST_ASM_OBJS) \
                      build/asm/libnuvm-asm.a \
                      build/common/libnuvm-common.a \
                      build/tests/runner.o
-	@$(CC) -o build/tests/run-asm $^ $(TEST_LIBS)
+	@$(CC) -o build/tests/run-asm $^ $(TEST_LIBS) $(TEST_ASM_LIBS)
 
 
 # How to build each of the test suites.
