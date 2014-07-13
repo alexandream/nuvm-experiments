@@ -27,10 +27,10 @@ TEST(read_version_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".version 5 200 44");
 
 	ni_read_version(lexer, &major, &minor, &revision, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_I64(major, 5);
-	ASSERT_EQ_I64(minor, 200);
-	ASSERT_EQ_I64(revision, 44);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(major, 5));
+	ASSERT(EQ_I64(minor, 200));
+	ASSERT(EQ_I64(revision, 44));
 }
 
 
@@ -50,7 +50,7 @@ TEST(read_version_rejects_incomplete_input) {
 	while (inputs[i]) {
 		NLexer* lexer = WITH_INPUT(inputs[i]);
 		ni_read_version(lexer, &a, &b, &c, &error);
-		ASSERT_ERROR(&error, error_name);
+		ASSERT(HAS_ERROR(&error, error_name));
 		i++;
 	}
 }
@@ -62,8 +62,8 @@ TEST(read_entry_point_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".entry-point 10588");
 
 	ni_read_entry_point(lexer, &entry_point, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_I64(entry_point, 10588);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(entry_point, 10588));
 }
 
 
@@ -74,8 +74,8 @@ TEST(read_globals_count_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".globals-count 65530");
 
 	ni_read_globals_count(lexer, &num_globals, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_I64(num_globals, 65300);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(num_globals, 65300));
 }
 
 
@@ -86,8 +86,8 @@ TEST(read_string_constant_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".string \"hello, world\"");
 
 	ni_read_string_constant(lexer, &value, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_STR(value, "hello, world");
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_STR(value, "hello, world"));;
 }
 
 
@@ -98,8 +98,8 @@ TEST(read_double_constant_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".double 3.14159");
 
 	ni_read_double_constant(lexer, &value, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_DBL(value, 3.14159);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_DBL(value, 3.14159));;
 }
 
 
@@ -110,8 +110,8 @@ TEST(read_character_constant_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".character \"á\"");
 
 	ni_read_character_constant(lexer, &value, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_STR(value, "á");
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_STR(value, "á"));;
 }
 
 
@@ -123,9 +123,9 @@ TEST(read_procedure_constant_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".procedure @main 128");
 
 	ni_read_procedure_constant(lexer, &label_name, &num_locals, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_STR(label_name, "main");
-	ASSERT_EQ_I64(num_locals, 128);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_STR(label_name, "main"));;
+	ASSERT(EQ_I64(num_locals, 128));
 }
 
 
@@ -136,8 +136,8 @@ TEST(read_int32_constant_recognizes_input) {
 	NLexer* lexer = WITH_INPUT(".int32 -1050088");
 
 	ni_read_int32_constant(lexer, &value, &error);
-	ASSERT_EOK(&error);
-	ASSERT_EQ_I64(value, -1050088);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(value, -1050088));
 }
 
 

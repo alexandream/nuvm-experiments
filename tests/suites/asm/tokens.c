@@ -34,8 +34,8 @@ CK_TOKEN(NTokenType expected_type, const char* expected_lexeme) {
 }
 
 
-#define ASSERT_EOF() ASSERT_CHECK(CK_EOF())
-#define ASSERT_TOKEN(type, lexeme) ASSERT_CHECK(CK_TOKEN(type, lexeme))
+#define ASSERT_EOF() ASSERT(CK_EOF())
+#define ASSERT_TOKEN(type, lexeme) ASSERT(CK_TOKEN(type, lexeme))
 
 
 

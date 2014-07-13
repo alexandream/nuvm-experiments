@@ -21,7 +21,7 @@ CK_PEEK(NTokenType expected_type) {
 		   ni_get_token_name(expected_type), ni_get_token_name(type)));
 }
 
-#define ASSERT_PEEK(type) ASSERT_CHECK(CK_PEEK(type))
+#define ASSERT_PEEK(type) ASSERT(CK_PEEK(type))
 
 TEARDOWN {
 	if (LEXER != NULL) {

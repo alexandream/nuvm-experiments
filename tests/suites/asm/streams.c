@@ -63,62 +63,62 @@ TEARDOWN {
 /* Test Cases */
 
 TEST(empty_stream_has_correct_length) {
-	ASSERT(ni_stream_length(EMPTY_STREAM) == 0);
+	ASSERT(IS_TRUE(ni_stream_length(EMPTY_STREAM) == 0));
 }
 
 
 TEST(short_stream_has_correct_length) {
-	ASSERT(ni_stream_length(SHORT_STREAM) == BASE_LENGTH);
+	ASSERT(IS_TRUE(ni_stream_length(SHORT_STREAM) == BASE_LENGTH));
 }
 
 
 TEST(long_stream_has_correct_length) {
-	ASSERT(ni_stream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH);
+	ASSERT(IS_TRUE(ni_stream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH));
 }
 
 
 TEST(empty_stream_has_correct_eof) {
-	ASSERT(ni_stream_eof(EMPTY_STREAM) == true);
+	ASSERT(IS_TRUE(ni_stream_eof(EMPTY_STREAM) == true));
 }
 
 
 TEST(short_stream_has_correct_eof) {
-	ASSERT(ni_stream_eof(SHORT_STREAM) == false);
+	ASSERT(IS_TRUE(ni_stream_eof(SHORT_STREAM) == false));
 }
 
 
 TEST(long_stream_has_correct_eof) {
-	ASSERT(ni_stream_eof(LONG_STREAM) == false);
+	ASSERT(IS_TRUE(ni_stream_eof(LONG_STREAM) == false));
 }
 
 
 TEST(peek_on_empty_stream_signals_eof) {
 	bool end = false;
 	ni_stream_peek(EMPTY_STREAM, &end);
-	ASSERT(end == true);
+	ASSERT(IS_TRUE(end == true));
 }
 
 
 TEST(read_on_empty_stream_signals_eof) {
 	bool end = false;
 	ni_stream_read(EMPTY_STREAM, &end);
-	ASSERT(end == true);
+	ASSERT(IS_TRUE(end == true));
 }
 
 
 TEST(first_peek_on_stream_returns_first_entry) {
 	bool end = false;
 	char entry = ni_stream_peek(SHORT_STREAM, &end);
-	ASSERT(end == false);
-	ASSERT(entry == 'A');
+	ASSERT(IS_TRUE(end == false));
+	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
 TEST(first_read_on_stream_returns_first_entry) {
 	bool end = false;
 	char entry = ni_stream_read(SHORT_STREAM, &end);
-	ASSERT(end == false);
-	ASSERT(entry == 'A');
+	ASSERT(IS_TRUE(end == false));
+	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
@@ -126,9 +126,9 @@ TEST(second_peek_on_stream_returns_first_entry) {
 	bool end = false;
 	char first_entry = ni_stream_peek(SHORT_STREAM, &end);
 	char entry = ni_stream_peek(SHORT_STREAM, &end);
-	ASSERT(end == false);
-	ASSERT(entry == first_entry);
-	ASSERT(entry == 'A');
+	ASSERT(IS_TRUE(end == false));
+	ASSERT(IS_TRUE(entry == first_entry));
+	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
@@ -136,7 +136,7 @@ TEST(second_read_on_stream_returns_second_entry) {
 	bool end = false;
 	char first_entry = ni_stream_read(SHORT_STREAM, &end);
 	char entry = ni_stream_read(SHORT_STREAM, &end);
-	ASSERT(end == false);
-	ASSERT(entry != first_entry);
-	ASSERT(entry == 'B');
+	ASSERT(IS_TRUE(end == false));
+	ASSERT(IS_TRUE(entry != first_entry));
+	ASSERT(IS_TRUE(entry == 'B'));
 }
