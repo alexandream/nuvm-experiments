@@ -67,18 +67,31 @@ n_error_print(NError* error) {
 		return error_type->print_func(error);
 	}
 	else {
-		return strdup(error_type->name);
+		return n_error_print_type_name(error);
 	}
 }
 
-
+const char*
+n_error_print_type_name(NError* error) {
+	NErrorType* error_type = &error_type_pool[error->type];
+	return strdup(error_type->name);
+}
 void
 n_error_destroy(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->destroy_func) {
 		error_type->destroy_func(error);
 	}
+	error->data = NULL;
 }
+
+
+void
+n_error_reset(NError* error) {
+	n_error_destroy(error);
+	error->type = 0;
+}
+
 
 bool
 n_error_ok(NError* error) {
@@ -88,7 +101,7 @@ n_error_ok(NError* error) {
 void
 n_init_errors() {
 	NErrorType* success = &error_type_pool[0];
-	success->name = "net.xndk.nuvm.errors.Ok";
+	success->name = "nuvm.errors.Ok";
 	success->print_func = NULL;
 	success->destroy_func = NULL;
 }

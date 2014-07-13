@@ -29,8 +29,14 @@ n_find_error_type(const char* name);
 const char*
 n_error_print(NError* error);
 
+const char*
+n_error_print_type_name(NError* error);
+
 void
 n_error_destroy(NError* error);
+
+void
+n_error_reset(NError* error);
 
 bool
 n_error_ok(NError* error);

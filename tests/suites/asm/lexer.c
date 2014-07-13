@@ -13,15 +13,15 @@ ADVANCE();
 static void
 WITH_INPUT(const char* str);
 
+static NCheckResult
+CK_PEEK(NTokenType expected_type) {
+	NTokenType type = ni_lexer_peek(LEXER);
+	NI_MAKE_CHECK(type == expected_type,
+		MF("Expected token type %s, got token type %s.",
+		   ni_get_token_name(expected_type), ni_get_token_name(type)));
+}
 
-#define ASSERT_PEEK(_type) do{\
-	NTokenType type = _type;\
-	NTokenType token = ni_lexer_peek(LEXER);\
-	ASSERT_MSG(token == type,\
-		MF("Expected token type %d, got token type %d.",\
-		   type, token));\
-} while(0)
-
+#define ASSERT_PEEK(type) ASSERT_CHECK(CK_PEEK(type))
 
 TEARDOWN {
 	if (LEXER != NULL) {

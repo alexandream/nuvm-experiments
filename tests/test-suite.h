@@ -2,6 +2,7 @@
 #define __NUVM__TEST__TEST_SUITE_H__
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include <atest.h>
@@ -34,13 +35,15 @@ typedef struct {
 	} \
 } while (0)
 
-#define NI_MAKE_CHECK(CC, MM, FF) do { \
+
+#define NI_MAKE_CHECK_F(CC, MM, FF) do { \
 	NCheckResult result; \
 	result.success = CC; \
 	result.message = result.success ? NULL : MM; \
 	return result; \
 } while(0)
 
+#define NI_MAKE_CHECK(CC, MM) NI_MAKE_CHECK_F(CC, MM, {})
 
 NCheckResult
 CK_BOOL(const char* expression, bool condition);
@@ -55,17 +58,22 @@ CK_EQ_I64(const char* expression, int64_t value, int64_t expected);
 NCheckResult
 CK_ERR_OK(const char* expression, NError* error);
 
+NCheckResult
+CK_EQ_DBL(const char* expression, double value, double expected);
+
+NCheckResult
+CK_EQ_STR(const char* expression, const char* value, const char* expected);
+
+NCheckResult
+CK_ERROR(NError* error, const char* type_name);
+
 #define ASSERT(VV) ASSERT_CHECK(CK_BOOL(#VV, VV))
+
 #define ASSERT_EQ_I64(VV, EE) ASSERT_CHECK(CK_EQ_I64(#VV, VV, EE))
+#define ASSERT_EQ_DBL(VV, EE) ASSERT_CHECK(CK_EQ_DBL(#VV, VV, EE))
+#define ASSERT_EQ_STR(VV, EE) ASSERT_CHECK(CK_EQ_STR(#VV, VV, EE))
+
+#define ASSERT_ERROR(VV, NN) ASSERT_CHECK(CK_ERROR(VV, NN))
 #define ASSERT_EOK(VV) ASSERT_CHECK(CK_ERR_OK(#VV, VV))
-
-
-#define ASSERT_MSG(condition, msg) do { \
-	bool _condition = condition; \
-	const char* _msg = NULL;\
-	if (_condition) _msg = msg; \
-	if (at_check_msg(ni_g_test_result, _condition, msg)) return; \
-} while(0)
-
 
 #endif
