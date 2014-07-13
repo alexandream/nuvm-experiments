@@ -80,7 +80,6 @@ TEST(peek_reads_eof_after_advancing_past_end) {
 }
 
 
-
 static void
 ADVANCE() {
 	ni_lexer_advance(LEXER);

@@ -6,32 +6,38 @@
 #include "streams.h"
 #include "tokens.h"
 
-static bool
-STRINGS_EQUAL(const char* str1, const char* str2);
+static NStream* STREAM = NULL;
 
 static void
 WITH_STREAM(const char* str);
 
-#define ASSERT_EOF() do {\
-	char buffer[256+1];\
-	NTokenType token = ni_get_next_token(STREAM, buffer, 255);\
-	ASSERT_MSG(token == NI_TK_EOF,\
-		MF("Expected EOF, got token type %s with lexeme %s.",\
-		   ni_get_token_name(token), buffer));\
-} while(0)
+static NCheckResult
+CK_EOF() {
+	char buffer[256+1];
+	NTokenType token = ni_get_next_token(STREAM, buffer, 256);
+	NI_MAKE_CHECK(token == NI_TK_EOF,
+		MF("Expected EOF, got token type %s with lexeme %s.",
+		   ni_get_token_name(token), buffer), { /* empty finalizer */ });
+}
 
-#define ASSERT_TOKEN(_type, _lexeme) do{\
-	char buffer[256+1];\
-	NTokenType type = _type;\
-	const char* lexeme = _lexeme;\
-	NTokenType token = ni_get_next_token(STREAM, buffer, 255);\
-	ASSERT_MSG(token == type && STRINGS_EQUAL(buffer, lexeme),\
-		MF("Expected token type %s with lexeme %s. "\
-		   "Got token type %s with lexeme %s",\
-		   ni_get_token_name(type), lexeme, ni_get_token_name(token), buffer));\
-} while(0)
+static NCheckResult
+CK_TOKEN(NTokenType expected_type, const char* expected_lexeme) {
+	char buffer[256+1];
+	NTokenType type = ni_get_next_token(STREAM, buffer, 256);
+	bool condition =
+		type == expected_type && strcmp(expected_lexeme, buffer) == 0;
+	NI_MAKE_CHECK(condition,
+		MF("Expected token type %s with lexeme %s. "
+		   "Got token type %s with lexeme %s",
+		   ni_get_token_name(expected_type), expected_lexeme,
+		   ni_get_token_name(type), buffer),
+		{ /* empty finalizer */ });
+}
+#define ASSERT_EOF() ASSERT_CHECK(CK_EOF())
 
-static NStream* STREAM = NULL;
+
+#define ASSERT_TOKEN(type, lexeme) ASSERT_CHECK(CK_TOKEN(type, lexeme))
+
 
 
 TEST(ignores_only_spaces) {
@@ -494,11 +500,4 @@ static void
 WITH_STREAM(const char* str) {
 	END_STREAM();
 	STREAM = ni_new_stream_from_string(str);
-}
-
-
-static bool
-STRINGS_EQUAL(const char* str1, const char* str2) {
-	return (str1 == NULL && str2 == NULL) ||
-	       (str1 != NULL && str2 != NULL && strcmp(str1, str2) == 0);
 }

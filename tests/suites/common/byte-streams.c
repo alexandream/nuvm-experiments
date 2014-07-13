@@ -24,13 +24,13 @@ _check_int64(ATResult* r, int64_t i, int64_t j);
 static void
 _check_uint64(ATResult* r, int64_t i, int64_t j);
 
-#define ASSERT_RW_BYTE(i, j)   _check_byte(at_result, i, j)
-#define ASSERT_RW_INT16(i, j)  _check_int16(at_result, i, j)
-#define ASSERT_RW_INT32(i, j)  _check_int32(at_result, i, j)
-#define ASSERT_RW_INT64(i, j)  _check_int64(at_result, i, j)
-#define ASSERT_RW_UINT16(i, j) _check_uint16(at_result, i, j)
-#define ASSERT_RW_UINT32(i, j) _check_uint32(at_result, i, j)
-#define ASSERT_RW_UINT64(i, j) _check_uint64(at_result, i, j)
+#define ASSERT_RW_BYTE(i, j)   _check_byte(ni_g_test_result, i, j)
+#define ASSERT_RW_INT16(i, j)  _check_int16(ni_g_test_result, i, j)
+#define ASSERT_RW_INT32(i, j)  _check_int32(ni_g_test_result, i, j)
+#define ASSERT_RW_INT64(i, j)  _check_int64(ni_g_test_result, i, j)
+#define ASSERT_RW_UINT16(i, j) _check_uint16(ni_g_test_result, i, j)
+#define ASSERT_RW_UINT32(i, j) _check_uint32(ni_g_test_result, i, j)
+#define ASSERT_RW_UINT64(i, j) _check_uint64(ni_g_test_result, i, j)
 
 static uint8_t
 ISTREAM[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
@@ -359,15 +359,15 @@ TEST(rw_f_f_uint64_works) {
 
 
 static void
-_check_rw_asserts(ATResult* at_result, int64_t i, int64_t j, int64_t i0, int64_t j0,
+_check_rw_asserts(ATResult* ni_g_test_result, int64_t i, int64_t j, int64_t i0, int64_t j0,
               uint8_t size, uint8_t psize) {
 	int k;
-	ASSERT(i == i0 + psize);
+	ASSERT_EQ_I64(i, i0 + psize);
 
-	ASSERT(size == psize);
-	ASSERT(j == j0 + size);
+	ASSERT_EQ_I64(size, psize);
+	ASSERT_EQ_I64(j, j0 + size);
 	for (k = 0; k < size; k++) {
-		ASSERT(OSTREAM[j0+k] == ISTREAM[i0+k]);
+		ASSERT_EQ_I64(OSTREAM[j0+k],ISTREAM[i0+k]);
 	}
 }
 
