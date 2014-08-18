@@ -54,22 +54,22 @@ build/asm/%.o: src/asm/%.c
 
 
 # How to build the test targets for each module
-build/tests/runner.o: tests/runner.c
+build/tests/%.o: tests/%.c
 	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
 
-build/tests/test-suite.o: tests/test-suite.c
-	@$(CC) -c $< -o $@ $(TEST_CFLAGS)
-
-build/tests/run-common: build/common/libnuvm-common.a \
+build/tests/run-common: $(TEST_COMMON_OBJS) \
+                        build/common/libnuvm-common.a \
                         build/tests/runner.o \
-						build/tests/test-suite.o $(TEST_COMMON_OBJS)
+						build/tests/test-suite.o \
+                        build/tests/run-common.o
 	@$(CC) -o build/tests/run-common $^ $(TEST_COMMON_LIBS)
 
 build/tests/run-asm: $(TEST_ASM_OBJS) \
                      build/asm/libnuvm-asm.a \
                      build/common/libnuvm-common.a \
                      build/tests/runner.o \
-					 build/tests/test-suite.o
+					 build/tests/test-suite.o \
+                     build/tests/run-asm.o
 	@$(CC) -o build/tests/run-asm $^ $(TEST_LIBS) $(TEST_ASM_LIBS)
 
 

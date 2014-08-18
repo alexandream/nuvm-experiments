@@ -55,6 +55,31 @@ TEST(read_version_rejects_incomplete_input) {
 	}
 }
 
+TEST(read_version_rejects_values_out_of_range) {
+	uint8_t a,b,c;
+	const char* range_error = "nuvm.asm.reader.errors.InvalidRange";
+	NError error = N_ERROR_INITIALIZER;
+
+	const char* inputs[] = {
+		".version 0 0 256",
+		".version 0 0  -1",
+		".version 0 256 0",
+		".version 0  -1 0",
+		".version 256 0 0",
+		".version  -1 0 0",
+		NULL
+	};
+
+	int i = 0;
+	while (inputs[i]) {
+		NLexer* lexer = WITH_INPUT(inputs[i]);
+		ni_read_version(lexer, &a, &b, &c, &error);
+		ASSERT(HAS_ERROR(&error, range_error));
+		i++;
+	}
+}
+
+
 TEST(read_entry_point_recognizes_input) {
 	uint16_t entry_point;
 	NError error = N_ERROR_INITIALIZER;

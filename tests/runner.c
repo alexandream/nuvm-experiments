@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include "common/common.h"
 
 #include "test-suite.h"
 
@@ -78,11 +77,9 @@ void print_result_totals(ATResultList* result_list) {
 			(succeeded+failed), succeeded, failed);
 }
 
-int main(int argc, char** argv) {
+int run(int argc, char** argv) {
 	char* test_name = (argc > 1) ? argv[1] : NULL;
 	ATResultList* result_list;
-
-	n_init_common();
 
 	result_list = at_run_all_tests(test_name);
 
