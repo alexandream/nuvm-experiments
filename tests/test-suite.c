@@ -23,8 +23,8 @@ ERROR_OK(NError* error) {
 	NI_MAKE_CHECK_F(n_error_ok(error),
 		MF("Error expected to be Ok, but the following error "
 		   "was reported: \"%s\"", error_text),
-		{ 
-			free(error_text); 
+		{
+			free(error_text);
 		});
 }
 

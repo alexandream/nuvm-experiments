@@ -49,7 +49,7 @@ n_register_error_type(const char* name,
 	else if (next_error_type_id >= MAX_ERROR_TYPES) {
 		return N_ERROR_TYPE_OVERFLOW;
 	}
-	
+
 	type_id = next_error_type_id++;
 	error_type = &error_type_pool[type_id];
 
@@ -88,8 +88,10 @@ n_error_destroy(NError* error) {
 
 void
 n_error_reset(NError* error) {
-	n_error_destroy(error);
-	error->type = 0;
+	if (error->type != 0) {
+		n_error_destroy(error);
+		error->type = 0;
+	}
 }
 
 

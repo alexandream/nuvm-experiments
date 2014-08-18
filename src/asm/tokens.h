@@ -5,6 +5,8 @@
 
 #include "streams.h"
 
+#define NI_TOKEN_INITIALIZER { NI_TK_UNKNOWN, NULL }
+
 typedef enum {
 	NI_TK_EOF = 0,
 	NI_TK_TOO_BIG,

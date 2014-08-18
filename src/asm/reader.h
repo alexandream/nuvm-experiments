@@ -47,4 +47,6 @@ ni_read_int32_constant(NLexer* lexer,
                        int32_t* value,
                        NError* error);
 
+void
+ni_init_reader();
 #endif

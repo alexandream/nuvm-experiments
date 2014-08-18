@@ -75,7 +75,7 @@ TEST(read_globals_count_recognizes_input) {
 
 	ni_read_globals_count(lexer, &num_globals, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(num_globals, 65300));
+	ASSERT(EQ_I64(num_globals, 65530));
 }
 
 
@@ -137,8 +137,10 @@ TEST(read_int32_constant_recognizes_input) {
 
 	ni_read_int32_constant(lexer, &value, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(value, -1050088));
+	ASSERT(EQ_I64(value, -1050088L));
 }
+
+
 
 
 static NLexer*

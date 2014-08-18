@@ -6,6 +6,7 @@
 #define N_ERROR_TYPE_NOT_FOUND          UINT32_MAX
 #define N_ERROR_TYPE_OVERFLOW           UINT32_MAX - 1
 #define N_ERROR_TYPE_ALREADY_REGISTERED UINT32_MAX - 2
+#define N_ERROR_LAST_VALID_ERROR        UINT32_MAX - 3
 
 typedef struct {
 	uint32_t type;
