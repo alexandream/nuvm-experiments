@@ -116,6 +116,18 @@ TEST(read_string_constant_recognizes_input) {
 }
 
 
+TEST(read_string_constant_recognizes_input_with_escape_quote) {
+	char* value;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT(".string \"hello,\\\" world\"");
+
+	ni_read_string_constant(lexer, &value, &error);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_STR(value, "hello,\" world"));;
+}
+
+
 TEST(read_double_constant_recognizes_input) {
 	double value;
 	NError error = N_ERROR_INITIALIZER;

@@ -33,14 +33,14 @@ ni_read_double_constant(NLexer* lexer,
 
 void
 ni_read_character_constant(NLexer* lexer,
-						   char** value,
-						   NError* error);
+                           char** value,
+                           NError* error);
 
 void
 ni_read_procedure_constant(NLexer* lexer,
-						   char** label,
-						   uint16_t* num_locals,
-						   NError* error);
+                           char** label,
+                           uint16_t* num_locals,
+                           NError* error);
 
 void
 ni_read_int32_constant(NLexer* lexer,

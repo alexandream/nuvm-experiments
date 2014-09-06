@@ -15,7 +15,7 @@ typedef struct {
 
 
 /* TODO: Make this error type pool dynamic. */
-static uint32_t next_error_type_id = 1;
+static uint32_t next_error_type_id = 2;
 static NErrorType error_type_pool[MAX_ERROR_TYPES];
 
 
@@ -103,7 +103,12 @@ n_error_ok(NError* error) {
 void
 n_init_errors() {
 	NErrorType* success = &error_type_pool[0];
+	NErrorType* unknown = &error_type_pool[1];
 	success->name = "nuvm.errors.Ok";
 	success->print_func = NULL;
 	success->destroy_func = NULL;
+
+	unknown->name = "nuvm.errors.Unknown";
+	unknown->print_func = NULL;
+	unknown->destroy_func = NULL;
 }
