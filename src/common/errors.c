@@ -60,7 +60,7 @@ n_register_error_type(const char* name,
 }
 
 
-const char*
+char*
 n_error_print(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	if (error_type->print_func) {
@@ -71,7 +71,7 @@ n_error_print(NError* error) {
 	}
 }
 
-const char*
+char*
 n_error_print_type_name(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	return strdup(error_type->name);

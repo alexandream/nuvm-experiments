@@ -44,6 +44,7 @@ typedef struct {
 	NCheckResult result; \
 	result.success = CC; \
 	result.message = result.success ? NULL : MM; \
+	FF\
 	return result; \
 } while(0)
 

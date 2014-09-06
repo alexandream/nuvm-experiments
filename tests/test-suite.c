@@ -19,7 +19,7 @@ EQ_I64_IMPL(const char* expression, int64_t value, int64_t expected) {
 
 NCheckResult
 ERROR_OK(NError* error) {
-	const char* error_text = n_error_print(error);
+	char* error_text = n_error_print(error);
 	NI_MAKE_CHECK_F(n_error_ok(error),
 		MF("Error expected to be Ok, but the following error "
 		   "was reported: \"%s\"", error_text),
@@ -51,7 +51,7 @@ EQ_STR_IMPL(const char* expression, const char* value, const char* expected) {
 
 NCheckResult
 HAS_ERROR(NError* error, const char* expected_name) {
-	const char* actual_name = n_error_print_type_name(error);
+	char* actual_name = n_error_print_type_name(error);
 	uint32_t expected_id = n_find_error_type(expected_name);
 	NI_MAKE_CHECK_F(error->type == expected_id,
 		MF("Error expected to be of type %s, but found to be "
