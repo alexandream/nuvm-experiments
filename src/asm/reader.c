@@ -5,6 +5,8 @@
 
 #include "reader.h"
 
+#include "common/polyfills/strdup.h"
+
 static uint32_t
 reader_eof_error;
 
@@ -19,6 +21,12 @@ consume_dec_int_u16(NLexer* lexer, uint16_t* value, NError* error);
 
 static void
 consume_dec_int_u8(NLexer* lexer, uint8_t* value, NError* error);
+
+static void
+consume_double(NLexer* lexer, double* value, NError* error);
+
+static void
+consume_label(NLexer* lexer, char** value, NError* error);
 
 static void
 consume_string(NLexer* lexer, char** value, NError* error);
@@ -95,7 +103,15 @@ ni_read_string_constant(NLexer* lexer,
 void
 ni_read_double_constant(NLexer* lexer,
                         double* value,
-                        NError* error) { }
+                        NError* error) {
+	expect_token_type(lexer, NI_TK_KW_DOUBLE, error);
+	if (!n_error_ok(error)) return;
+
+	ni_lexer_advance(lexer);
+
+	consume_double(lexer, value, error);
+}
+
 
 void
 ni_read_character_constant(NLexer* lexer,
@@ -110,11 +126,23 @@ ni_read_character_constant(NLexer* lexer,
 	consume_string(lexer, value, error);
 }
 
+
 void
 ni_read_procedure_constant(NLexer* lexer,
                            char** label,
                            uint16_t* num_locals,
-                           NError* error) { }
+                           NError* error) {
+	expect_token_type(lexer, NI_TK_KW_PROCEDURE, error);
+	if (!n_error_ok(error)) return;
+
+	ni_lexer_advance(lexer);
+
+	consume_label(lexer, label, error);
+	if (!n_error_ok(error)) return;
+
+	consume_dec_int_u16(lexer, num_locals, error);
+}
+
 
 void
 ni_read_int32_constant(NLexer* lexer,
@@ -201,6 +229,7 @@ consume_dec_int(NLexer* lexer, int32_t* value, NError* error) {
 	ni_destroy_token(cur_token);
 }
 
+
 static void
 consume_dec_int_u16(NLexer* lexer, uint16_t* value, NError* error) {
 	int32_t value_i32;
@@ -228,6 +257,32 @@ consume_dec_int_u8(NLexer* lexer, uint8_t* value, NError* error) {
 	return;
 }
 
+
+static void
+consume_double(NLexer* lexer, double* value, NError* error) {
+	char* end_ptr;
+	NToken cur_token = NI_TOKEN_INITIALIZER;
+	expect_token_type(lexer, NI_TK_REAL, error);
+	if (!n_error_ok(error)) return;
+
+	cur_token = ni_lexer_read(lexer);
+	*value = strtod(cur_token.lexeme, &end_ptr);
+	ni_destroy_token(cur_token);
+	assert(*end_ptr == '\0');
+	assert(errno != ERANGE);
+}
+
+
+static void
+consume_label(NLexer* lexer, char** value, NError* error) {
+	NToken cur_token = NI_TOKEN_INITIALIZER;
+	expect_token_type(lexer, NI_TK_LABEL, error);
+	if (!n_error_ok(error)) return;
+
+	cur_token = ni_lexer_read(lexer);
+	*value = strdup(&cur_token.lexeme[1]);
+	ni_destroy_token(cur_token);
+}
 
 static void
 consume_string(NLexer* lexer, char** value, NError* error) {
