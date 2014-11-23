@@ -5,7 +5,7 @@
 
 #include "reader.h"
 
-#include "common/polyfills/strdup.h"
+#include "common/polyfills/p-strdup.h"
 
 static uint32_t
 reader_eof_error;

@@ -2,7 +2,7 @@
 #include <string.h>
 
 #include "errors.h"
-#include "polyfills/strdup.h"
+#include "polyfills/p-strdup.h"
 
 #define MAX_ERROR_TYPES 1024
 

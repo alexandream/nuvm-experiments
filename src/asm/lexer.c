@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "common/polyfills/strdup.h"
+#include "common/polyfills/p-strdup.h"
 
 #include "lexer.h"
 #define LEXEME_BUFFER_SIZE 256
