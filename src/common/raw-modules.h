@@ -1,7 +1,7 @@
 #ifndef __N__COMMON__RAW_MODULE__H__
 #define __N__COMMON__RAW_MODULE__H__
 
-#include "std-types.h"
+#include "polyfills/p-stdint.h"
 
 #define MAGIC_MASK   0x000000FFFFFFFFFF
 #define MAGIC_NUMBER 0x0000004D56554E1B

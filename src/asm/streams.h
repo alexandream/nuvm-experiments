@@ -1,7 +1,7 @@
 #ifndef __N__ASM__STREAMS__H__
 #define __N__ASM__STREAMS__H__
 
-#include "common/std-types.h"
+#include "common/polyfills/p-stdint.h"
 
 typedef struct NStream NStream;
 

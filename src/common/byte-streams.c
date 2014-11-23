@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include "std-types.h"
+#include "polyfills/p-stdint.h"
 
 #include "byte-streams.h"
 

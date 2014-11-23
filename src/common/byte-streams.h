@@ -1,7 +1,7 @@
 #ifndef __N__COMMON__BYTE_STREAM__H__
 #define __N__COMMON__BYTE_STREAM__H__
 
-#include "std-types.h"
+#include "polyfills/p-stdint.h"
 
 uint8_t
 ni_read_byte(uint8_t* stream, int64_t size, int64_t* index);

@@ -1,7 +1,7 @@
 #ifndef __N__COMMON__ERRORS__H__
 #define __N__COMMON__ERRORS__H__
 
-#include "std-types.h"
+#include "polyfills/p-stdint.h"
 
 #define N_ERROR_TYPE_NOT_FOUND          UINT32_MAX
 #define N_ERROR_TYPE_OVERFLOW           UINT32_MAX - 1
