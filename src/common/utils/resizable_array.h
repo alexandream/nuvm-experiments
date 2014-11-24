@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "types.h"
+#include "../polyfills/p-stdint.h"
 #include "prefix-macro.h"
 
 #ifndef ARRAY_TYPE_NAME
@@ -108,10 +108,12 @@ int32_t ARRAY_COUNT(ARRAY_TYPE_NAME* array) {
 }
 
 
+#ifndef ARRAY_ELEMENTS__SKIP
 static
 ARRAY_CONTENTS_TYPE* ARRAY_ELEMENTS(ARRAY_TYPE_NAME* array) {
 	return array->elements;
 }
+#endif
 
 
 static
@@ -172,3 +174,4 @@ void ARRAY_SET(ARRAY_TYPE_NAME* array,
 
 #undef ARRAY_APPEND__SKIP
 #undef ARRAY_DESTROY__SKIP
+#undef ARRAY_ELEMENTS__SKIP
