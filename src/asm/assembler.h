@@ -1,51 +1,15 @@
 #ifndef __N__ASM__builder_H__
 #define __N__ASM__builder_H__
 
-#include "lexer.h"
-#include "common/errors.h"
-
-struct NStreamWriter {
-	NStreamWriter_vtable* vtable;
-};
-
-struct NStreamWriter_vtable {
-	void (*write_bytes)(NStreamWriter* self,
-	                    uint8_t* data,
-	                    uint32_t size,
-	                    NError* error);
-
-	void (*close)(NStreamWriter* self, NError* error);
-}
-
+#include "../common/polyfills/p-stdint.h"
 
 typedef struct NAssembler NAssembler;
-typedef struct NConstantDescriptor NConstantDescriptor;
-typedef struct NPointerArray NPointerArray;
 
-struct NConstantDescriptor {
-	uint8_t type;
-	uint64_t integer;
-	double real;
-	char* text;
-}
+NAssembler*
+ni_new_assembler();
 
-struct NPointerArray {
-	int32_t capacity;
-	int32_t size;
-	void** values;
-}:
-
-
-struct NAssembler {
-	uint8_t version[3];
-	uint16_t entry_point;
-	uint16_t globals_count;
-
-	NPointerArray constants; /* <NConstantDescriptor> */
-
-	Map<String, Int> 
-}
-
+void
+ni_destroy_assembler(NAssembler* self);
 
 void
 ni_asm_set_version(NAssembler* self,
@@ -79,7 +43,9 @@ ni_asm_add_procedure_constant(NAssembler* self,
 uint16_t
 ni_asm_get_label(NAssembler* self, const char* label);
 
+/*
 void
 ni_asm_write_output(NAssembler* self, NStreamWriter* writer, NError* error);
+*/
 
 #endif
