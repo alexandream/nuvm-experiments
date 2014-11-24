@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifndef HAVE_STRDUP
+#ifndef HAS_STRDUP
 char *strdup(const char *str)
 {
 	size_t length = strlen(str);
