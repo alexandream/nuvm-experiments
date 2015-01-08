@@ -76,6 +76,22 @@ n_error_print_type_name(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];
 	return strdup(error_type->name);
 }
+
+
+NError*
+n_error_clone(NError* error) {
+	/* FIXME (#4): MUST use different allocation strategy here. */
+	/* If we fail to do this, this will break when errors with garbage
+	 * data in them get cloned. */
+	NError* cloned = (NError*) malloc(sizeof(NError));
+	if (cloned != NULL) {
+		cloned->type = error->type;
+		cloned->data = error->data;
+	}
+	return cloned;
+}
+
+
 void
 n_error_destroy(NError* error) {
 	NErrorType* error_type = &error_type_pool[error->type];

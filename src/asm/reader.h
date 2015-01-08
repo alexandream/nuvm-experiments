@@ -2,8 +2,8 @@
 #define __N__ASM__READER_H__
 
 #include "lexer.h"
+#include "assembler.h"
 #include "common/errors.h"
-
 void
 ni_read_version(NLexer* lexer,
                 uint8_t* major,

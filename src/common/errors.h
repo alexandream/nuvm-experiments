@@ -13,6 +13,7 @@ typedef struct {
 	void* data;
 } NError;
 
+/* FIXME (#4): This initializer fails if any GC is involved on error data */
 #define N_ERROR_INITIALIZER { 0, NULL }
 
 typedef char* (*error_print_func_t)(NError*);
@@ -38,6 +39,9 @@ n_error_destroy(NError* error);
 
 void
 n_error_reset(NError* error);
+
+NError*
+n_error_clone(NError* error);
 
 bool
 n_error_ok(NError* error);

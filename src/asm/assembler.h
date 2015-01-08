@@ -1,6 +1,7 @@
 #ifndef __N__ASM__builder_H__
 #define __N__ASM__builder_H__
 
+#include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
 
 typedef struct NAssembler NAssembler;
@@ -41,8 +42,11 @@ ni_asm_add_procedure_constant(NAssembler* self,
                               uint16_t nlocals);
 
 uint16_t
-ni_asm_get_label(NAssembler* self, const char* label);
+ni_asm_get_label(NAssembler* self, const char* label, NError* error);
 
+
+void
+ni_init_assembler();
 /*
 void
 ni_asm_write_output(NAssembler* self, NStreamWriter* writer, NError* error);

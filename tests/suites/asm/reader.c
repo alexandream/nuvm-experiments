@@ -36,7 +36,7 @@ TEST(read_version_recognizes_input) {
 
 TEST(read_version_rejects_incomplete_input) {
 	uint8_t a,b,c;
-	const char* error_name = "nuvm.asm.reader.errors.EOF";
+	const char* error_name = "nuvm.asm.reader.EOF";
 	NError error = N_ERROR_INITIALIZER;
 
 	const char* inputs[] = {

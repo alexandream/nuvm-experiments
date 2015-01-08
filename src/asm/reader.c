@@ -160,10 +160,12 @@ ni_read_int32_constant(NLexer* lexer,
 void
 ni_init_reader() {
 	reader_eof_error =
-		n_register_error_type("nuvm.asm.reader.errors.EOF", NULL, NULL);
+		n_register_error_type("nuvm.asm.reader.EOF", NULL, NULL);
 
 	assert(reader_eof_error < N_ERROR_LAST_VALID_ERROR);
 }
+
+
 
 static void
 expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error) {

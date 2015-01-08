@@ -1,5 +1,5 @@
-#ifndef __N__ASM__LEXERS__H__
-#define __N__ASM__LEXERS__H__
+#ifndef __N__ASM__LEXER__H__
+#define __N__ASM__LEXER__H__
 
 #include "streams.h"
 #include "tokens.h"
