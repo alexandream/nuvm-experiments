@@ -13,10 +13,18 @@ typedef struct {
 	uint32_t definition;
 } NLabel;
 
-/* Instantiating the resizable-array template */
+
+/* Instantiating the resizable-array template for the label pool */
 #define ARRAY_TYPE_NAME NLabelArray
 #define ARRAY_CONTENTS_TYPE NLabel
 #define ARRAY_PREFIX nlarray
+#define ARRAY_ELEMENTS__SKIP
+#include "../common/utils/resizable-array/full.h"
+
+/* Instantiating the resizable-array template for the instructions pool */
+#define ARRAY_TYPE_NAME NCodePool
+#define ARRAY_CONTENTS_TYPE NInstruction*
+#define ARRAY_PREFIX ncpool
 #define ARRAY_ELEMENTS__SKIP
 #include "../common/utils/resizable-array/full.h"
 
@@ -36,8 +44,6 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error);
 static void
 consume_header_data(NAssembler* self, NLexer* lexer, NError* error);
 
-static bool
-is_constant_description_token(NTokenType);
 
 /*
 struct NStreamWriter {
@@ -71,8 +77,7 @@ struct NAssembler {
 	uint16_t entry_point;
 	uint16_t globals_count;
 
-	uint32_t cur_code_index;
-
+	NCodePool code_pool;
 	NLabelArray label_pool;
 
 };
@@ -88,6 +93,7 @@ ni_new_assembler() {
 	/* FIXME: This array initializer has no way of signaling errors
 	 * to the caller */
 	nlarray_init(&result->label_pool, 64);
+	ncpool_init(&result->code_pool, 1024);
 	return result;
 }
 
@@ -102,6 +108,8 @@ ni_destroy_assembler(NAssembler* self) {
 		free(elem.name);
 	}
 	nlarray_destroy(pool);
+	ncpool_destroy(&self->code_pool);
+
 	free(self);
 }
 
@@ -131,9 +139,25 @@ ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count) {
 
 void
 ni_asm_add_instruction(NAssembler* self,
-                       NInstructionDescriptor* instruction,
+                       NInstruction* instruction,
                        NError* error) {
+	NInstruction* owned_instruction =
+		ni_asm_instruction_clone(instruction, error);
+	if (!n_error_ok(error)) return;
+	if (instruction->argument_label != NULL) {
+		owned_instruction->argument_label_id =
+			ni_asm_get_label(self, instruction->argument_label, error);
+		if (!n_error_ok(error)) goto handle_error;
+	}
 
+	ncpool_append(&self->code_pool, owned_instruction);
+
+	return;
+handle_error:
+	if (owned_instruction != NULL) {
+		ni_asm_instruction_destroy(owned_instruction);
+		free(owned_instruction);
+	}
 }
 
 
@@ -202,7 +226,7 @@ ni_asm_define_label(NAssembler* self, const char* label_name, NError* error) {
 	if (!n_error_ok(error)) return;
 
 	label = nlarray_get(&self->label_pool, label_id);
-	label.definition = self->cur_code_index;
+	label.definition = ncpool_count(&self->code_pool);
 }
 
 
@@ -285,11 +309,12 @@ consume_code_element(NAssembler* self,
 		ni_destroy_token(label_def);
 	}
 	else if (ni_token_is_opcode(token)) {
-		NInstructionDescriptor instruction;
+		NInstruction instruction = N_INSTRUCTION_INITIALIZER;
 		ni_read_instruction(lexer, &instruction, error);
 		if (!n_error_ok(error)) return;
 
 		ni_asm_add_instruction(self, &instruction, error);
+		ni_asm_instruction_destroy(&instruction);
 		if (!n_error_ok(error)) return;
 	}
 	else {
@@ -389,7 +414,7 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 	ni_lexer_advance(lexer);
 
 	next_token = ni_lexer_peek(lexer);
-	while (is_constant_description_token(next_token)) {
+	while (ni_token_is_constant_keyword(next_token)) {
 		consume_constant(self, lexer, next_token, error);
 		if (!n_error_ok(error)) {
 			NError* original_error = n_error_clone(error);
@@ -434,10 +459,4 @@ consume_header_data(NAssembler* self, NLexer* lexer, NError* error) {
 	}
 
 	ni_asm_set_globals_count(self, globals_count);
-}
-
-
-static bool
-is_constant_description_token(NTokenType token) {
-	return true;
 }

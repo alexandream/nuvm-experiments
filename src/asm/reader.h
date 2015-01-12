@@ -1,24 +1,9 @@
 #ifndef __N__ASM__READER_H__
 #define __N__ASM__READER_H__
 
-typedef struct NInstructionDescriptor NInstructionDescriptor;
-
 #include "lexer.h"
-#include "assembler.h"
+#include "instruction.h"
 #include "common/errors.h"
-
-typedef struct {
-	uint8_t type;
-	int32_t value;
-} NInstructionArgument;
-
-struct NInstructionDescriptor {
-	uint8_t opcode;
-	NInstructionArgument arg_a;
-	NInstructionArgument arg_b;
-	NInstructionArgument arg_c;
-	const char* argument_label;
-};
 
 
 void
@@ -66,7 +51,7 @@ ni_read_int32_constant(NLexer* lexer,
 
 void
 ni_read_instruction(NLexer* lexer,
-                    NInstructionDescriptor* instruction,
+                    NInstruction* instruction,
                     NError* error);
 
 void

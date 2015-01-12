@@ -66,7 +66,6 @@ ni_lexer_read(NLexer* self) {
 NToken
 ni_lexer_copy(NLexer* self) {
 	NToken result;
-
 	result.type = ni_lexer_peek(self);
 	result.lexeme = strdup(self->buffer);
 

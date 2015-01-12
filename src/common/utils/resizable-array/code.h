@@ -62,11 +62,7 @@ ARRAY_CONTENTS_TYPE* ARRAY_ELEMENTS(ARRAY_TYPE_NAME* array) {
 
 ARRAY_STATIC
 ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME* array, int32_t index) {
-	ARRAY_CONTENTS_TYPE result;
 	assert(index >= 0);
-	do {
-		ARRAY_COPY_ELEMENT(&result, &array->elements[index]);
-	} while(0);
 	return array->elements[index];
 }
 

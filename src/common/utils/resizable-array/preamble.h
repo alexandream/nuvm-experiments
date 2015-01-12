@@ -7,10 +7,15 @@
 #include "../../polyfills/p-stdint.h"
 #include "../prefix-macro.h"
 
-#define ARRAY_STATIC
+#endif
+
 
 #ifdef ARRAY_USE_STATIC
-#define ARRAY_STATIC static
+  #ifndef ARRAY_STATIC
+    #define ARRAY_STATIC static
+  #endif
+#else
+  #define ARRAY_STATIC
 #endif
 
 #ifndef ARRAY_TYPE_NAME
@@ -53,4 +58,3 @@
 #define ARRAY_RESIZE   NI_PREFIX_NAME(ARRAY_PREFIX, resize)
 #define ARRAY_SET      NI_PREFIX_NAME(ARRAY_PREFIX, set)
 
-#endif

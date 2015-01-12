@@ -28,7 +28,7 @@ ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count);
 
 void
 ni_asm_add_instruction(NAssembler* self,
-                       NInstructionDescriptor* instruction,
+                       NInstruction* instruction,
                        NError* error);
 
 void

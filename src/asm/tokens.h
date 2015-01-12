@@ -90,4 +90,7 @@ ni_token_lift(NToken token);
 
 bool
 ni_token_is_opcode(NTokenType token_type);
+
+bool
+ni_token_is_constant_keyword(NTokenType token_type);
 #endif

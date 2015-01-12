@@ -1,5 +1,6 @@
 #include "common/common.h"
 #include "reader.h"
+#include "assembler.h"
 
 void
 n_init_asm() {

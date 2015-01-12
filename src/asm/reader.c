@@ -43,12 +43,12 @@ consume_string(NLexer* lexer, char** value, NError* error);
 static int32_t
 parse_dec_integer(const char* lexeme);
 
-static NInstructionArgument
+static NArgument
 parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error);
 
 static void
 read_register_based_instruction(NLexer* lexer,
-                                NInstructionDescriptor* instruction,
+                                NInstruction* instruction,
                                 uint8_t reg_a_bits,
                                 uint8_t reg_a_types,
                                 uint8_t reg_b_bits,
@@ -57,6 +57,10 @@ read_register_based_instruction(NLexer* lexer,
                                 uint8_t reg_c_types,
                                 NError* error);
 
+static void
+ni_read_arith_rel_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error);
 
 void
 ni_read_version(NLexer* lexer,
@@ -186,15 +190,28 @@ ni_read_int32_constant(NLexer* lexer,
 
 void
 ni_read_instruction(NLexer* lexer,
-                    NInstructionDescriptor* instruction,
+                    NInstruction* instruction,
                     NError* error) {
-
+	NTokenType opcode_token = ni_lexer_peek(lexer);
+	switch(opcode_token) {
+		case NI_TK_OP_EQ:
+		case NI_TK_OP_GE:
+		case NI_TK_OP_GT:
+		case NI_TK_OP_LE:
+		case NI_TK_OP_LT:
+		case NI_TK_OP_ADD:
+		case NI_TK_OP_DIV:
+		case NI_TK_OP_MUL:
+		case NI_TK_OP_SUB:
+			ni_read_arith_rel_instruction(lexer, instruction, error);
+			return;
+	}
 }
 
-void
-ni_read_arithmetic_rel_instruction(NLexer* lexer,
-                               NInstructionDescriptor* instruction,
-                               NError* error) {
+static void
+ni_read_arith_rel_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error) {
 	read_register_based_instruction(lexer, instruction,
 	                                8,  LREG,
 	                                7,  LREG|CREG,
@@ -205,7 +222,7 @@ ni_read_arithmetic_rel_instruction(NLexer* lexer,
 
 void
 ni_read_move_instruction(NLexer* lexer,
-                         NInstructionDescriptor* instruction,
+                         NInstruction* instruction,
                          NError* error) {
 	read_register_based_instruction(lexer, instruction,
 	                                8,  LREG,
@@ -217,7 +234,7 @@ ni_read_move_instruction(NLexer* lexer,
 
 static void
 read_register_based_instruction(NLexer* lexer,
-                                NInstructionDescriptor* instruction,
+                                NInstruction* instruction,
                                 uint8_t reg_a_bits,
                                 uint8_t reg_a_types,
                                 uint8_t reg_b_bits,
@@ -258,9 +275,9 @@ read_register_based_instruction(NLexer* lexer,
 
 
 
-static NInstructionArgument
+static NArgument
 parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
-	NInstructionArgument result;
+	NArgument result;
 	NToken token = NI_TOKEN_INITIALIZER;
 	int32_t max_value, value;
 	uint8_t type;
@@ -382,7 +399,7 @@ parse_dec_integer(const char* lexeme) {
 	return result;
 }
 
-
+#include <stdio.h>
 static char*
 parse_string(NToken token) {
 	char* result;
@@ -409,6 +426,7 @@ parse_string(NToken token) {
 		result[j] = input[i];
 		j++;
 	}
+	result[j] = '\0';
 	return result;
 }
 

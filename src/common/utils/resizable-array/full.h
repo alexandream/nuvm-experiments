@@ -1,9 +1,10 @@
+#define ARRAY_USE_STATIC
 #include "preamble.h"
 
 #define ARRAY_UNDEFINES__SKIP
-#define ARRAY_USE_STATIC
 #include "header.h"
 
+#undef ARRAY_STATIC
 #include "code.h"
 
 #undef ARRAY_UNDEFINES__SKIP

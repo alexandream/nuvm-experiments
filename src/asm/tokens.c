@@ -359,6 +359,21 @@ ni_token_lift(NToken token) {
 
 
 bool
+ni_token_is_constant_keyword(NTokenType token_type) {
+	switch(token_type) {
+		case NI_TK_KW_CHARACTER:
+		case NI_TK_KW_DOUBLE:
+		case NI_TK_KW_INT32:
+		case NI_TK_KW_PROCEDURE:
+		case NI_TK_KW_STRING:
+			return true;
+		default:
+			return false;
+	}
+}
+
+
+bool
 ni_token_is_opcode(NTokenType token_type) {
 	return token_type > NI_TK_XX_OPCODES_START &&
 	       token_type < NI_TK_XX_OPCODES_END;
