@@ -1,3 +1,4 @@
+#include <string.h>
 
 #include "assembler.h"
 #include "reader.h"
@@ -5,10 +6,17 @@
 #include "../common/polyfills/p-strcasecmp.h"
 #include "../common/polyfills/p-strdup.h"
 
+#define UNDEFINED_LABEL UINT32_MAX
+
+typedef struct {
+	char* name;
+	uint32_t definition;
+} NLabel;
+
 /* Instantiating the resizable-array template */
-#define ARRAY_TYPE_NAME NStringArray
-#define ARRAY_CONTENTS_TYPE char*
-#define ARRAY_PREFIX nsarray
+#define ARRAY_TYPE_NAME NLabelArray
+#define ARRAY_CONTENTS_TYPE NLabel
+#define ARRAY_PREFIX nlarray
 #define ARRAY_ELEMENTS__SKIP
 #include "../common/utils/resizable-array/full.h"
 
@@ -17,8 +25,8 @@ static uint32_t error_code_not_found,
                 error_constant_parsing_failed,
                 error_constants_not_found,
                 error_empty_constants_list,
-                error_entry_point_out_of_bounds;
-
+                error_entry_point_out_of_bounds,
+                error_unexpected_token;
 static void
 consume_code_segment(NAssembler* self, NLexer* lexer, NError* error);
 
@@ -63,8 +71,9 @@ struct NAssembler {
 	uint16_t entry_point;
 	uint16_t globals_count;
 
+	uint32_t cur_code_index;
 
-	NStringArray label_pool;
+	NLabelArray label_pool;
 
 };
 
@@ -78,21 +87,21 @@ ni_new_assembler() {
 	}
 	/* FIXME: This array initializer has no way of signaling errors
 	 * to the caller */
-	nsarray_init(&result->label_pool, 64);
+	nlarray_init(&result->label_pool, 64);
 	return result;
 }
 
 
 void
 ni_destroy_assembler(NAssembler* self) {
-	NStringArray* pool = &self->label_pool;
-	int32_t nelements = nsarray_count(pool);
+	NLabelArray* pool = &self->label_pool;
+	int32_t nelements = nlarray_count(pool);
 	int32_t i;
 	for (i = 0; i < nelements; i++) {
-		char* elem = nsarray_get(pool, i);
-		free(elem);
+		NLabel elem = nlarray_get(pool, i);
+		free(elem.name);
 	}
-	nsarray_destroy(pool);
+	nlarray_destroy(pool);
 	free(self);
 }
 
@@ -118,6 +127,15 @@ void
 ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count) {
 	self->globals_count = globals_count;
 }
+
+
+void
+ni_asm_add_instruction(NAssembler* self,
+                       NInstructionDescriptor* instruction,
+                       NError* error) {
+
+}
+
 
 
 void
@@ -153,14 +171,14 @@ ni_asm_add_procedure_constant(NAssembler* self,
 
 uint16_t
 ni_asm_get_label(NAssembler* self, const char* label, NError* error) {
-	NStringArray* pool = &self->label_pool;
-	int32_t size = nsarray_count(pool);
-	char* new_element;
+	NLabelArray* pool = &self->label_pool;
+	int32_t size = nlarray_count(pool);
+	NLabel new_element;
 	int32_t i;
 	/* Find the label in the pool, if it exists. */
 	for (i = 0; i < size; i++) {
-		char* elem = nsarray_get(pool, i);
-		if (strcasecmp(label, elem) == 0) {
+		NLabel elem = nlarray_get(pool, i);
+		if (strcasecmp(label, elem.name) == 0) {
 			/* FIXME: Should add a proper limiting factor to the for to make
 			 * sure type constraints are preserved in the cast below */
 			return (uint16_t) i;
@@ -169,8 +187,22 @@ ni_asm_get_label(NAssembler* self, const char* label, NError* error) {
 	/* If we reach this, then the label is not yet present in the pool.
 	 * We should add it. */
 	/* FIXME: What do we do when this returns NULL? */
-	new_element = strdup(label);
-	return (uint16_t) nsarray_append(pool, new_element);
+	new_element.name = strdup(label);
+	new_element.definition = UNDEFINED_LABEL;
+
+	return (uint16_t) nlarray_append(pool, new_element);
+}
+
+
+void
+ni_asm_define_label(NAssembler* self, const char* label_name, NError* error) {
+	NLabel label;
+
+	uint16_t label_id = ni_asm_get_label(self, label_name, error);
+	if (!n_error_ok(error)) return;
+
+	label = nlarray_get(&self->label_pool, label_id);
+	label.definition = self->cur_code_index;
 }
 
 
@@ -179,7 +211,7 @@ ni_asm_read_from_lexer(NAssembler* self, NLexer* lexer, NError* error) {
 
 	consume_header_data(self, lexer, error);
 	if (!n_error_ok(error)) return;
-	
+
 	consume_constant_list(self, lexer, error);
 	if (!n_error_ok(error)) return;
 
@@ -197,6 +229,7 @@ destroy_error_with_child(NError* error) {
 	}
 	error->data = NULL;
 }
+
 
 
 void ni_init_assembler() {
@@ -229,6 +262,12 @@ void ni_init_assembler() {
 		                      NULL,
 		                      destroy_error_with_child);
 	assert(error_code_parsing_failed < N_ERROR_LAST_VALID_ERROR);
+
+	error_unexpected_token =
+		n_register_error_type("nuvm.asm.assembler.UnexpectedToken",
+		                      NULL,
+		                      n_error_destroy_by_freeing);
+	assert(error_unexpected_token < N_ERROR_LAST_VALID_ERROR);
 }
 
 
@@ -237,6 +276,29 @@ consume_code_element(NAssembler* self,
                      NLexer* lexer,
                      NTokenType token,
                      NError* error) {
+	if(token == NI_TK_LABEL_DEF) {
+		NToken label_def = ni_lexer_read(lexer);
+		size_t label_len = strlen(label_def.lexeme);
+		char* label_name = label_def.lexeme;
+		label_name[label_len] = '\0';
+		ni_asm_define_label(self, label_name, error);
+		ni_destroy_token(label_def);
+	}
+	else if (ni_token_is_opcode(token)) {
+		NInstructionDescriptor instruction;
+		ni_read_instruction(lexer, &instruction, error);
+		if (!n_error_ok(error)) return;
+
+		ni_asm_add_instruction(self, &instruction, error);
+		if (!n_error_ok(error)) return;
+	}
+	else {
+		NToken token_data = ni_lexer_copy(lexer);
+		error->type = error_unexpected_token;
+		error->data = (void*) ni_token_lift(token_data);
+		return;
+	}
+
 }
 
 
@@ -247,7 +309,7 @@ consume_code_segment(NAssembler* self, NLexer* lexer, NError* error) {
 		error->type = error_code_not_found;
 		return;
 	}
-	
+
 	next_token = ni_lexer_peek(lexer);
 	while (next_token != NI_TK_EOF) {
 		consume_code_element(self, lexer, next_token, error);
@@ -267,6 +329,7 @@ consume_constant(NAssembler* self,
                  NLexer* lexer,
                  NTokenType token,
                  NError* error) {
+	NToken token_data;
 	char* string_value;
 	char* label_name;
 	uint16_t num_locals, label_id;
@@ -307,6 +370,9 @@ consume_constant(NAssembler* self,
 			ni_asm_add_string_constant(self, string_value);
 			break;
 		default:
+			token_data = ni_lexer_copy(lexer);
+			error->type = error_unexpected_token;
+			error->data = (void*) ni_token_lift(token_data);
 			break;
 	}
 }

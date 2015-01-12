@@ -116,6 +116,16 @@ n_error_ok(NError* error) {
 	return error->type == 0;
 }
 
+
+void
+n_error_destroy_by_freeing(NError* error) {
+	void* data = error->data;
+	if (data != NULL) {
+		free(data);
+	}
+}
+
+
 void
 n_init_errors() {
 	NErrorType* success = &error_type_pool[0];

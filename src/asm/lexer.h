@@ -15,6 +15,9 @@ ni_new_lexer(NStream* input);
 void
 ni_lexer_advance(NLexer* self);
 
+NToken
+ni_lexer_copy(NLexer* self);
+
 NTokenType
 ni_lexer_peek(NLexer* self);
 

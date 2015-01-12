@@ -209,6 +209,10 @@ ni_get_token_name(NTokenType type) {
 		case NI_TK_OP_RETURN: return "OP_RETURN";
 
 		case NI_TK_UNKNOWN: return "UNKNOWN";
+		/* Control tokens should not appear anywhere else. */
+		case NI_TK_XX_OPCODES_START:
+		case NI_TK_XX_OPCODES_END:
+			return "Control Token";
 	}
 }
 
@@ -336,6 +340,28 @@ ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
 		result = NI_TK_TOO_BIG;
 	}
 	return result;
+}
+
+
+/* Takes a stack allocated token value and turns it into a heap allocated.
+ * The lexeme, which is already stored in a heap value, is maintained, so the
+ * original stack allocated token should not be modified after being lifted. */
+NToken*
+ni_token_lift(NToken token) {
+	/* FIXME (#1): Double check this allocation when GC comes up. */
+	NToken* result = (NToken*) malloc(sizeof(NToken));
+	if (result != NULL) {
+		result->type = token.type;
+		result->lexeme = token.lexeme;
+	}
+	return result;
+}
+
+
+bool
+ni_token_is_opcode(NTokenType token_type) {
+	return token_type > NI_TK_XX_OPCODES_START &&
+	       token_type < NI_TK_XX_OPCODES_END;
 }
 
 

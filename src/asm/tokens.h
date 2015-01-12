@@ -33,6 +33,8 @@ typedef enum {
 
 	NI_TK_UNRECOGNIZED_KW,
 
+	NI_TK_XX_OPCODES_START,
+
 	NI_TK_OP_GLOBAL_REF,
 	NI_TK_OP_GLOBAL_SET,
 	NI_TK_OP_MOVE,
@@ -60,6 +62,8 @@ typedef enum {
 
 	NI_TK_OP_RETURN,
 
+	NI_TK_XX_OPCODES_END,
+
 	NI_TK_UNKNOWN = -1
 } NTokenType;
 
@@ -80,4 +84,10 @@ ni_get_token_name(NTokenType type);
 NTokenType
 ni_get_next_token(NStream* stream, char* buffer, size_t bufsize);
 
+NToken*
+ni_token_lift(NToken token);
+
+
+bool
+ni_token_is_opcode(NTokenType token_type);
 #endif

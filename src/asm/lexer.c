@@ -57,11 +57,18 @@ ni_lexer_peek(NLexer* self) {
 
 NToken
 ni_lexer_read(NLexer* self) {
+	NToken result = ni_lexer_copy(self);
+	ni_lexer_advance(self);
+	return result;
+}
+
+
+NToken
+ni_lexer_copy(NLexer* self) {
 	NToken result;
-	
+
 	result.type = ni_lexer_peek(self);
 	result.lexeme = strdup(self->buffer);
 
-	ni_lexer_advance(self);
 	return result;
 }

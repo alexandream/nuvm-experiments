@@ -1,6 +1,8 @@
 #ifndef __N__ASM__builder_H__
 #define __N__ASM__builder_H__
 
+#include "reader.h"
+
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
 
@@ -25,6 +27,11 @@ void
 ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count);
 
 void
+ni_asm_add_instruction(NAssembler* self,
+                       NInstructionDescriptor* instruction,
+                       NError* error);
+
+void
 ni_asm_add_string_constant(NAssembler* self, const char* str);
 
 void
@@ -43,6 +50,9 @@ ni_asm_add_procedure_constant(NAssembler* self,
 
 uint16_t
 ni_asm_get_label(NAssembler* self, const char* label, NError* error);
+
+void
+ni_asm_define_label(NAssembler* self, const char* label, NError* error);
 
 
 void

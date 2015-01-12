@@ -47,5 +47,8 @@ bool
 n_error_ok(NError* error);
 
 void
+n_error_destroy_by_freeing(NError* error);
+
+void
 n_init_errors();
 #endif
