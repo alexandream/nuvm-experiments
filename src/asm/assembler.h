@@ -8,6 +8,15 @@
 
 typedef struct NAssembler NAssembler;
 
+
+enum NConstantType {
+	NI_CONSTANT_STRING = 0,
+	NI_CONSTANT_DOUBLE,
+	NI_CONSTANT_INT32,
+	NI_CONSTANT_PROCEDURE,
+	NI_CONSTANT_CHARACTER
+};
+
 NAssembler*
 ni_new_assembler();
 
@@ -32,13 +41,13 @@ ni_asm_add_instruction(NAssembler* self,
                        NError* error);
 
 void
-ni_asm_add_string_constant(NAssembler* self, const char* str);
+ni_asm_add_string_constant(NAssembler* self, char* str);
 
 void
 ni_asm_add_double_constant(NAssembler* self, double number);
 
 void
-ni_asm_add_character_constant(NAssembler* self, const char* utf8_char);
+ni_asm_add_character_constant(NAssembler* self, char* utf8_char);
 
 void
 ni_asm_add_int32_constant(NAssembler* self, int32_t integer);
