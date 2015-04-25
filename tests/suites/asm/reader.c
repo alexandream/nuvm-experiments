@@ -320,6 +320,47 @@ TEST(read_instruction_rejects_load_bool_other) {
 }
 
 
+TEST(read_instruction_recognizes_jump) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("jump -8000000");
+	ni_read_instruction(lexer, &ins, &error);
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_JUMP));
+	ASSERT(EQ_I64(ins.arg_a.value, -8000000));
+}
+
+
+TEST(read_instruction_recognizes_jump_if) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("jump-if L:127 65535");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_JUMP_IF));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 127));
+	ASSERT(EQ_I64(ins.arg_b.value, 65535));
+}
+
+
+TEST(read_instruction_recognizes_return) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("return L:4194303");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_RETURN));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 4194303));
+}
+
+
 static NLexer*
 WITH_INPUT(const char* input) {
 	END_INPUT();

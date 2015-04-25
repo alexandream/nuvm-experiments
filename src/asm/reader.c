@@ -12,7 +12,9 @@
 #define GREG NI_RT_GLOBAL
 #define LREG NI_RT_LOCAL
 
-
+#define INT24_MIN  -8388608
+#define INT24_MAX   8388607
+#define UINT22_MAX  4194303
 static uint32_t error_eof,
                 error_incompatible_register_type,
                 error_register_out_of_range,
@@ -75,10 +77,22 @@ static void
 ni_read_global_set_instruction(NLexer* lexer,
                                NInstruction* instruction,
                                NError* error);
+
+static void
+ni_read_jump_instruction(NLexer* lexer,
+                         NInstruction* instruction,
+                         NError* error);
+
+static void
+ni_read_jump_if_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error);
+
 static void
 ni_read_load_bool_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error);
+
 static void
 ni_read_logical_instruction(NLexer* lexer,
                             NInstruction* instruction,
@@ -93,6 +107,11 @@ static void
 ni_read_not_instruction(NLexer* lexer,
                         NInstruction* instruction,
                         NError* error);
+
+static void
+ni_read_return_instruction(NLexer* lexer,
+                           NInstruction* instruction,
+                           NError* error);
 
 void
 ni_read_version(NLexer* lexer,
@@ -256,6 +275,15 @@ ni_read_instruction(NLexer* lexer,
 		case NI_TK_OP_LOAD_BOOL:
 			ni_read_load_bool_instruction(lexer, instruction, error);
 			return;
+		case NI_TK_OP_JUMP:
+			ni_read_jump_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_JUMP_IF:
+			ni_read_jump_if_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_RETURN:
+			ni_read_return_instruction(lexer, instruction, error);
+			return;
 	}
 }
 
@@ -308,6 +336,60 @@ ni_read_global_set_instruction(NLexer* lexer,
 
 
 static void
+ni_read_jump_instruction(NLexer* lexer,
+                         NInstruction* instruction,
+                         NError* error) {
+	NToken offset_tk = NI_TOKEN_INITIALIZER;
+	int32_t offset = 0;
+	uint8_t opcode = consume_opcode(lexer, error);
+	if (!n_error_ok(error)) return;
+
+	instruction->opcode = opcode;
+
+	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	if (!n_error_ok(error)) return;
+
+	offset_tk = ni_lexer_read(lexer);
+	offset = parse_dec_integer(offset_tk.lexeme);
+	if (offset < INT24_MIN || offset > INT24_MAX) {
+		error->type = error_register_out_of_range;
+		return;
+	}
+	instruction->arg_a.value = offset;
+}
+
+
+static void
+ni_read_jump_if_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error) {
+	NToken offset_tk = NI_TOKEN_INITIALIZER;
+	int32_t offset = 0;
+	uint8_t opcode = consume_opcode(lexer, error);
+	if (!n_error_ok(error)) return;
+
+
+	instruction->opcode = opcode;
+
+	instruction->arg_a = parse_register(lexer, 8, LREG, error);
+	if (!n_error_ok(error)) return;
+
+
+	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	if (!n_error_ok(error)) return;
+
+	offset_tk = ni_lexer_read(lexer);
+	offset = parse_dec_integer(offset_tk.lexeme);
+	if (offset < INT24_MIN || offset > INT24_MAX) {
+		error->type = error_register_out_of_range;
+		return;
+	}
+	instruction->arg_b.value = offset;
+
+}
+
+
+static void
 ni_read_load_bool_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error) {
@@ -355,6 +437,18 @@ ni_read_not_instruction(NLexer* lexer,
 	                                15, LREG|GREG,
 	                                 0, 0,
 	                                 error);
+}
+
+
+static void
+ni_read_return_instruction(NLexer* lexer,
+                           NInstruction* instruction,
+                           NError* error) {
+	read_register_based_instruction(lexer, instruction,
+	                                22, LREG | GREG | CREG,
+	                                 0, 0,
+	                                 0, 0,
+	                                error);
 }
 
 
@@ -413,19 +507,19 @@ parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
 
 	switch(bits) {
 		case 7:
-			max_value = 127;
+			max_value = INT8_MAX;
 			break;
 		case 8:
-			max_value = 255;
+			max_value = UINT8_MAX;
 			break;
 		case 15:
-			max_value = 32767;
+			max_value = INT16_MAX;
 			break;
 		case 16:
-			max_value = 65535;
+			max_value = UINT16_MAX;
 			break;
 		case 22:
-			max_value = 4194303;
+			max_value = UINT22_MAX;
 			break;
 		default:
 			/* This shouldn't happen. Just a guard here. */

@@ -22,6 +22,7 @@
 	X( "sub"       , NI_TK_OP_SUB       ,  N_OP_SUB        )\
 	X( "mul"       , NI_TK_OP_MUL       ,  N_OP_MUL        )\
 	X( "div"       , NI_TK_OP_DIV       ,  N_OP_DIV        )\
-	X( "load-bool" , NI_TK_OP_LOAD_BOOL ,  N_OP_LOAD_BOOL  )
+	X( "load-bool" , NI_TK_OP_LOAD_BOOL ,  N_OP_LOAD_BOOL  )\
+	X( "return"    , NI_TK_OP_RETURN    ,  N_OP_RETURN     )
 
 #endif
