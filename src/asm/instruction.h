@@ -6,6 +6,13 @@
 
 #define N_INSTRUCTION_INITIALIZER { 0, {0, 0}, {0, 0}, {0, 0}, NULL, 0}
 
+typedef enum {
+	NI_RT_CONSTANT = 1,
+	NI_RT_GLOBAL   = 2,
+	NI_RT_LOCAL    = 4
+} NRegisterType;
+
+
 typedef struct {
 	uint8_t type;
 	int32_t value;

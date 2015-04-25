@@ -4,17 +4,20 @@
 #include <string.h>
 
 #include "reader.h"
+#include "opcodes.h"
 
 #include "common/polyfills/p-strdup.h"
 
-#define CREG 1
-#define GREG 2
-#define LREG 4
+#define CREG NI_RT_CONSTANT
+#define GREG NI_RT_GLOBAL
+#define LREG NI_RT_LOCAL
+
 
 static uint32_t error_eof,
                 error_incompatible_register_type,
                 error_register_out_of_range,
-                error_unexpected_token;
+                error_unexpected_token,
+                error_unimplemented_opcode;
 
 static void
 expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error);
@@ -244,7 +247,6 @@ read_register_based_instruction(NLexer* lexer,
                                 NError* error) {
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
-
 	instruction->opcode = opcode;
 
 	if (reg_a_bits > 0) {
@@ -281,7 +283,6 @@ parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
 	NToken token = NI_TOKEN_INITIALIZER;
 	int32_t max_value, value;
 	uint8_t type;
-
 	expect_token_type(lexer, NI_TK_REGISTER, error);
 	if (!n_error_ok(error)) goto handle_error;
 
@@ -310,13 +311,13 @@ parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
 
 	switch(token.lexeme[0]) {
 		case 'C':
-			type = CREG;
+			type = NI_RT_CONSTANT;
 			break;
 		case 'G':
-			type = GREG;
+			type = NI_RT_GLOBAL;
 			break;
 		case 'L':
-			type = LREG;
+			type = NI_RT_LOCAL;
 			break;
 		default:
 			/* This shouldn't happen. Just a guard here. */
@@ -364,8 +365,13 @@ ni_init_reader() {
 		n_register_error_type("nuvm.asm.reader.IncompatibleRegisterType",
 		                      NULL,
 		                      NULL);
-
 	assert(error_incompatible_register_type < N_ERROR_LAST_VALID_ERROR);
+
+	error_unimplemented_opcode =
+		n_register_error_type("nuvm.asm.reader.UnimplementedOpcode",
+		                      NULL,
+		                      NULL);
+	assert(error_unimplemented_opcode < N_ERROR_LAST_VALID_ERROR);
 
 	error_register_out_of_range =
 		n_register_error_type("nuvm.asm.reader.RegisterOutOfRange",
@@ -384,7 +390,7 @@ expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error) {
 
 	if (cur_token_type != expected_type) {
 		/* TODO (#1): Generate proper error. */
-		error->type = 1;
+		error->type = error_unexpected_token;
 		return;
 	}
 	return;
@@ -500,7 +506,20 @@ consume_label(NLexer* lexer, char** value, NError* error) {
 
 static uint8_t
 consume_opcode(NLexer* lexer, NError* error) {
-	return 0;
+	NTokenType token_type = ni_lexer_peek(lexer);
+	if (!ni_token_is_opcode(token_type)) {
+		error->type = error_unexpected_token;
+		return 0;
+	}
+	ni_lexer_advance(lexer);
+	switch (token_type) {
+		#define X( _, op_token, op_code ) case op_token: return op_code;
+		NI_OPCODE_MAPPINGS
+		default:
+			error->type = error_unimplemented_opcode;
+			return 0;
+	}
+
 }
 
 

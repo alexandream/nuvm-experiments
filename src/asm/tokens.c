@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "tokens.h"
+#include "opcodes.h"
 
 #ifndef LEXEME_BUFFER_SIZE
 #define LEXEME_BUFFER_SIZE 256
@@ -28,24 +29,9 @@ static lexeme_table_t KEYWORD_TABLE[] = {
 };
 
 static lexeme_table_t OPCODE_TABLE[] = {
-	{ "move",       NI_TK_OP_MOVE },
-	{ "global-ref", NI_TK_OP_GLOBAL_REF },
-	{ "global-set", NI_TK_OP_GLOBAL_SET },
-	{ "jump",       NI_TK_OP_JUMP },
-	{ "jump-if",    NI_TK_OP_JUMP_IF },
-	{ "eq",         NI_TK_OP_EQ },
-	{ "lt",         NI_TK_OP_LT },
-	{ "le",         NI_TK_OP_LE },
-	{ "gt",         NI_TK_OP_GT },
-	{ "ge",         NI_TK_OP_GE },
-	{ "not",        NI_TK_OP_NOT },
-	{ "or",         NI_TK_OP_OR },
-	{ "and",        NI_TK_OP_AND },
-	{ "add",        NI_TK_OP_ADD },
-	{ "sub",        NI_TK_OP_SUB },
-	{ "mul",        NI_TK_OP_MUL },
-	{ "div",        NI_TK_OP_DIV },
-	{ "load-bool",  NI_TK_OP_LOAD_BOOL },
+#define X(op_name, op_token, op_code) { op_name,      op_token },
+	NI_OPCODE_MAPPINGS
+#undef X
 	{  NULL,        NI_TK_UNRECOGNIZED_OPCODE }
 };
 

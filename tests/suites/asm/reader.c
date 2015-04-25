@@ -2,9 +2,11 @@
 
 #include "../../test-suite.h"
 #include "common/errors.h"
+#include "common/opcodes.h"
 
 #include "reader.h"
 #include "lexer.h"
+
 #include "streams.h"
 
 static NLexer* LEXER = NULL;
@@ -178,6 +180,22 @@ TEST(read_int32_constant_recognizes_input) {
 }
 
 
+TEST(read_instruction_recognizes_arith_rel_operations) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("add L:1 C:2 L:3");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_ADD));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_CONSTANT));
+	ASSERT(EQ_I64(ins.arg_c.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 1));
+	ASSERT(EQ_I64(ins.arg_b.value, 2));
+	ASSERT(EQ_I64(ins.arg_c.value, 3));
+}
 
 
 static NLexer*
