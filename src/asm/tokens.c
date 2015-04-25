@@ -129,6 +129,9 @@ static void
 ignore_whitespace(NStream* stream, bool* end);
 
 static void
+ignore_until_eol(NStream* stream, bool* end);
+
+static void
 init_store(store_t* buffer, char* store, uint16_t capacity);
 
 
@@ -237,7 +240,6 @@ ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
 	tk_state_t state = S_INIT;
 
 	init_store(&store, buffer, buffer_last_pos);
-
 	ignore_whitespace(stream, &eof);
 	chr = ni_stream_peek(stream, &eof);
 	while (!eof && !overflow && !complete) {
@@ -608,7 +610,18 @@ handle_S_LABEL_LEAD(char chr) {
 static void
 ignore_whitespace(NStream* stream, bool* end) {
 	char chr = ni_stream_peek(stream, end);
-	while (isspace(chr) && !(*end)) {
+	while ((isspace(chr) || chr == '#') && !(*end)) {
+		if (chr == '#') ignore_until_eol(stream, end);
+		ni_stream_read(stream, end);
+		chr = ni_stream_peek(stream, end);
+	}
+}
+
+
+static void
+ignore_until_eol(NStream* stream, bool* end) {
+	char chr = ni_stream_peek(stream, end);
+	while (chr != '\n' && !(*end)) {
 		ni_stream_read(stream, end);
 		chr = ni_stream_peek(stream, end);
 	}

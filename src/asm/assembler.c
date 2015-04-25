@@ -16,13 +16,15 @@ typedef struct {
 
 typedef struct {
 	uint8_t type;
-	uint64_t integer;
+	int64_t integer;
 	uint16_t aux_integer;
 	double real;
 	char* text;
 } NConstantDescriptor;
 
 #define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
+
+
 /* Instantiating the resizable-array template for the label pool */
 #define ARRAY_TYPE_NAME NLabelArray
 #define ARRAY_CONTENTS_TYPE NLabel

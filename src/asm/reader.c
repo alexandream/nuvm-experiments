@@ -284,6 +284,9 @@ ni_read_instruction(NLexer* lexer,
 		case NI_TK_OP_RETURN:
 			ni_read_return_instruction(lexer, instruction, error);
 			return;
+		default:
+			error->type = error_unimplemented_opcode;
+			return;
 	}
 }
 
