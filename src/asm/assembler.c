@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 
 #include "assembler.h"
 #include "reader.h"
@@ -13,7 +14,15 @@ typedef struct {
 	uint32_t definition;
 } NLabel;
 
+typedef struct {
+	uint8_t type;
+	uint64_t integer;
+	uint16_t aux_integer;
+	double real;
+	char* text;
+} NConstantDescriptor;
 
+#define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
 /* Instantiating the resizable-array template for the label pool */
 #define ARRAY_TYPE_NAME NLabelArray
 #define ARRAY_CONTENTS_TYPE NLabel
@@ -25,6 +34,13 @@ typedef struct {
 #define ARRAY_TYPE_NAME NCodePool
 #define ARRAY_CONTENTS_TYPE NInstruction*
 #define ARRAY_PREFIX ncpool
+#define ARRAY_ELEMENTS__SKIP
+#include "../common/utils/resizable-array/full.h"
+
+/* Instantiating the resizable-array template for the constants pool */
+#define ARRAY_TYPE_NAME NConstantPool
+#define ARRAY_CONTENTS_TYPE NConstantDescriptor
+#define ARRAY_PREFIX ncopool
 #define ARRAY_ELEMENTS__SKIP
 #include "../common/utils/resizable-array/full.h"
 
@@ -63,13 +79,6 @@ struct NStreamWriter_vtable {
 
 typedef struct NConstantDescriptor NConstantDescriptor;
 
-
-struct NConstantDescriptor {
-	uint8_t type;
-	uint64_t integer;
-	double real;
-	char* text;
-}
 */
 
 struct NAssembler {
@@ -79,7 +88,7 @@ struct NAssembler {
 
 	NCodePool code_pool;
 	NLabelArray label_pool;
-
+	NConstantPool constant_pool;
 };
 
 
@@ -94,6 +103,7 @@ ni_new_assembler() {
 	 * to the caller */
 	nlarray_init(&result->label_pool, 64);
 	ncpool_init(&result->code_pool, 1024);
+	ncopool_init(&result->constant_pool, 128);
 	return result;
 }
 
@@ -107,9 +117,24 @@ ni_destroy_assembler(NAssembler* self) {
 		NLabel elem = nlarray_get(pool, i);
 		free(elem.name);
 	}
+
+	nelements = ncopool_count(&self->constant_pool);
+	for (i = 0; i < nelements; i++) {
+		NConstantDescriptor descriptor = ncopool_get(&self->constant_pool, i);
+		if (descriptor.text != NULL) {
+			free(descriptor.text);
+		}
+	}
+
+	nelements = ncpool_count(&self->code_pool);
+	for (i = 0; i < nelements; i++) {
+		NInstruction* instruction = ncpool_get(&self->code_pool, i);
+		free(instruction);
+	}
+
 	nlarray_destroy(pool);
 	ncpool_destroy(&self->code_pool);
-
+	ncopool_destroy(&self->constant_pool);
 	free(self);
 }
 
@@ -163,26 +188,38 @@ handle_error:
 
 
 void
-ni_asm_add_string_constant(NAssembler* self, const char* str) {
-
+ni_asm_add_string_constant(NAssembler* self, char* str) {
+	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
+	descriptor.type = NI_CONSTANT_STRING;
+	descriptor.text = str;
+	ncopool_append(&self->constant_pool, descriptor);
 }
 
 
 void
 ni_asm_add_double_constant(NAssembler* self, double number) {
-
+	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
+	descriptor.type = NI_CONSTANT_DOUBLE;
+	descriptor.real = number;
+	ncopool_append(&self->constant_pool, descriptor);
 }
 
 
 void
-ni_asm_add_character_constant(NAssembler* self, const char* utf8_char) {
-
+ni_asm_add_character_constant(NAssembler* self, char* utf8_char) {
+	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
+	descriptor.type = NI_CONSTANT_CHARACTER;
+	descriptor.text = utf8_char;
+	ncopool_append(&self->constant_pool, descriptor);
 }
 
 
 void
 ni_asm_add_int32_constant(NAssembler* self, int32_t integer) {
-
+	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
+	descriptor.type = NI_CONSTANT_INT32;
+	descriptor.integer = integer;
+	ncopool_append(&self->constant_pool, descriptor);
 }
 
 
@@ -190,7 +227,11 @@ void
 ni_asm_add_procedure_constant(NAssembler* self,
                               uint16_t label_id,
                               uint16_t nlocals) {
-
+	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
+	descriptor.type = NI_CONSTANT_PROCEDURE;
+	descriptor.integer = label_id;
+	descriptor.aux_integer = nlocals;
+	ncopool_append(&self->constant_pool, descriptor);
 }
 
 uint16_t
