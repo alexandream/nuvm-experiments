@@ -1,0 +1,54 @@
+The binary module forpmat starts with a magic number header composed as
+follows: 
+
+The DEL ASCII character (0x7F) followed by the ASCII codes forming the word
+NUVM (0x4E 0x55 0x56 0x4D) followed by the hexadecimal representation of the
+three version numbers in the order (major, minor, revision).
+
+Thus, the magic number for a program compiled for Nuvm with version numbers
+16, 32 and 48 would be the following byte sequence:
+
+7F 4E 55 56  4D 10 20 30.
+
+After that header, the next eight bytes are reserved and stay as 0x00.
+
+00 00 00 00  00 00 00 00.
+
+Then the module description properties are laid out in the following order
+and sizes:
+
+- index of the entry point in the constants (unsigned 16 bits);
+- size of the data segment in bytes (unsigned 32 bits);
+- size of constants description segment (unsigned 16 bits);
+- size of the globals pool of the module (unsigned 16 bits);
+- size of the code segment in instruction blocks (unsigned 32 bits);
+
+
+Then the segments are laid out as follows:
+
+- The Data segment, a pool of bytes that might be used by the constants to
+  construct their values.
+
+- The constants description segment with the following structure being
+  repeated for each entry:
+  - type of the constant (unsigned 8 bits);
+  - index on the data pool or immediate value (unsigned 24 bits);
+
+- The code segment with the following structure being repeated for each
+  instruction:
+  - opcode of the instruction (unsigned 8 bits);
+  - operands definition (unsigned 24 bits);
+
+Each of the opcodes can decide how to use the space it has for operands as
+it sees fit. Here's a list of the most common patterns:
+
+- divided into three blocks of 8 bits where each 8 bits block may have one
+  bit for describing which kind of address it'll use (local, global or
+  constant) and the remaining 7 or 8 bits is used to store the address;
+
+- divided into two blocks of 8 bits and 16 bits, in any order, again being
+  possible for the operands to denote address with bit marks to describe
+  what kind of address they are;
+
+- not divided at all with the 24 bits being a signed or unsigned value the
+  instruction will use;
