@@ -65,6 +65,35 @@ ni_read_arith_rel_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error);
 
+
+static void
+ni_read_global_ref_instruction(NLexer* lexer,
+                               NInstruction* instruction,
+                               NError* error);
+
+static void
+ni_read_global_set_instruction(NLexer* lexer,
+                               NInstruction* instruction,
+                               NError* error);
+static void
+ni_read_load_bool_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error);
+static void
+ni_read_logical_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error);
+
+static void
+ni_read_move_instruction(NLexer* lexer,
+                         NInstruction* instruction,
+                         NError* error);
+
+static void
+ni_read_not_instruction(NLexer* lexer,
+                        NInstruction* instruction,
+                        NError* error);
+
 void
 ni_read_version(NLexer* lexer,
                 uint8_t* major,
@@ -208,6 +237,25 @@ ni_read_instruction(NLexer* lexer,
 		case NI_TK_OP_SUB:
 			ni_read_arith_rel_instruction(lexer, instruction, error);
 			return;
+		case NI_TK_OP_AND:
+		case NI_TK_OP_OR:
+			ni_read_logical_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_MOVE:
+			ni_read_move_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_NOT:
+			ni_read_not_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_GLOBAL_REF:
+			ni_read_global_ref_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_GLOBAL_SET:
+			ni_read_global_set_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_LOAD_BOOL:
+			ni_read_load_bool_instruction(lexer, instruction, error);
+			return;
 	}
 }
 
@@ -223,7 +271,7 @@ ni_read_arith_rel_instruction(NLexer* lexer,
 }
 
 
-void
+static void
 ni_read_move_instruction(NLexer* lexer,
                          NInstruction* instruction,
                          NError* error) {
@@ -232,6 +280,81 @@ ni_read_move_instruction(NLexer* lexer,
 	                               15,  LREG|CREG,
 	                                0,  0,
 	                                error);
+}
+
+
+static void
+ni_read_global_ref_instruction(NLexer* lexer,
+                               NInstruction* instruction,
+                               NError* error) {
+	read_register_based_instruction(lexer, instruction,
+	                                 8, LREG,
+	                                16, GREG,
+	                                 0, 0,
+	                                error);
+}
+
+
+static void
+ni_read_global_set_instruction(NLexer* lexer,
+                               NInstruction* instruction,
+                               NError* error) {
+	read_register_based_instruction(lexer, instruction,
+	                                16, GREG,
+	                                 8, LREG,
+	                                 0, 0,
+	                                error);
+}
+
+
+static void
+ni_read_load_bool_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error) {
+	NToken value_tk = NI_TOKEN_INITIALIZER;
+	int32_t value = 0;
+	uint8_t opcode = consume_opcode(lexer, error);
+	if (!n_error_ok(error)) return;
+
+	instruction->opcode = opcode;
+
+	instruction->arg_a = parse_register(lexer, 8, LREG, error);
+	if (!n_error_ok(error)) return;
+
+	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	if (!n_error_ok(error)) return;
+
+	value_tk = ni_lexer_read(lexer);
+	value = parse_dec_integer(value_tk.lexeme);
+	if (value < 0 || value > 1) {
+		error->type = error_register_out_of_range;
+		return;
+	}
+	instruction->arg_b.value = value;
+}
+
+
+static void
+ni_read_logical_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error) {
+	read_register_based_instruction(lexer, instruction,
+	                                8, LREG,
+	                                8, LREG,
+	                                8, LREG,
+	                                error);
+}
+
+
+static void
+ni_read_not_instruction(NLexer* lexer,
+                        NInstruction* instruction,
+                        NError* error) {
+	read_register_based_instruction(lexer, instruction,
+	                                 8, LREG,
+	                                15, LREG|GREG,
+	                                 0, 0,
+	                                 error);
 }
 
 

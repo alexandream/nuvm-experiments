@@ -198,6 +198,128 @@ TEST(read_instruction_recognizes_arith_rel_operations) {
 }
 
 
+TEST(read_instruction_recognizes_logical_or) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("or L:1 L:2 L:3");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_OR));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_c.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 1));
+	ASSERT(EQ_I64(ins.arg_b.value, 2));
+	ASSERT(EQ_I64(ins.arg_c.value, 3));
+}
+
+
+TEST(read_instruction_recognizes_move_local) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("move L:1 L:300");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_MOVE));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 1));
+	ASSERT(EQ_I64(ins.arg_b.value, 300));
+}
+
+
+TEST(read_instruction_recognizes_logical_not) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("not L:255 G:12345");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_NOT));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 255));
+	ASSERT(EQ_I64(ins.arg_b.value, 12345));
+}
+
+
+TEST(read_instruction_recognizes_global_ref) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("global-ref L:255 G:12345");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_GLOBAL_REF));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 255));
+	ASSERT(EQ_I64(ins.arg_b.value, 12345));
+}
+
+
+TEST(read_instruction_recognizes_global_set) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("global-set G:12255 L:123");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_GLOBAL_SET));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_GLOBAL));
+	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 12255));
+	ASSERT(EQ_I64(ins.arg_b.value, 123));
+}
+
+
+TEST(read_instruction_recognizes_load_bool_false) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("load-bool L:127 0");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_LOAD_BOOL));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 127));
+	ASSERT(EQ_I64(ins.arg_b.value, 0));
+}
+
+
+TEST(read_instruction_recognizes_load_bool_true) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("load-bool L:127 1");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_I64(ins.opcode, N_OP_LOAD_BOOL));
+	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_I64(ins.arg_a.value, 127));
+	ASSERT(EQ_I64(ins.arg_b.value, 1));
+}
+
+
+TEST(read_instruction_rejects_load_bool_other) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("load-bool L:127 3");
+	ni_read_instruction(lexer, &ins, &error);
+	ASSERT(HAS_ERROR(&error, "nuvm.asm.reader.RegisterOutOfRange"));
+}
+
+
 static NLexer*
 WITH_INPUT(const char* input) {
 	END_INPUT();
