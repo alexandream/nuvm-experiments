@@ -378,6 +378,7 @@ consume_code_segment(NAssembler* self, NLexer* lexer, NError* error) {
 		return;
 	}
 
+	ni_lexer_advance(lexer);
 	next_token = ni_lexer_peek(lexer);
 	while (next_token != NI_TK_EOF) {
 		consume_code_element(self, lexer, next_token, error);
@@ -405,25 +406,21 @@ consume_constant(NAssembler* self,
 	int32_t int32_value;
 	switch (token) {
 		case NI_TK_KW_CHARACTER:
-			ni_lexer_advance(lexer);
 			ni_read_character_constant(lexer, &string_value, error);
 			if (!n_error_ok(error)) return;
 			ni_asm_add_character_constant(self, string_value);
 			break;
 		case NI_TK_KW_DOUBLE:
-			ni_lexer_advance(lexer);
 			ni_read_double_constant(lexer, &double_value, error);
 			if (!n_error_ok(error)) return;
 			ni_asm_add_double_constant(self, double_value);
 			break;
 		case NI_TK_KW_INT32:
-			ni_lexer_advance(lexer);
 			ni_read_int32_constant(lexer, &int32_value, error);
 			if (!n_error_ok(error)) return;
 			ni_asm_add_int32_constant(self, int32_value);
 			break;
 		case NI_TK_KW_PROCEDURE:
-			ni_lexer_advance(lexer);
 			ni_read_procedure_constant(lexer, &label_name, &num_locals, error);
 			if (!n_error_ok(error)) return;
 			label_id = ni_asm_get_label(self, label_name, error);
@@ -432,7 +429,6 @@ consume_constant(NAssembler* self,
 			ni_asm_add_procedure_constant(self, label_id, num_locals);
 			break;
 		case NI_TK_KW_STRING:
-			ni_lexer_advance(lexer);
 			ni_read_string_constant(lexer, &string_value, error);
 			if (!n_error_ok(error)) return;
 			ni_asm_add_string_constant(self, string_value);
@@ -473,6 +469,14 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 		error->type = error_empty_constants_list;
 		return;
 	}
+	if (num_constants_found <= self->entry_point) {
+		/* FIXME: This error handling was rushed. */
+		/* Check if we need to add more data for the error to be meaningful
+		 * for a caller. */
+		error->type = error_entry_point_out_of_bounds;
+		error->data = NULL;
+	}
+
 }
 
 
@@ -493,13 +497,6 @@ consume_header_data(NAssembler* self, NLexer* lexer, NError* error) {
 
 	ni_read_globals_count(lexer, &globals_count, error);
 	if (!n_error_ok(error)) return;
-	if (globals_count <= entry_point) {
-		/* FIXME: This error handling was rushed. */
-		/* Check if we need to add more data for the error to be meaningful
-		 * for a caller. */
-		error->type = error_entry_point_out_of_bounds;
-		error->data = NULL;
-	}
 
 	ni_asm_set_globals_count(self, globals_count);
 }

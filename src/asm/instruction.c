@@ -17,7 +17,12 @@ ni_asm_instruction_clone(NInstruction* instruction, NError* error) {
 	result->arg_a = instruction->arg_a;
 	result->arg_b = instruction->arg_b;
 	result->arg_c = instruction->arg_c;
-	result->argument_label = strdup(instruction->argument_label);
+	if (instruction->argument_label != NULL) {
+		result->argument_label = strdup(instruction->argument_label);
+	}
+	else {
+		result->argument_label = NULL;
+	}
 	result->argument_label_id = instruction->argument_label_id;
 	return result;
 }
