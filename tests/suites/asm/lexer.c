@@ -88,5 +88,5 @@ ADVANCE() {
 
 static void
 WITH_INPUT(const char* str) {
-	LEXER = ni_new_lexer(ni_new_stream_from_string(str));
+	LEXER = ni_new_lexer(ni_new_istream_from_string(str));
 }

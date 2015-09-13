@@ -126,10 +126,10 @@ static tk_state_t
 handle_S_STRING_OPENED(char chr, bool* handling_spaces, bool* complete);
 
 static void
-ignore_whitespace(NStream* stream, bool* end);
+ignore_whitespace(NIStream* stream, bool* end);
 
 static void
-ignore_until_eol(NStream* stream, bool* end);
+ignore_until_eol(NIStream* stream, bool* end);
 
 static void
 init_store(store_t* buffer, char* store, uint16_t capacity);
@@ -227,7 +227,7 @@ ni_get_token_name(NTokenType type) {
  *    docs/diagrams/tokenizer-state-machine.{svg,dia}
  */
 NTokenType
-ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
+ni_get_next_token(NIStream* stream, char* buffer, size_t buffer_last_pos) {
 	store_t store;
 	NTokenType result;
 	bool eof = false,
@@ -241,7 +241,7 @@ ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
 
 	init_store(&store, buffer, buffer_last_pos);
 	ignore_whitespace(stream, &eof);
-	chr = ni_stream_peek(stream, &eof);
+	chr = ni_istream_peek(stream, &eof);
 	while (!eof && !overflow && !complete) {
 		feed_store(&store, chr, &overflow);
 		switch (state) {
@@ -301,9 +301,9 @@ ni_get_next_token(NStream* stream, char* buffer, size_t buffer_last_pos) {
 				break;
 		}
 		if (!complete) {
-			ni_stream_read(stream, &eof);
+			ni_istream_read(stream, &eof);
 			consumed_size++;
-			chr = ni_stream_peek(stream, &eof);
+			chr = ni_istream_peek(stream, &eof);
 			if (!handling_spaces && isspace(chr)) {
 				complete = true;
 			}
@@ -608,22 +608,22 @@ handle_S_LABEL_LEAD(char chr) {
 
 
 static void
-ignore_whitespace(NStream* stream, bool* end) {
-	char chr = ni_stream_peek(stream, end);
+ignore_whitespace(NIStream* stream, bool* end) {
+	char chr = ni_istream_peek(stream, end);
 	while ((isspace(chr) || chr == '#') && !(*end)) {
 		if (chr == '#') ignore_until_eol(stream, end);
-		ni_stream_read(stream, end);
-		chr = ni_stream_peek(stream, end);
+		ni_istream_read(stream, end);
+		chr = ni_istream_peek(stream, end);
 	}
 }
 
 
 static void
-ignore_until_eol(NStream* stream, bool* end) {
-	char chr = ni_stream_peek(stream, end);
+ignore_until_eol(NIStream* stream, bool* end) {
+	char chr = ni_istream_peek(stream, end);
 	while (chr != '\n' && !(*end)) {
-		ni_stream_read(stream, end);
-		chr = ni_stream_peek(stream, end);
+		ni_istream_read(stream, end);
+		chr = ni_istream_peek(stream, end);
 	}
 }
 

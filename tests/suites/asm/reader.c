@@ -7,7 +7,7 @@
 #include "reader.h"
 #include "lexer.h"
 
-#include "streams.h"
+#include "istreams.h"
 
 static NLexer* LEXER = NULL;
 
@@ -364,7 +364,7 @@ TEST(read_instruction_recognizes_return) {
 static NLexer*
 WITH_INPUT(const char* input) {
 	END_INPUT();
-	LEXER = ni_new_lexer(ni_new_stream_from_string(input));
+	LEXER = ni_new_lexer(ni_new_istream_from_string(input));
 	return LEXER;
 }
 

@@ -5,16 +5,16 @@
 
 #include "../../test-suite.h"
 
-#include "streams.h"
+#include "istreams.h"
 
 #define LONG_STREAM_ITERATIONS 50
 
 const char* BASE_PATTERN = "ABCDEFGHIJKLMNOPQRSTUVWXYZ\n";
 size_t BASE_LENGTH;
 
-NStream* EMPTY_STREAM;
-NStream* SHORT_STREAM;
-NStream* LONG_STREAM;
+NIStream* EMPTY_STREAM;
+NIStream* SHORT_STREAM;
+NIStream* LONG_STREAM;
 
 /* Write to the used files to guarantee they'll have the expected contents. */
 CONSTRUCTOR {
@@ -47,95 +47,95 @@ CONSTRUCTOR {
 
 
 SETUP {
-	EMPTY_STREAM = ni_new_stream_from_path("build/empty-file");
-	SHORT_STREAM = ni_new_stream_from_path("build/short-file");
-	LONG_STREAM  = ni_new_stream_from_path("build/long-file");
+	EMPTY_STREAM = ni_new_istream_from_path("build/empty-file");
+	SHORT_STREAM = ni_new_istream_from_path("build/short-file");
+	LONG_STREAM  = ni_new_istream_from_path("build/long-file");
 }
 
 
 TEARDOWN {
-	ni_destroy_stream(EMPTY_STREAM);
-	ni_destroy_stream(SHORT_STREAM);
-	ni_destroy_stream(LONG_STREAM);
+	ni_destroy_istream(EMPTY_STREAM);
+	ni_destroy_istream(SHORT_STREAM);
+	ni_destroy_istream(LONG_STREAM);
 }
 
 
 /* Test Cases */
 
-TEST(empty_stream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_stream_length(EMPTY_STREAM) == 0));
+TEST(empty_istream_has_correct_length) {
+	ASSERT(IS_TRUE(ni_istream_length(EMPTY_STREAM) == 0));
 }
 
 
-TEST(short_stream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_stream_length(SHORT_STREAM) == BASE_LENGTH));
+TEST(short_istream_has_correct_length) {
+	ASSERT(IS_TRUE(ni_istream_length(SHORT_STREAM) == BASE_LENGTH));
 }
 
 
-TEST(long_stream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_stream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH));
+TEST(long_istream_has_correct_length) {
+	ASSERT(IS_TRUE(ni_istream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH));
 }
 
 
-TEST(empty_stream_has_correct_eof) {
-	ASSERT(IS_TRUE(ni_stream_eof(EMPTY_STREAM) == true));
+TEST(empty_istream_has_correct_eof) {
+	ASSERT(IS_TRUE(ni_istream_eof(EMPTY_STREAM) == true));
 }
 
 
-TEST(short_stream_has_correct_eof) {
-	ASSERT(IS_TRUE(ni_stream_eof(SHORT_STREAM) == false));
+TEST(short_istream_has_correct_eof) {
+	ASSERT(IS_TRUE(ni_istream_eof(SHORT_STREAM) == false));
 }
 
 
-TEST(long_stream_has_correct_eof) {
-	ASSERT(IS_TRUE(ni_stream_eof(LONG_STREAM) == false));
+TEST(long_istream_has_correct_eof) {
+	ASSERT(IS_TRUE(ni_istream_eof(LONG_STREAM) == false));
 }
 
 
-TEST(peek_on_empty_stream_signals_eof) {
+TEST(peek_on_empty_istream_signals_eof) {
 	bool end = false;
-	ni_stream_peek(EMPTY_STREAM, &end);
+	ni_istream_peek(EMPTY_STREAM, &end);
 	ASSERT(IS_TRUE(end == true));
 }
 
 
-TEST(read_on_empty_stream_signals_eof) {
+TEST(read_on_empty_istream_signals_eof) {
 	bool end = false;
-	ni_stream_read(EMPTY_STREAM, &end);
+	ni_istream_read(EMPTY_STREAM, &end);
 	ASSERT(IS_TRUE(end == true));
 }
 
 
-TEST(first_peek_on_stream_returns_first_entry) {
+TEST(first_peek_on_istream_returns_first_entry) {
 	bool end = false;
-	char entry = ni_stream_peek(SHORT_STREAM, &end);
+	char entry = ni_istream_peek(SHORT_STREAM, &end);
 	ASSERT(IS_TRUE(end == false));
 	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
-TEST(first_read_on_stream_returns_first_entry) {
+TEST(first_read_on_istream_returns_first_entry) {
 	bool end = false;
-	char entry = ni_stream_read(SHORT_STREAM, &end);
+	char entry = ni_istream_read(SHORT_STREAM, &end);
 	ASSERT(IS_TRUE(end == false));
 	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
-TEST(second_peek_on_stream_returns_first_entry) {
+TEST(second_peek_on_istream_returns_first_entry) {
 	bool end = false;
-	char first_entry = ni_stream_peek(SHORT_STREAM, &end);
-	char entry = ni_stream_peek(SHORT_STREAM, &end);
+	char first_entry = ni_istream_peek(SHORT_STREAM, &end);
+	char entry = ni_istream_peek(SHORT_STREAM, &end);
 	ASSERT(IS_TRUE(end == false));
 	ASSERT(IS_TRUE(entry == first_entry));
 	ASSERT(IS_TRUE(entry == 'A'));
 }
 
 
-TEST(second_read_on_stream_returns_second_entry) {
+TEST(second_read_on_istream_returns_second_entry) {
 	bool end = false;
-	char first_entry = ni_stream_read(SHORT_STREAM, &end);
-	char entry = ni_stream_read(SHORT_STREAM, &end);
+	char first_entry = ni_istream_read(SHORT_STREAM, &end);
+	char entry = ni_istream_read(SHORT_STREAM, &end);
 	ASSERT(IS_TRUE(end == false));
 	ASSERT(IS_TRUE(entry != first_entry));
 	ASSERT(IS_TRUE(entry == 'B'));

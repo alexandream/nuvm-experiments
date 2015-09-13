@@ -3,10 +3,10 @@
 
 #include "../../test-suite.h"
 
-#include "streams.h"
+#include "istreams.h"
 #include "tokens.h"
 
-static NStream* STREAM = NULL;
+static NIStream* STREAM = NULL;
 
 static void
 WITH_STREAM(const char* str);
@@ -489,7 +489,7 @@ TEST(reads_op_load_bool) {
 static void
 END_STREAM() {
 	if (STREAM) {
-		ni_destroy_stream(STREAM);
+		ni_destroy_istream(STREAM);
 		STREAM = NULL;
 	}
 }
@@ -498,5 +498,5 @@ END_STREAM() {
 static void
 WITH_STREAM(const char* str) {
 	END_STREAM();
-	STREAM = ni_new_stream_from_string(str);
+	STREAM = ni_new_istream_from_string(str);
 }

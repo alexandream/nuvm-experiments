@@ -1,6 +1,6 @@
-#ifndef __N__ASM__builder_H__
-#define __N__ASM__builder_H__
-
+#ifndef __N__ASM__assembler_H__
+#define __N__ASM__assembler_H__
+#include <stdio.h>
 #include "reader.h"
 
 #include "../common/errors.h"
@@ -66,9 +66,44 @@ ni_asm_define_label(NAssembler* self, const char* label, NError* error);
 
 void
 ni_init_assembler();
-/*
-void
-ni_asm_write_output(NAssembler* self, NStreamWriter* writer, NError* error);
-*/
 
-#endif
+void
+ni_asm_read_from_lexer(NAssembler* self, NLexer* lexer, NError* error);
+
+size_t
+ni_asm_compute_result_size(NAssembler* self, NError* error);
+
+#ifdef TEST_ACCESSORS
+uint8_t*
+nt_asm_version(NAssembler* self);
+
+uint16_t
+nt_asm_entry_point(NAssembler* self);
+
+uint16_t
+nt_asm_globals_count(NAssembler* self);
+
+int32_t
+nt_asm_constants_count(NAssembler* self);
+
+uint8_t
+nt_asm_constant_type(NAssembler* self, int32_t constant);
+
+int64_t
+nt_asm_constant_integer(NAssembler* self, int32_t constant);
+
+uint16_t
+nt_asm_constant_aux_integer(NAssembler* self, int32_t constant);
+
+int32_t
+nt_asm_code_count(NAssembler* self);
+
+NInstruction*
+nt_asm_instruction(NAssembler* self, int32_t index);
+
+uint32_t
+nt_asm_label_definition(NAssembler* self, int32_t label_id);
+
+#endif /* TEST_ACCESSORS */
+
+#endif /* __N__ASM__assembler_H__ */

@@ -7,7 +7,7 @@
 static char discard_buffer[LEXEME_BUFFER_SIZE+1];
 
 struct NLexer {
-	NStream* input;
+	NIStream* input;
 	NTokenType cache;
 	bool has_cache;
 	char buffer[LEXEME_BUFFER_SIZE+1];
@@ -16,11 +16,11 @@ struct NLexer {
 
 void
 ni_destroy_lexer(NLexer* self) {
-	ni_destroy_stream(self->input);
+	ni_destroy_istream(self->input);
 }
 
 NLexer*
-ni_new_lexer(NStream* input) {
+ni_new_lexer(NIStream* input) {
 	NLexer* self = (NLexer*) malloc(sizeof(NLexer));
 	if (self == NULL) {
 		return NULL;

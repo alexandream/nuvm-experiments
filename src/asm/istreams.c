@@ -4,9 +4,9 @@
 
 #include "common/polyfills/p-strdup.h"
 
-#include "streams.h"
+#include "istreams.h"
 
-struct NStream {
+struct NIStream {
 	char* buffer;
 	int32_t size;
 	int32_t cursor;
@@ -14,18 +14,18 @@ struct NStream {
 };
 
 void
-ni_destroy_stream(NStream* self) {
+ni_destroy_istream(NIStream* self) {
 	free(self);
 }
 
 
-NStream*
-ni_new_stream_from_path(const char* path) {
+NIStream*
+ni_new_istream_from_path(const char* path) {
 	/* TODO: Add error reporting and detailed error checking. */
 	int status;
 	int32_t file_size, i;
 	char* buffer = NULL;
-	NStream* result = NULL;
+	NIStream* result = NULL;
 
 	FILE* file = fopen(path, "rb");
 	if (file == NULL) {
@@ -47,7 +47,7 @@ ni_new_stream_from_path(const char* path) {
 		goto cleanup;
 	}
 
-	result = malloc(sizeof(NStream));
+	result = malloc(sizeof(NIStream));
 	if (result == NULL) {
 		goto cleanup;
 	}
@@ -89,17 +89,17 @@ cleanup:
 }
 
 
-NStream*
-ni_new_stream_from_string(const char* string) {
+NIStream*
+ni_new_istream_from_string(const char* string) {
 	/* TODO: Add error reporting and detailed error checking. */
 	size_t length = strlen(string);
-	NStream* result = NULL;
+	NIStream* result = NULL;
 	char* buffer = NULL;
 	if (length > INT32_MAX) {
 		return NULL;
 	}
 
-	result = malloc(sizeof(NStream));
+	result = malloc(sizeof(NIStream));
 	if (result == NULL) {
 		return NULL;
 	}
@@ -120,19 +120,19 @@ ni_new_stream_from_string(const char* string) {
 
 
 bool
-ni_stream_eof(NStream* self) {
+ni_istream_eof(NIStream* self) {
 	return self->eof;
 }
 
 
 uint32_t
-ni_stream_length(NStream* self) {
+ni_istream_length(NIStream* self) {
 	return self->size;
 }
 
 
 char
-ni_stream_peek(NStream* self, bool* end) {
+ni_istream_peek(NIStream* self, bool* end) {
 	char result = '\0';
 	if (self->cursor == self->size) {
 		self->eof = true;
@@ -146,8 +146,8 @@ ni_stream_peek(NStream* self, bool* end) {
 
 
 char
-ni_stream_read(NStream* self, bool* end) {
-	char result = ni_stream_peek(self, end);
+ni_istream_read(NIStream* self, bool* end) {
+	char result = ni_istream_peek(self, end);
 	if (!self->eof) {
 		self->cursor += 1;
 	}

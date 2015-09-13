@@ -1,6 +1,6 @@
 CC=clang
 
-CFLAGS=-pedantic -Wall -std=c89 -g -I "src"
+CFLAGS=-pedantic -Wall -std=c89 -g -I "src" -DTEST_ACCESSORS
 LIBS=
 
 ATEST_ROOT=../atest/build

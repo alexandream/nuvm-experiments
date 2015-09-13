@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#include "streams.h"
+#include "istreams.h"
 
 #define NI_TOKEN_INITIALIZER { NI_TK_UNKNOWN, NULL }
 
@@ -82,7 +82,7 @@ const char*
 ni_get_token_name(NTokenType type);
 
 NTokenType
-ni_get_next_token(NStream* stream, char* buffer, size_t bufsize);
+ni_get_next_token(NIStream* stream, char* buffer, size_t bufsize);
 
 NToken*
 ni_token_lift(NToken token);

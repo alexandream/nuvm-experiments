@@ -1,4 +1,4 @@
-The binary module forpmat starts with a magic number header composed as
+The binary module format starts with a magic number header composed as
 follows: 
 
 The DEL ASCII character (0x7F) followed by the ASCII codes forming the word

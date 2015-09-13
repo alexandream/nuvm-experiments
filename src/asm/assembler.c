@@ -9,6 +9,8 @@
 
 #define UNDEFINED_LABEL UINT32_MAX
 
+#define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
+
 typedef struct {
 	char* name;
 	uint32_t definition;
@@ -22,14 +24,11 @@ typedef struct {
 	char* text;
 } NConstantDescriptor;
 
-#define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
-
 
 /* Instantiating the resizable-array template for the label pool */
 #define ARRAY_TYPE_NAME NLabelArray
 #define ARRAY_CONTENTS_TYPE NLabel
 #define ARRAY_PREFIX nlarray
-#define ARRAY_ELEMENTS__SKIP
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the instructions pool */
@@ -46,6 +45,16 @@ typedef struct {
 #define ARRAY_ELEMENTS__SKIP
 #include "../common/utils/resizable-array/full.h"
 
+
+struct NAssembler {
+	uint8_t version[3];
+	uint16_t entry_point;
+	uint16_t globals_count;
+
+	NCodePool code_pool;
+	NLabelArray label_pool;
+	NConstantPool constant_pool;
+};
 static uint32_t error_code_not_found,
                 error_code_parsing_failed,
                 error_constant_parsing_failed,
@@ -62,36 +71,12 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error);
 static void
 consume_header_data(NAssembler* self, NLexer* lexer, NError* error);
 
+static int32_t
+count_instructions(NAssembler* self);
 
-/*
-struct NStreamWriter {
-	NStreamWriter_vtable* vtable;
-};
+static int32_t
+count_constants(NAssembler* self);
 
-
-struct NStreamWriter_vtable {
-	void (*write_bytes)(NStreamWriter* self,
-	                    uint8_t* data,
-	                    uint32_t size,
-	                    NError* error);
-
-	void (*close)(NStreamWriter* self, NError* error);
-}
-
-
-typedef struct NConstantDescriptor NConstantDescriptor;
-
-*/
-
-struct NAssembler {
-	uint8_t version[3];
-	uint16_t entry_point;
-	uint16_t globals_count;
-
-	NCodePool code_pool;
-	NLabelArray label_pool;
-	NConstantPool constant_pool;
-};
 
 
 NAssembler*
@@ -128,7 +113,7 @@ ni_destroy_assembler(NAssembler* self) {
 		}
 	}
 
-	nelements = ncpool_count(&self->code_pool);
+	nelements = count_instructions(self);
 	for (i = 0; i < nelements; i++) {
 		NInstruction* instruction = ncpool_get(&self->code_pool, i);
 		free(instruction);
@@ -263,13 +248,13 @@ ni_asm_get_label(NAssembler* self, const char* label, NError* error) {
 
 void
 ni_asm_define_label(NAssembler* self, const char* label_name, NError* error) {
-	NLabel label;
+	NLabel* label;
 
 	uint16_t label_id = ni_asm_get_label(self, label_name, error);
 	if (!n_error_ok(error)) return;
 
-	label = nlarray_get(&self->label_pool, label_id);
-	label.definition = ncpool_count(&self->code_pool);
+	label = &nlarray_elements(&self->label_pool)[label_id];
+	label->definition = count_instructions(self);
 }
 
 
@@ -347,7 +332,7 @@ consume_code_element(NAssembler* self,
 		NToken label_def = ni_lexer_read(lexer);
 		size_t label_len = strlen(label_def.lexeme);
 		char* label_name = label_def.lexeme;
-		label_name[label_len] = '\0';
+		label_name[label_len-1] = '\0';
 		ni_asm_define_label(self, label_name, error);
 		ni_destroy_token(label_def);
 	}
@@ -500,3 +485,111 @@ consume_header_data(NAssembler* self, NLexer* lexer, NError* error) {
 
 	ni_asm_set_globals_count(self, globals_count);
 }
+
+
+static int32_t
+count_instructions(NAssembler* self) {
+	return ncpool_count(&self->code_pool);
+}
+
+static int32_t
+count_constants(NAssembler* self) {
+	return ncopool_count(&self->constant_pool);
+}
+
+
+
+void
+ni_asm_print_output(NAssembler* self) {
+	/*
+	uint8_t base_magic_number[] = { 0x7F, 0x4E, 0x55, 0x56, 0x4D };
+	uint8_t reserved_space[] = { 0,0,0,0,0,0,0,0 };
+	fwrite((void*) base_magic_number, 1, 5, stdout);
+	fwrite((void*) &self->version, 1, 3, stdout);
+	fwrite((void*) reserved_space, 1, 8, stdout);
+	fwrite((void*) &self->entry_point, 2, 1, stdout);
+	fwrite((void*) compute_data_segment(self), 4, 1, stdout);
+	fwrite((void*) ncopool_count(&self->constant_pool), 2, 1, stdout);
+	fwrite((void*) self->globals_count, 2, 1, stdout);
+	fwrite((void*) ncpool_count(&self->code_pool), 2, 1, stdout);
+*/
+}
+size_t
+ni_asm_compute_result_size(NAssembler* self, NError* error) {
+	size_t magic_number_size = 8;
+	size_t reserved_space_size = 8;
+	size_t entry_point_size = sizeof(self->entry_point);
+	size_t globals_count_size = sizeof(self->globals_count);
+	size_t constants_count_size = sizeof(uint16_t);
+	size_t instruction_count_size = sizeof(uint32_t);
+
+	size_t instruction_size = sizeof(uint32_t);
+	size_t constant_size = sizeof(uint32_t);
+
+	int32_t constants_count = count_constants(self);
+	int32_t instruction_count = count_instructions(self);
+
+	size_t data_segment_size = 0;
+	size_t code_segment_size = instruction_count * instruction_size;
+	size_t constants_segment_size = constants_count * constant_size;
+
+	size_t header_size = magic_number_size + reserved_space_size +
+	                     entry_point_size + globals_count_size +
+	                     constants_count_size + instruction_count_size;
+
+	size_t segments_size =
+		data_segment_size + code_segment_size + constants_segment_size;
+
+	return header_size + segments_size;
+}
+#ifdef TEST_ACCESSORS
+uint8_t*
+nt_asm_version(NAssembler* self) {
+	return self->version;
+}
+
+uint16_t
+nt_asm_entry_point(NAssembler* self) {
+	return self->entry_point;
+}
+
+uint16_t
+nt_asm_globals_count(NAssembler* self) {
+	return self->globals_count;
+}
+
+int32_t
+nt_asm_constants_count(NAssembler* self) {
+	return count_constants(self);
+}
+
+uint8_t nt_asm_constant_type(NAssembler* self, int32_t constant) {
+	return ncopool_get(&self->constant_pool, constant).type;
+}
+
+int64_t
+nt_asm_constant_integer(NAssembler* self, int32_t constant) {
+	return ncopool_get(&self->constant_pool, constant).integer;
+}
+
+uint16_t
+nt_asm_constant_aux_integer(NAssembler* self, int32_t constant) {
+	return ncopool_get(&self->constant_pool, constant).aux_integer;
+}
+
+int32_t
+nt_asm_code_count(NAssembler* self) {
+	return count_instructions(self);
+}
+
+NInstruction*
+nt_asm_instruction(NAssembler* self, int32_t index) {
+	return ncpool_get(&self->code_pool, index);
+}
+
+uint32_t
+nt_asm_label_definition(NAssembler* self, int32_t label_id) {
+	return nlarray_get(&self->label_pool, label_id).definition;
+}
+
+#endif
