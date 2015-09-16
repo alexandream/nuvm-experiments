@@ -59,7 +59,7 @@ TEST(read_version_rejects_incomplete_input) {
 
 TEST(read_version_rejects_values_out_of_range) {
 	uint8_t a,b,c;
-	const char* range_error = "nuvm.asm.reader.errors.InvalidRange";
+	const char* range_error = "nuvm.asm.reader.InvalidRange";
 	NError error = N_ERROR_INITIALIZER;
 
 	const char* inputs[] = {
