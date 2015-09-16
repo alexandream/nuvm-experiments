@@ -40,7 +40,7 @@ typedef struct {
 	} \
 } while (0)
 
-#define NI_MAKE_CHECK_F(CC, MM, FF) do { \
+#define NI_DO_CHECK_F(CC, MM, FF) do { \
 	NCheckResult result; \
 	result.success = CC; \
 	result.message = result.success ? NULL : MM; \
@@ -48,10 +48,13 @@ typedef struct {
 	return result; \
 } while(0)
 
-#define NI_MAKE_CHECK(CC, MM) NI_MAKE_CHECK_F(CC, MM, {})
+#define NI_DO_CHECK(CC, MM) NI_DO_CHECK_F(CC, MM, {})
 
 NCheckResult
 IS_TRUE_IMPL(const char* expression, bool condition);
+
+NCheckResult
+IS_FALSE_IMPL(const char* expression, bool condition);
 
 NCheckResult
 EQ_I64_IMPL(const char* expression, int64_t value, int64_t expected);
@@ -69,8 +72,8 @@ NCheckResult
 HAS_ERROR(NError* error, const char* expected_name);
 
 #define IS_TRUE(VV)      IS_TRUE_IMPL(#VV, VV)
-#define EQ_I64(VV, EE)    EQ_I64_IMPL(#VV, VV, EE)
-#define EQ_DBL(VV, EE)    EQ_DBL_IMPL(#VV, VV, EE)
-#define EQ_STR(VV, EE)    EQ_STR_IMPL(#VV, VV, EE)
-
+#define IS_FALSE(VV)     IS_FALSE_IMPL(#VV, VV)
+#define EQ_I64(VV, EE)   EQ_I64_IMPL(#VV, VV, EE)
+#define EQ_DBL(VV, EE)   EQ_DBL_IMPL(#VV, VV, EE)
+#define EQ_STR(VV, EE)   EQ_STR_IMPL(#VV, VV, EE)
 #endif

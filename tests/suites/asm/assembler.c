@@ -89,7 +89,6 @@ TEST(read_from_lexer) {
 
 	ni_asm_read_from_lexer(assembler, lexer, &error);
 
-	printf("Computed output size was %lu.\n", ni_asm_compute_result_size(assembler, NULL));
 	ASSERT(ERROR_OK(&error));
 
 	version = nt_asm_version(assembler);

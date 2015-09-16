@@ -16,7 +16,7 @@ WITH_INPUT(const char* str);
 static NCheckResult
 CK_PEEK(NTokenType expected_type) {
 	NTokenType type = ni_lexer_peek(LEXER);
-	NI_MAKE_CHECK(type == expected_type,
+	NI_DO_CHECK(type == expected_type,
 		MF("Expected token type %s, got token type %s.",
 		   ni_get_token_name(expected_type), ni_get_token_name(type)));
 }

@@ -15,7 +15,7 @@ static NCheckResult
 CK_EOF() {
 	char buffer[256+1];
 	NTokenType token = ni_get_next_token(STREAM, buffer, 256);
-	NI_MAKE_CHECK(token == NI_TK_EOF,
+	NI_DO_CHECK(token == NI_TK_EOF,
 		MF("Expected EOF, got token type %s with lexeme %s.",
 		   ni_get_token_name(token), buffer));
 }
@@ -26,7 +26,7 @@ CK_TOKEN(NTokenType expected_type, const char* expected_lexeme) {
 	NTokenType type = ni_get_next_token(STREAM, buffer, 256);
 	bool condition =
 		type == expected_type && strcmp(expected_lexeme, buffer) == 0;
-	NI_MAKE_CHECK(condition,
+	NI_DO_CHECK(condition,
 		MF("Expected token type %s with lexeme %s. "
 		   "Got token type %s with lexeme %s",
 		   ni_get_token_name(expected_type), expected_lexeme,
