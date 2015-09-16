@@ -10,7 +10,6 @@ struct NIStream {
 	char* buffer;
 	int32_t size;
 	int32_t cursor;
-	bool eof;
 };
 
 void
@@ -18,43 +17,60 @@ ni_destroy_istream(NIStream* self) {
 	free(self);
 }
 
+static uint32_t error_io,
+                error_bad_alloc;
 
 NIStream*
-ni_new_istream_from_path(const char* path) {
-	/* TODO: Add error reporting and detailed error checking. */
+ni_new_istream_from_path(const char* path, NError *error) {
+	/* TODO : This should not load the file into memory. */
+	/*   This function is very very stupid. It creates a "stream" by loading
+	 * the whole file into memory and acting as if it's a big string.
+	 *   For now this behaviour is good enough, but it should be turned into
+	 * a real stream and do buffered input from the file. */
 	int status;
 	int32_t file_size, i;
 	char* buffer = NULL;
+	uint32_t error_type = 0;
 	NIStream* result = NULL;
 
-	FILE* file = fopen(path, "rb");
+	FILE* file = NULL;
+
+	n_error_reset(error);
+
+	file = fopen(path, "rb");
 	if (file == NULL) {
+		error_type = error_io;
 		goto cleanup;
 	}
 
 	status = fseek(file, 0, SEEK_END);
 	if (status != 0) {
+		error_type = error_io;
 		goto cleanup;
 	}
 
 	file_size = ftell(file);
 	if (file_size < 0) {
+		error_type = error_io;
 		goto cleanup;
 	}
 
 	status = fseek(file, 0, SEEK_SET);
 	if (status != 0) {
+		error_type = error_io;
 		goto cleanup;
 	}
 
 	result = malloc(sizeof(NIStream));
 	if (result == NULL) {
+		error_type = error_bad_alloc;
 		goto cleanup;
 	}
 
 	if (file_size > 0) {
 		buffer = malloc(sizeof(char) * (file_size + 1));
 		if (buffer == NULL) {
+			error_type = error_bad_alloc;
 			goto cleanup;
 		}
 
@@ -62,6 +78,7 @@ ni_new_istream_from_path(const char* path) {
 		while (!feof(file)) {
 			size_t n = fread(buffer + i, sizeof(char), file_size - i + 1, file);
 			if (ferror(file)) {
+				error_type = error_io;
 				goto cleanup;
 			}
 			i += n;
@@ -71,7 +88,7 @@ ni_new_istream_from_path(const char* path) {
 	result->buffer = buffer;
 	result->size = file_size;
 	result->cursor = 0;
-	result->eof = file_size == 0;
+	fclose(file);
 	return result;
 
 cleanup:
@@ -84,7 +101,10 @@ cleanup:
 	if (buffer != NULL) {
 		free(buffer);
 	}
-
+	if (error != NULL) {
+		/* TODO: Error should contain more information about the situation */
+		error->type = error_io;
+	}
 	return NULL;
 }
 
@@ -113,7 +133,6 @@ ni_new_istream_from_string(const char* string) {
 	result->buffer = buffer;
 	result->size = length;
 	result->cursor = 0;
-	result->eof = length == 0;
 
 	return result;
 }
@@ -121,36 +140,43 @@ ni_new_istream_from_string(const char* string) {
 
 bool
 ni_istream_eof(NIStream* self) {
-	return self->eof;
-}
-
-
-uint32_t
-ni_istream_length(NIStream* self) {
-	return self->size;
+	return self->cursor == self->size;
 }
 
 
 char
 ni_istream_peek(NIStream* self, bool* end) {
 	char result = '\0';
-	if (self->cursor == self->size) {
-		self->eof = true;
-	}
-	if (!self->eof) {
+	bool finished = true;
+	if (!ni_istream_eof(self)) {
 		result = self->buffer[self->cursor];
+		finished = false;
 	}
-	*end = self->eof;
+	if (end != NULL) {
+		*end = finished;
+	}
 	return result;
 }
 
 
 char
 ni_istream_read(NIStream* self, bool* end) {
-	char result = ni_istream_peek(self, end);
-	if (!self->eof) {
+	bool finished;
+	char result = ni_istream_peek(self, &finished);
+	if (!finished) {
 		self->cursor += 1;
 	}
-
+	if (end != NULL) {
+		*end = finished;
+	}
 	return result;
+}
+
+void
+ni_init_istreams() {
+	error_io =
+		n_register_error_type("nuvm.asm.IOError", NULL, NULL);
+
+	error_bad_alloc =
+		n_find_error_type("nuvm.BadAllocation");
 }

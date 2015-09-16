@@ -47,9 +47,9 @@ CONSTRUCTOR {
 
 
 SETUP {
-	EMPTY_STREAM = ni_new_istream_from_path("build/empty-file");
-	SHORT_STREAM = ni_new_istream_from_path("build/short-file");
-	LONG_STREAM  = ni_new_istream_from_path("build/long-file");
+	EMPTY_STREAM = ni_new_istream_from_path("build/empty-file", NULL);
+	SHORT_STREAM = ni_new_istream_from_path("build/short-file", NULL);
+	LONG_STREAM  = ni_new_istream_from_path("build/long-file", NULL);
 }
 
 
@@ -62,21 +62,6 @@ TEARDOWN {
 
 /* Test Cases */
 
-TEST(empty_istream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_istream_length(EMPTY_STREAM) == 0));
-}
-
-
-TEST(short_istream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_istream_length(SHORT_STREAM) == BASE_LENGTH));
-}
-
-
-TEST(long_istream_has_correct_length) {
-	ASSERT(IS_TRUE(ni_istream_length(LONG_STREAM) == LONG_STREAM_ITERATIONS * BASE_LENGTH));
-}
-
-
 TEST(empty_istream_has_correct_eof) {
 	ASSERT(IS_TRUE(ni_istream_eof(EMPTY_STREAM) == true));
 }
@@ -86,10 +71,33 @@ TEST(short_istream_has_correct_eof) {
 	ASSERT(IS_TRUE(ni_istream_eof(SHORT_STREAM) == false));
 }
 
+TEST(short_istream_has_correct_length) {
+	int i = 0;
+	while(!ni_istream_eof(SHORT_STREAM)) {
+		i++;
+		ni_istream_read(SHORT_STREAM, NULL);
+
+	}
+	ASSERT(EQ_I64(i, BASE_LENGTH));
+}
+
+
 
 TEST(long_istream_has_correct_eof) {
 	ASSERT(IS_TRUE(ni_istream_eof(LONG_STREAM) == false));
 }
+
+
+TEST(long_istream_has_correct_length) {
+	int i = 0;
+	while(!ni_istream_eof(LONG_STREAM)) {
+		i++;
+		ni_istream_read(LONG_STREAM, NULL);
+
+	}
+	ASSERT(EQ_I64(i, BASE_LENGTH * LONG_STREAM_ITERATIONS));
+}
+
 
 
 TEST(peek_on_empty_istream_signals_eof) {

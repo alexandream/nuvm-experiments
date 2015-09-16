@@ -645,8 +645,8 @@ parse_string(NToken token) {
 	assert(result != NULL);
 	for (i = 1; i < length - 1; i++) {
 		if (input[i] == '\\') {
-			/* TODO (#2): Implement proper escaping, right now we only handle the
-			 * escaped quote (\") case correctly. */
+			/* TODO (#2): Implement proper escaping, right now we only handle
+			 * the escaped quote (\") case correctly. */
 			i++;
 		}
 		result[j] = input[i];
