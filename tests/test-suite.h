@@ -77,6 +77,24 @@ ERROR_OK(NError* error);
 NCheckResult
 HAS_ERROR(NError* error, const char* expected_name);
 
+#ifdef USE_JOINED_STRING
+
+static const char*
+JOINED_STRING(char* dst, const char **src, size_t src_size) {
+	size_t n_elems = src_size / sizeof(const char*);
+	size_t i, offset = 0;
+	for (i = 0; i < n_elems; i++) {
+		strcpy(dst + offset, src[i]);
+		offset += strlen(src[i]);
+	}
+	return dst;
+}
+
+#define EXPECTED_SIZE(VAR, LINE_LENGTH)\
+	LINE_LENGTH * sizeof(VAR)/sizeof(char*)
+
+#endif
+
 #define IS_TRUE(VV)      IS_TRUE_IMPL(#VV, VV)
 #define IS_FALSE(VV)     IS_FALSE_IMPL(#VV, VV)
 #define EQ_INT(VV, EE)   EQ_INT_IMPL(#VV, VV, EE)
