@@ -57,13 +57,19 @@ NCheckResult
 IS_FALSE_IMPL(const char* expression, bool condition);
 
 NCheckResult
-EQ_I64_IMPL(const char* expression, int64_t value, int64_t expected);
+EQ_INT_IMPL(const char* expression, int64_t value, int64_t expected);
 
 NCheckResult
 EQ_DBL_IMPL(const char* expression, double value, double expected);
 
 NCheckResult
 EQ_STR_IMPL(const char* expression, const char* value, const char* expected);
+
+NCheckResult
+EQ_SZT_IMPL(const char* expression, size_t value, size_t expected);
+
+NCheckResult
+EQ_UINT_IMPL(const char* expression, uint64_t value, uint64_t expected);
 
 NCheckResult
 ERROR_OK(NError* error);
@@ -73,7 +79,9 @@ HAS_ERROR(NError* error, const char* expected_name);
 
 #define IS_TRUE(VV)      IS_TRUE_IMPL(#VV, VV)
 #define IS_FALSE(VV)     IS_FALSE_IMPL(#VV, VV)
-#define EQ_I64(VV, EE)   EQ_I64_IMPL(#VV, VV, EE)
+#define EQ_INT(VV, EE)   EQ_INT_IMPL(#VV, VV, EE)
 #define EQ_DBL(VV, EE)   EQ_DBL_IMPL(#VV, VV, EE)
 #define EQ_STR(VV, EE)   EQ_STR_IMPL(#VV, VV, EE)
+#define EQ_SZT(VV, EE)   EQ_SZT_IMPL(#VV, VV, EE)
+#define EQ_UINT(VV, EE)  EQ_UINT_IMPL(#VV, VV, EE)
 #endif

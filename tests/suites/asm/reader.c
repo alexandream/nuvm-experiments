@@ -30,9 +30,9 @@ TEST(read_version_recognizes_input) {
 
 	ni_read_version(lexer, &major, &minor, &revision, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(major, 5));
-	ASSERT(EQ_I64(minor, 200));
-	ASSERT(EQ_I64(revision, 44));
+	ASSERT(EQ_UINT(major, 5));
+	ASSERT(EQ_UINT(minor, 200));
+	ASSERT(EQ_UINT(revision, 44));
 }
 
 
@@ -90,7 +90,7 @@ TEST(read_entry_point_recognizes_input) {
 
 	ni_read_entry_point(lexer, &entry_point, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(entry_point, 10588));
+	ASSERT(EQ_UINT(entry_point, 10588));
 }
 
 
@@ -102,7 +102,7 @@ TEST(read_globals_count_recognizes_input) {
 
 	ni_read_globals_count(lexer, &num_globals, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(num_globals, 65530));
+	ASSERT(EQ_UINT(num_globals, 65530));
 }
 
 
@@ -164,7 +164,7 @@ TEST(read_procedure_constant_recognizes_input) {
 	ni_read_procedure_constant(lexer, &label_name, &num_locals, &error);
 	ASSERT(ERROR_OK(&error));
 	ASSERT(EQ_STR(label_name, "main"));;
-	ASSERT(EQ_I64(num_locals, 128));
+	ASSERT(EQ_UINT(num_locals, 128));
 }
 
 
@@ -176,7 +176,7 @@ TEST(read_int32_constant_recognizes_input) {
 
 	ni_read_int32_constant(lexer, &value, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(value, -1050088L));
+	ASSERT(EQ_INT(value, -1050088L));
 }
 
 
@@ -188,13 +188,13 @@ TEST(read_instruction_recognizes_arith_rel_operations) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_ADD));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_CONSTANT));
-	ASSERT(EQ_I64(ins.arg_c.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 1));
-	ASSERT(EQ_I64(ins.arg_b.value, 2));
-	ASSERT(EQ_I64(ins.arg_c.value, 3));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_ADD));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_CONSTANT));
+	ASSERT(EQ_INT(ins.arg_c.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 1));
+	ASSERT(EQ_INT(ins.arg_b.value, 2));
+	ASSERT(EQ_INT(ins.arg_c.value, 3));
 }
 
 
@@ -206,13 +206,13 @@ TEST(read_instruction_recognizes_logical_or) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_OR));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_c.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 1));
-	ASSERT(EQ_I64(ins.arg_b.value, 2));
-	ASSERT(EQ_I64(ins.arg_c.value, 3));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_OR));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_c.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 1));
+	ASSERT(EQ_INT(ins.arg_b.value, 2));
+	ASSERT(EQ_INT(ins.arg_c.value, 3));
 }
 
 
@@ -224,11 +224,11 @@ TEST(read_instruction_recognizes_move_local) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_MOVE));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 1));
-	ASSERT(EQ_I64(ins.arg_b.value, 300));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_MOVE));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 1));
+	ASSERT(EQ_INT(ins.arg_b.value, 300));
 }
 
 
@@ -240,11 +240,11 @@ TEST(read_instruction_recognizes_logical_not) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_NOT));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 255));
-	ASSERT(EQ_I64(ins.arg_b.value, 12345));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_NOT));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 255));
+	ASSERT(EQ_INT(ins.arg_b.value, 12345));
 }
 
 
@@ -256,11 +256,11 @@ TEST(read_instruction_recognizes_global_ref) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_GLOBAL_REF));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 255));
-	ASSERT(EQ_I64(ins.arg_b.value, 12345));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_GLOBAL_REF));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 255));
+	ASSERT(EQ_INT(ins.arg_b.value, 12345));
 }
 
 
@@ -272,11 +272,11 @@ TEST(read_instruction_recognizes_global_set) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_GLOBAL_SET));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_GLOBAL));
-	ASSERT(EQ_I64(ins.arg_b.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 12255));
-	ASSERT(EQ_I64(ins.arg_b.value, 123));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_GLOBAL_SET));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_GLOBAL));
+	ASSERT(EQ_INT(ins.arg_b.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 12255));
+	ASSERT(EQ_INT(ins.arg_b.value, 123));
 }
 
 
@@ -288,10 +288,10 @@ TEST(read_instruction_recognizes_load_bool_false) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_LOAD_BOOL));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 127));
-	ASSERT(EQ_I64(ins.arg_b.value, 0));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_LOAD_BOOL));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 127));
+	ASSERT(EQ_INT(ins.arg_b.value, 0));
 }
 
 
@@ -303,10 +303,10 @@ TEST(read_instruction_recognizes_load_bool_true) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_LOAD_BOOL));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 127));
-	ASSERT(EQ_I64(ins.arg_b.value, 1));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_LOAD_BOOL));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 127));
+	ASSERT(EQ_INT(ins.arg_b.value, 1));
 }
 
 
@@ -327,8 +327,8 @@ TEST(read_instruction_recognizes_jump) {
 	NLexer* lexer = WITH_INPUT("jump -8000000");
 	ni_read_instruction(lexer, &ins, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_JUMP));
-	ASSERT(EQ_I64(ins.arg_a.value, -8000000));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_JUMP));
+	ASSERT(EQ_INT(ins.arg_a.value, -8000000));
 }
 
 
@@ -340,10 +340,10 @@ TEST(read_instruction_recognizes_jump_if) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_JUMP_IF));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 127));
-	ASSERT(EQ_I64(ins.arg_b.value, 65535));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_JUMP_IF));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 127));
+	ASSERT(EQ_INT(ins.arg_b.value, 65535));
 }
 
 
@@ -355,9 +355,9 @@ TEST(read_instruction_recognizes_return) {
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(ins.opcode, N_OP_RETURN));
-	ASSERT(EQ_I64(ins.arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(ins.arg_a.value, 4194303));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_RETURN));
+	ASSERT(EQ_INT(ins.arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(ins.arg_a.value, 4194303));
 }
 
 

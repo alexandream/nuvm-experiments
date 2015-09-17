@@ -1,4 +1,4 @@
-#define SUITE_NAME Streams
+#define SUITE_NAME IStreams
 
 #include <stdio.h>
 #include <string.h>
@@ -78,7 +78,7 @@ TEST(short_istream_has_correct_length) {
 		ni_istream_read(SHORT_STREAM, NULL);
 
 	}
-	ASSERT(EQ_I64(i, BASE_LENGTH));
+	ASSERT(EQ_SZT(i, BASE_LENGTH));
 }
 
 
@@ -95,7 +95,7 @@ TEST(long_istream_has_correct_length) {
 		ni_istream_read(LONG_STREAM, NULL);
 
 	}
-	ASSERT(EQ_I64(i, BASE_LENGTH * LONG_STREAM_ITERATIONS));
+	ASSERT(EQ_SZT(i, BASE_LENGTH * LONG_STREAM_ITERATIONS));
 }
 
 

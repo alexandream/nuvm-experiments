@@ -17,7 +17,7 @@ IS_FALSE_IMPL(const char* expression, bool condition) {
 
 
 NCheckResult
-EQ_I64_IMPL(const char* expression, int64_t value, int64_t expected) {
+EQ_INT_IMPL(const char* expression, int64_t value, int64_t expected) {
 	NI_DO_CHECK(value == expected,
 		MF("Expression (%s) expected to have value %ld but found "
 		   "to have value %ld.",
@@ -56,6 +56,23 @@ EQ_STR_IMPL(const char* expression, const char* value, const char* expected) {
 		   expression, expected, value));
 }
 
+
+NCheckResult
+EQ_SZT_IMPL(const char* expression, size_t value, size_t expected) {
+	NI_DO_CHECK(value == expected,
+		MF("Expression (%s) expected to have value %lu but found "
+		   "to have value %lu.",
+		   expression, expected, value));
+}
+
+
+NCheckResult
+EQ_UINT_IMPL(const char* expression, uint64_t value, uint64_t expected) {
+	NI_DO_CHECK(value == expected,
+		MF("Expression (%s) expected to have value %ld but found "
+		   "to have value %ld.",
+		   expression, expected, value));
+}
 
 NCheckResult
 HAS_ERROR(NError* error, const char* expected_name) {

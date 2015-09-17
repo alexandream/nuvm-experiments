@@ -22,7 +22,7 @@ SETUP {
 
 TEST(first_label_comes_with_id_zero) {
 	int32_t id = ni_asm_get_label(ASM, "hello", NULL);
-	ASSERT(EQ_I64(id, 0));
+	ASSERT(EQ_INT(id, 0));
 }
 
 
@@ -31,7 +31,7 @@ TEST(repeated_first_label_comes_with_id_zero) {
 	ni_asm_get_label(ASM, "hello", NULL);
 	id = ni_asm_get_label(ASM, "hello", NULL);
 
-	ASSERT(EQ_I64(id, 0));
+	ASSERT(EQ_INT(id, 0));
 }
 
 
@@ -40,7 +40,7 @@ TEST(repeated_labels_ignore_case) {
 	ni_asm_get_label(ASM, "hello", NULL);
 	id = ni_asm_get_label(ASM, "hElLo", NULL);
 
-	ASSERT(EQ_I64(id, 0));
+	ASSERT(EQ_INT(id, 0));
 }
 
 
@@ -49,7 +49,7 @@ TEST(new_label_increases_id) {
 	ni_asm_get_label(ASM, "first_label", NULL);
 	id = ni_asm_get_label(ASM, "second_label", NULL);
 
-	ASSERT(EQ_I64(id, 1));
+	ASSERT(EQ_INT(id, 1));
 }
 
 TEST(read_from_lexer) {
@@ -97,86 +97,86 @@ TEST(read_from_lexer) {
 	constants_count = nt_asm_constants_count(assembler);
 	code_count = nt_asm_code_count(assembler);
 
-	ASSERT(EQ_I64(version[0], 0));
-	ASSERT(EQ_I64(version[1], 0));
-	ASSERT(EQ_I64(version[2], 1));
+	ASSERT(EQ_UINT(version[0], 0));
+	ASSERT(EQ_UINT(version[1], 0));
+	ASSERT(EQ_UINT(version[2], 1));
 
-	ASSERT(EQ_I64(entry_point, 0));
-	ASSERT(EQ_I64(globals_count, 3));
-	ASSERT(EQ_I64(constants_count, 3));
-	ASSERT(EQ_I64(code_count, 4));
+	ASSERT(EQ_UINT(entry_point, 0));
+	ASSERT(EQ_UINT(globals_count, 3));
+	ASSERT(EQ_INT(constants_count, 3));
+	ASSERT(EQ_INT(code_count, 4));
 
 	/* Check if the INIT label exists with definition at 0 */
 	label_id = ni_asm_get_label(assembler, "INIT", &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(nt_asm_label_definition(assembler, label_id), 0));
+	ASSERT(EQ_INT(nt_asm_label_definition(assembler, label_id), 0));
 
 	/* Check if the END label exists with definition at 3 */
 	label_id = ni_asm_get_label(assembler, "END", &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_I64(nt_asm_label_definition(assembler, label_id), 3));
+	ASSERT(EQ_INT(nt_asm_label_definition(assembler, label_id), 3));
 
 	/* Check the first constant */
 	const_type = nt_asm_constant_type(assembler, 0);
 	const_integer = nt_asm_constant_integer(assembler, 0);
 	const_aux_integer = nt_asm_constant_aux_integer(assembler, 0);
 
-	ASSERT(EQ_I64(const_type, NI_CONSTANT_PROCEDURE));
+	ASSERT(EQ_UINT(const_type, NI_CONSTANT_PROCEDURE));
 	label_id = ni_asm_get_label(assembler, "INIT", NULL);
-	ASSERT(EQ_I64(const_integer, label_id));
-	ASSERT(EQ_I64(const_aux_integer, 25));
+	ASSERT(EQ_INT(const_integer, label_id));
+	ASSERT(EQ_UINT(const_aux_integer, 25));
 
 	/* Check the second constant */
 	const_type = nt_asm_constant_type(assembler, 1);
 	const_integer = nt_asm_constant_integer(assembler, 1);
 	const_aux_integer = nt_asm_constant_aux_integer(assembler, 1);
 
-	ASSERT(EQ_I64(const_type, NI_CONSTANT_INT32));
-	ASSERT(EQ_I64(const_integer, 10588));
+	ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
+	ASSERT(EQ_INT(const_integer, 10588));
 
 	/* Check the third constant */
 	const_type = nt_asm_constant_type(assembler, 2);
 	const_integer = nt_asm_constant_integer(assembler, 2);
 	const_aux_integer = nt_asm_constant_aux_integer(assembler, 2);
 
-	ASSERT(EQ_I64(const_type, NI_CONSTANT_INT32));
-	ASSERT(EQ_I64(const_integer, 42));
+	ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
+	ASSERT(EQ_INT(const_integer, 42));
 
 	/* Check first instruction */
 	inst = nt_asm_instruction(assembler, 0);
-	ASSERT(EQ_I64(inst->opcode, N_OP_GLOBAL_REF));
-	ASSERT(EQ_I64(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(inst->arg_a.value, 0));
+	ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
+	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(inst->arg_a.value, 0));
 
-	ASSERT(EQ_I64(inst->arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_I64(inst->arg_b.value, 1));
+	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_INT(inst->arg_b.value, 1));
 
 	/* Check second instruction */
 	inst = nt_asm_instruction(assembler, 1);
-	ASSERT(EQ_I64(inst->opcode, N_OP_GLOBAL_REF));
-	ASSERT(EQ_I64(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(inst->arg_a.value, 1));
+	ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
+	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(inst->arg_a.value, 1));
 
-	ASSERT(EQ_I64(inst->arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_I64(inst->arg_b.value, 2));
+	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
+	ASSERT(EQ_INT(inst->arg_b.value, 2));
 
 	/* Check third instruction */
 	inst = nt_asm_instruction(assembler, 2);
-	ASSERT(EQ_I64(inst->opcode, N_OP_ADD));
+	ASSERT(EQ_UINT(inst->opcode, N_OP_ADD));
 
-	ASSERT(EQ_I64(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(inst->arg_a.value, 3));
+	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(inst->arg_a.value, 3));
 
-	ASSERT(EQ_I64(inst->arg_b.type, NI_RT_CONSTANT));
-	ASSERT(EQ_I64(inst->arg_b.value, 1));
+	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_CONSTANT));
+	ASSERT(EQ_INT(inst->arg_b.value, 1));
 
-	ASSERT(EQ_I64(inst->arg_c.type, NI_RT_CONSTANT));
-	ASSERT(EQ_I64(inst->arg_c.value, 2));
+	ASSERT(EQ_INT(inst->arg_c.type, NI_RT_CONSTANT));
+	ASSERT(EQ_INT(inst->arg_c.value, 2));
 
 	/* Check fourth instruction */
 	inst = nt_asm_instruction(assembler, 3);
-	ASSERT(EQ_I64(inst->opcode, N_OP_RETURN));
+	ASSERT(EQ_UINT(inst->opcode, N_OP_RETURN));
 
-	ASSERT(EQ_I64(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_I64(inst->arg_a.value, 3));
+	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+	ASSERT(EQ_INT(inst->arg_a.value, 3));
 }

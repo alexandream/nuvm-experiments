@@ -362,12 +362,12 @@ static void
 _check_rw_asserts(ATResult* ni_g_test_result, int64_t i, int64_t j, int64_t i0, int64_t j0,
               uint8_t size, uint8_t psize) {
 	int k;
-	ASSERT(EQ_I64(i, i0 + psize));
+	ASSERT(EQ_INT(i, i0 + psize));
 
-	ASSERT(EQ_I64(size, psize));
-	ASSERT(EQ_I64(j, j0 + size));
+	ASSERT(EQ_INT(size, psize));
+	ASSERT(EQ_INT(j, j0 + size));
 	for (k = 0; k < size; k++) {
-		ASSERT(EQ_I64(OSTREAM[j0+k],ISTREAM[i0+k]));
+		ASSERT(EQ_INT(OSTREAM[j0+k],ISTREAM[i0+k]));
 	}
 }
 
