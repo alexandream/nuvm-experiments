@@ -342,7 +342,7 @@ static void
 ni_read_jump_instruction(NLexer* lexer,
                          NInstruction* instruction,
                          NError* error) {
-	NToken offset_tk = NI_TOKEN_INITIALIZER;
+	NToken offset_tk;
 	int32_t offset = 0;
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
@@ -366,7 +366,7 @@ static void
 ni_read_jump_if_instruction(NLexer* lexer,
                             NInstruction* instruction,
                             NError* error) {
-	NToken offset_tk = NI_TOKEN_INITIALIZER;
+	NToken offset_tk;
 	int32_t offset = 0;
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
@@ -396,7 +396,7 @@ static void
 ni_read_load_bool_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error) {
-	NToken value_tk = NI_TOKEN_INITIALIZER;
+	NToken value_tk;
 	int32_t value = 0;
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
@@ -659,7 +659,7 @@ parse_string(NToken token) {
 
 static void
 consume_dec_int(NLexer* lexer, int32_t* value, NError* error) {
-	NToken cur_token = NI_TOKEN_INITIALIZER;
+	NToken cur_token;
 	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
 	if (!n_error_ok(error)) return;
 
@@ -671,7 +671,7 @@ consume_dec_int(NLexer* lexer, int32_t* value, NError* error) {
 
 static void
 consume_dec_int_u16(NLexer* lexer, uint16_t* value, NError* error) {
-	int32_t value_i32;
+	int32_t value_i32 = 0;
 	consume_dec_int(lexer, &value_i32, error);
 	if (value_i32 < 0 || value_i32 > UINT16_MAX) {
 		/* TODO (#1): Generate proper error. */
@@ -685,7 +685,7 @@ consume_dec_int_u16(NLexer* lexer, uint16_t* value, NError* error) {
 
 static void
 consume_dec_int_u8(NLexer* lexer, uint8_t* value, NError* error) {
-	int32_t value_i32;
+	int32_t value_i32 = 0;
 	consume_dec_int(lexer, &value_i32, error);
 	if (value_i32 < 0 || value_i32 > UINT8_MAX) {
 		/* TODO (#1): Generate proper error. */
@@ -700,7 +700,7 @@ consume_dec_int_u8(NLexer* lexer, uint8_t* value, NError* error) {
 static void
 consume_double(NLexer* lexer, double* value, NError* error) {
 	char* end_ptr;
-	NToken cur_token = NI_TOKEN_INITIALIZER;
+	NToken cur_token;
 	expect_token_type(lexer, NI_TK_REAL, error);
 	if (!n_error_ok(error)) return;
 
@@ -714,7 +714,7 @@ consume_double(NLexer* lexer, double* value, NError* error) {
 
 static void
 consume_label(NLexer* lexer, char** value, NError* error) {
-	NToken cur_token = NI_TOKEN_INITIALIZER;
+	NToken cur_token;
 	expect_token_type(lexer, NI_TK_LABEL, error);
 	if (!n_error_ok(error)) return;
 
@@ -745,7 +745,7 @@ consume_opcode(NLexer* lexer, NError* error) {
 
 static void
 consume_string(NLexer* lexer, char** value, NError* error) {
-	NToken cur_token = NI_TOKEN_INITIALIZER;
+	NToken cur_token;
 	expect_token_type(lexer, NI_TK_STRING, error);
 	if (!n_error_ok(error)) return;
 

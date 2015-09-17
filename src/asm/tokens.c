@@ -203,6 +203,8 @@ ni_get_token_name(NTokenType type) {
 		case NI_TK_XX_OPCODES_END:
 			return "Control Token";
 	}
+	/* This should also never happen. */
+	return "Unprocessed Token";
 }
 
 /* The function below implements the following lexer, in POSIX Extended Regular

@@ -103,7 +103,7 @@ cleanup:
 	}
 	if (error != NULL) {
 		/* TODO: Error should contain more information about the situation */
-		error->type = error_io;
+		error->type = error_type;
 	}
 	return NULL;
 }
