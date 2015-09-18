@@ -16,14 +16,6 @@ typedef struct {
 	uint32_t definition;
 } NLabel;
 
-typedef struct {
-	uint8_t type;
-	int64_t integer;
-	uint16_t aux_integer;
-	double real;
-	char* text;
-} NConstantDescriptor;
-
 
 /* Instantiating the resizable-array template for the label pool */
 #define N_DS_ARRAY_TYPE_NAME NLabelArray
@@ -35,27 +27,24 @@ typedef struct {
 #define N_DS_ARRAY_TYPE_NAME NCodePool
 #define N_DS_ARRAY_CONTENTS_TYPE NInstruction*
 #define N_DS_ARRAY_PREFIX ncpool
-#define N_DS_ARRAY_P_SKIP_ELEMENTS
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the constants pool */
 #define N_DS_ARRAY_TYPE_NAME NConstantPool
 #define N_DS_ARRAY_CONTENTS_TYPE NConstantDescriptor
 #define N_DS_ARRAY_PREFIX ncopool
-#define N_DS_ARRAY_P_SKIP_ELEMENTS
 #include "../common/utils/resizable-array/full.h"
 
 
 struct NAssembler {
-	uint8_t version[3];
-	uint16_t entry_point;
-	uint16_t globals_count;
+	NProgram* program;
 
 	NCodePool code_pool;
 	NLabelArray label_pool;
 	NConstantPool constant_pool;
 };
-static uint32_t error_code_not_found,
+static uint32_t error_bad_alloc,
+                error_code_not_found,
                 error_code_parsing_failed,
                 error_constant_parsing_failed,
                 error_constants_not_found,
@@ -84,6 +73,11 @@ ni_new_assembler() {
 	NAssembler* result = (NAssembler*) malloc(sizeof(NAssembler));
 	if (result == NULL) {
 		/* FIXME: Add proper error handling for allocation errors. */
+		return NULL;
+	}
+	result->program = ni_new_program(NULL);
+	if (result->program == NULL) {
+		free(result);
 		return NULL;
 	}
 	/* FIXME: This array initializer has no way of signaling errors
@@ -131,21 +125,21 @@ ni_asm_set_version(NAssembler* self,
                    uint8_t major,
                    uint8_t minor,
                    uint8_t rev) {
-	self->version[0] = major;
-	self->version[1] = minor;
-	self->version[2] = rev;
+	self->program->major_version = major;
+	self->program->minor_version = minor;
+	self->program->revision      = rev;
 }
 
 
 void
 ni_asm_set_entry_point(NAssembler* self, uint16_t entry_point) {
-	self->entry_point = entry_point;
+	self->program->entry_point = entry_point;
 }
 
 
 void
 ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count) {
-	self->globals_count = globals_count;
+	self->program->globals_count = globals_count;
 }
 
 
@@ -159,13 +153,13 @@ ni_asm_add_instruction(NAssembler* self,
 	if (instruction->argument_label != NULL) {
 		owned_instruction->argument_label_id =
 			ni_asm_get_label(self, instruction->argument_label, error);
-		if (!n_error_ok(error)) goto handle_error;
+		if (!n_error_ok(error)) goto cleanup;
 	}
 
 	ncpool_append(&self->code_pool, owned_instruction);
 
 	return;
-handle_error:
+cleanup:
 	if (owned_instruction != NULL) {
 		ni_asm_instruction_destroy(owned_instruction);
 		free(owned_instruction);
@@ -258,16 +252,27 @@ ni_asm_define_label(NAssembler* self, const char* label_name, NError* error) {
 }
 
 
-void
-ni_asm_read_from_lexer(NAssembler* self, NLexer* lexer, NError* error) {
-
+NProgram*
+ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
+	NLexer* lexer = ni_new_lexer(istream);
+	if (lexer == NULL) {
+		n_error_set(error, error_bad_alloc, NULL);
+		return NULL;
+	}
 	consume_header_data(self, lexer, error);
-	if (!n_error_ok(error)) return;
+	if (!n_error_ok(error)) return NULL;
 
 	consume_constant_list(self, lexer, error);
-	if (!n_error_ok(error)) return;
+	if (!n_error_ok(error)) return NULL;
 
 	consume_code_segment(self, lexer, error);
+
+	self->program->code = ncpool_elements(&self->code_pool);
+	self->program->code_size = ncpool_count(&self->code_pool);
+
+	self->program->constants = ncopool_elements(&self->constant_pool);
+	self->program->constants_size = ncopool_count(&self->constant_pool);
+	return self->program;
 }
 
 /* Destructor for nuvm.asm.assembler.ConstantParsingFailed */
@@ -285,6 +290,9 @@ destroy_error_with_child(NError* error) {
 
 
 void ni_init_assembler() {
+	error_bad_alloc =
+		n_find_error_type("nuvm.BadAllocation");
+
 	error_entry_point_out_of_bounds =
 		n_register_error_type("nuvm.asm.assembler.EntryPointOutOfBounds",
 		                      NULL,
@@ -454,7 +462,7 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 		error->type = error_empty_constants_list;
 		return;
 	}
-	if (num_constants_found <= self->entry_point) {
+	if (num_constants_found <= self->program->entry_point) {
 		/* FIXME: This error handling was rushed. */
 		/* Check if we need to add more data for the error to be meaningful
 		 * for a caller. */
@@ -518,8 +526,8 @@ size_t
 ni_asm_compute_result_size(NAssembler* self, NError* error) {
 	size_t magic_number_size = 8;
 	size_t reserved_space_size = 8;
-	size_t entry_point_size = sizeof(self->entry_point);
-	size_t globals_count_size = sizeof(self->globals_count);
+	size_t entry_point_size = sizeof(self->program->entry_point);
+	size_t globals_count_size = sizeof(self->program->globals_count);
 	size_t constants_count_size = sizeof(uint16_t);
 	size_t instruction_count_size = sizeof(uint32_t);
 
@@ -542,54 +550,3 @@ ni_asm_compute_result_size(NAssembler* self, NError* error) {
 
 	return header_size + segments_size;
 }
-#ifdef TEST_ACCESSORS
-uint8_t*
-nt_asm_version(NAssembler* self) {
-	return self->version;
-}
-
-uint16_t
-nt_asm_entry_point(NAssembler* self) {
-	return self->entry_point;
-}
-
-uint16_t
-nt_asm_globals_count(NAssembler* self) {
-	return self->globals_count;
-}
-
-int32_t
-nt_asm_constants_count(NAssembler* self) {
-	return count_constants(self);
-}
-
-uint8_t nt_asm_constant_type(NAssembler* self, int32_t constant) {
-	return ncopool_get(&self->constant_pool, constant).type;
-}
-
-int64_t
-nt_asm_constant_integer(NAssembler* self, int32_t constant) {
-	return ncopool_get(&self->constant_pool, constant).integer;
-}
-
-uint16_t
-nt_asm_constant_aux_integer(NAssembler* self, int32_t constant) {
-	return ncopool_get(&self->constant_pool, constant).aux_integer;
-}
-
-int32_t
-nt_asm_code_count(NAssembler* self) {
-	return count_instructions(self);
-}
-
-NInstruction*
-nt_asm_instruction(NAssembler* self, int32_t index) {
-	return ncpool_get(&self->code_pool, index);
-}
-
-uint32_t
-nt_asm_label_definition(NAssembler* self, int32_t label_id) {
-	return nlarray_get(&self->label_pool, label_id).definition;
-}
-
-#endif

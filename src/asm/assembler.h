@@ -1,7 +1,10 @@
 #ifndef NHG_A_ASSEMBLER
 #define NHG_A_ASSEMBLER
 #include <stdio.h>
-#include "reader.h"
+
+#include "instruction.h"
+#include "program.h"
+#include "istreams.h"
 
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
@@ -67,43 +70,11 @@ ni_asm_define_label(NAssembler* self, const char* label, NError* error);
 void
 ni_init_assembler();
 
-void
-ni_asm_read_from_lexer(NAssembler* self, NLexer* lexer, NError* error);
+NProgram*
+ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error);
 
 size_t
 ni_asm_compute_result_size(NAssembler* self, NError* error);
 
-#ifdef TEST_ACCESSORS
-uint8_t*
-nt_asm_version(NAssembler* self);
-
-uint16_t
-nt_asm_entry_point(NAssembler* self);
-
-uint16_t
-nt_asm_globals_count(NAssembler* self);
-
-int32_t
-nt_asm_constants_count(NAssembler* self);
-
-uint8_t
-nt_asm_constant_type(NAssembler* self, int32_t constant);
-
-int64_t
-nt_asm_constant_integer(NAssembler* self, int32_t constant);
-
-uint16_t
-nt_asm_constant_aux_integer(NAssembler* self, int32_t constant);
-
-int32_t
-nt_asm_code_count(NAssembler* self);
-
-NInstruction*
-nt_asm_instruction(NAssembler* self, int32_t index);
-
-uint32_t
-nt_asm_label_definition(NAssembler* self, int32_t label_id);
-
-#endif /* TEST_ACCESSORS */
 
 #endif /* NHG_A_ASSEMBLER */

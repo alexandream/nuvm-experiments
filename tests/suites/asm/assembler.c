@@ -6,54 +6,10 @@
 
 #include "../common/opcodes.h"
 #include "assembler.h"
-
-static NAssembler* ASM = NULL;
-
-TEARDOWN {
-	if (ASM != NULL) {
-		ni_destroy_assembler(ASM);
-		ASM = NULL;
-	}
-}
-
-SETUP {
-	ASM = ni_new_assembler();
-}
+#include "program.h"
 
 
-TEST(first_label_comes_with_id_zero) {
-	int32_t id = ni_asm_get_label(ASM, "hello", NULL);
-	ASSERT(EQ_INT(id, 0));
-}
-
-
-TEST(repeated_first_label_comes_with_id_zero) {
-	int32_t id;
-	ni_asm_get_label(ASM, "hello", NULL);
-	id = ni_asm_get_label(ASM, "hello", NULL);
-
-	ASSERT(EQ_INT(id, 0));
-}
-
-
-TEST(repeated_labels_ignore_case) {
-	int32_t id;
-	ni_asm_get_label(ASM, "hello", NULL);
-	id = ni_asm_get_label(ASM, "hElLo", NULL);
-
-	ASSERT(EQ_INT(id, 0));
-}
-
-
-TEST(new_label_increases_id) {
-	int32_t id;
-	ni_asm_get_label(ASM, "first_label", NULL);
-	id = ni_asm_get_label(ASM, "second_label", NULL);
-
-	ASSERT(EQ_INT(id, 1));
-}
-
-TEST(read_from_lexer) {
+TEST(read_from_istream) {
 	const char* prog_lines[] = {
 	    ".version 0 0 1                \n",
 	    ".entry-point 0                \n",
@@ -74,115 +30,92 @@ TEST(read_from_lexer) {
 	    "  return L:3                  \n"
 	};
 	char prog_buffer[EXPECTED_SIZE(prog_lines, 80)];
-	const char* prog =
+	const char* prog_text =
 		JOINED_STRING(prog_buffer, prog_lines, sizeof(prog_lines));
 
 
 	NAssembler* assembler = ni_new_assembler();
 	NError error = N_ERROR_INITIALIZER;
-	NIStream* stream = ni_new_istream_from_string(prog);
-	NLexer* lexer = ni_new_lexer(stream);
+	NIStream* stream = ni_new_istream_from_string(prog_text);
+	NProgram* program;
 
-	int32_t label_id;
-
-	uint8_t *version, const_type;
-	uint16_t entry_point, globals_count;
-	int32_t constants_count, code_count;
-	int64_t const_integer;
-	uint16_t const_aux_integer;
-
-	NInstruction* inst;
-
-	ni_asm_read_from_lexer(assembler, lexer, &error);
-
+	program = ni_asm_read_from_istream(assembler, stream, &error);
 	ASSERT(ERROR_OK(&error));
 
-	version = nt_asm_version(assembler);
-	entry_point = nt_asm_entry_point(assembler);
-	globals_count = nt_asm_globals_count(assembler);
-	constants_count = nt_asm_constants_count(assembler);
-	code_count = nt_asm_code_count(assembler);
+	ASSERT(EQ_UINT(program->major_version, 0));
+	ASSERT(EQ_UINT(program->minor_version, 0));
+	ASSERT(EQ_UINT(program->revision, 1));
 
-	ASSERT(EQ_UINT(version[0], 0));
-	ASSERT(EQ_UINT(version[1], 0));
-	ASSERT(EQ_UINT(version[2], 1));
+	ASSERT(EQ_UINT(program->entry_point, 0));
+	ASSERT(EQ_UINT(program->globals_count, 3));
+	ASSERT(EQ_INT(program->constants_size, 3));
+	ASSERT(EQ_INT(program->code_size, 4));
 
-	ASSERT(EQ_UINT(entry_point, 0));
-	ASSERT(EQ_UINT(globals_count, 3));
-	ASSERT(EQ_INT(constants_count, 3));
-	ASSERT(EQ_INT(code_count, 4));
+	{
+		uint8_t const_type;
+		int64_t const_integer;
+		uint16_t const_aux_integer;
+		NInstruction* inst;
 
-	/* Check if the INIT label exists with definition at 0 */
-	label_id = ni_asm_get_label(assembler, "INIT", &error);
-	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_INT(nt_asm_label_definition(assembler, label_id), 0));
+		/* Check the first constant */
+		const_type = program->constants[0].type;
+		const_integer = program->constants[0].integer;
+		const_aux_integer = program->constants[0].aux_integer;
 
-	/* Check if the END label exists with definition at 3 */
-	label_id = ni_asm_get_label(assembler, "END", &error);
-	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_INT(nt_asm_label_definition(assembler, label_id), 3));
+		ASSERT(EQ_UINT(const_type, NI_CONSTANT_PROCEDURE));
+		ASSERT(EQ_INT(const_integer, 0));
+		ASSERT(EQ_UINT(const_aux_integer, 25));
 
-	/* Check the first constant */
-	const_type = nt_asm_constant_type(assembler, 0);
-	const_integer = nt_asm_constant_integer(assembler, 0);
-	const_aux_integer = nt_asm_constant_aux_integer(assembler, 0);
+		/* Check the second constant */
+		const_type = program->constants[1].type;
+		const_integer = program->constants[1].integer;
 
-	ASSERT(EQ_UINT(const_type, NI_CONSTANT_PROCEDURE));
-	label_id = ni_asm_get_label(assembler, "INIT", NULL);
-	ASSERT(EQ_INT(const_integer, label_id));
-	ASSERT(EQ_UINT(const_aux_integer, 25));
+		ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
+		ASSERT(EQ_INT(const_integer, 10588));
 
-	/* Check the second constant */
-	const_type = nt_asm_constant_type(assembler, 1);
-	const_integer = nt_asm_constant_integer(assembler, 1);
-	const_aux_integer = nt_asm_constant_aux_integer(assembler, 1);
+		/* Check the third constant */
+		const_type = program->constants[2].type;
+		const_integer = program->constants[2].integer;
 
-	ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
-	ASSERT(EQ_INT(const_integer, 10588));
+		ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
+		ASSERT(EQ_INT(const_integer, 42));
 
-	/* Check the third constant */
-	const_type = nt_asm_constant_type(assembler, 2);
-	const_integer = nt_asm_constant_integer(assembler, 2);
-	const_aux_integer = nt_asm_constant_aux_integer(assembler, 2);
+		/* Check first instruction */
+		inst = program->code[0];
+		ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
+		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst->arg_a.value, 0));
 
-	ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
-	ASSERT(EQ_INT(const_integer, 42));
+		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
+		ASSERT(EQ_INT(inst->arg_b.value, 1));
 
-	/* Check first instruction */
-	inst = nt_asm_instruction(assembler, 0);
-	ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
-	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_INT(inst->arg_a.value, 0));
+		/* Check second instruction */
+		inst = program->code[1];
+		ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
+		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst->arg_a.value, 1));
 
-	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_INT(inst->arg_b.value, 1));
+		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
+		ASSERT(EQ_INT(inst->arg_b.value, 2));
 
-	/* Check second instruction */
-	inst = nt_asm_instruction(assembler, 1);
-	ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
-	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_INT(inst->arg_a.value, 1));
+		/* Check third instruction */
+		inst = program->code[2];
+		ASSERT(EQ_UINT(inst->opcode, N_OP_ADD));
 
-	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
-	ASSERT(EQ_INT(inst->arg_b.value, 2));
+		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst->arg_a.value, 3));
 
-	/* Check third instruction */
-	inst = nt_asm_instruction(assembler, 2);
-	ASSERT(EQ_UINT(inst->opcode, N_OP_ADD));
+		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_CONSTANT));
+		ASSERT(EQ_INT(inst->arg_b.value, 1));
 
-	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_INT(inst->arg_a.value, 3));
+		ASSERT(EQ_INT(inst->arg_c.type, NI_RT_CONSTANT));
+		ASSERT(EQ_INT(inst->arg_c.value, 2));
 
-	ASSERT(EQ_INT(inst->arg_b.type, NI_RT_CONSTANT));
-	ASSERT(EQ_INT(inst->arg_b.value, 1));
+		/* Check fourth instruction */
+		inst = program->code[3];
+		ASSERT(EQ_UINT(inst->opcode, N_OP_RETURN));
 
-	ASSERT(EQ_INT(inst->arg_c.type, NI_RT_CONSTANT));
-	ASSERT(EQ_INT(inst->arg_c.value, 2));
-
-	/* Check fourth instruction */
-	inst = nt_asm_instruction(assembler, 3);
-	ASSERT(EQ_UINT(inst->opcode, N_OP_RETURN));
-
-	ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-	ASSERT(EQ_INT(inst->arg_a.value, 3));
+		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst->arg_a.value, 3));
+	}
 }
