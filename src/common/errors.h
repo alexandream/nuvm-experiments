@@ -47,6 +47,9 @@ bool
 n_error_ok(NError* error);
 
 void
+n_error_set(NError* error, uint32_t type, void* data);
+
+void
 n_error_destroy_by_freeing(NError* error);
 
 void

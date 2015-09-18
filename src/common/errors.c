@@ -125,6 +125,13 @@ n_error_destroy_by_freeing(NError* error) {
 	}
 }
 
+void
+n_error_set(NError* error, uint32_t type, void* data) {
+	if (error != NULL) {
+		error->type = type;
+		error->data = data;
+	}
+}
 
 void
 n_init_errors() {
