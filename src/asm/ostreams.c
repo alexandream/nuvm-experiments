@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "errors.h"
 #include "ostreams.h"
 
 struct NOStream {
@@ -11,10 +12,6 @@ struct NOStream {
 	FILE* file;
 };
 
-
-static uint32_t error_io,
-                error_bad_alloc,
-                error_buffer_too_small;
 
 static size_t
 available_buffer_space(NOStream* self);
@@ -28,20 +25,20 @@ ni_new_memory_ostream(size_t size, NError* error) {
 	char* buffer = NULL;
 	NOStream* result = NULL;
 	uint32_t error_type = 0;
-	
+
 	if (size < N_OSTREAM_MIN_BUFFER_SIZE) {
 		size = N_OSTREAM_MIN_BUFFER_SIZE;
 	}
 
 	buffer = (char*) malloc(sizeof(char) * size);
 	if (buffer == NULL) {
-		error_type = error_bad_alloc;
+		error_type = ni_a_errors.BadAllocation;
 		goto cleanup;
 	}
 
 	result = (NOStream*) malloc(sizeof(NOStream));
 	if(result == NULL) {
-		error_type = error_bad_alloc;
+		error_type = ni_a_errors.BadAllocation;
 		goto cleanup;
 	}
 
@@ -69,18 +66,18 @@ ni_new_file_ostream(const char* path, size_t buf_size, NError* error) {
 	NOStream* result;
 	FILE* file = NULL;
 	uint32_t error_type = 0;
-	
+
 	n_error_reset(error);
 
 	file = fopen(path, "wb");
 	if (file == NULL) {
-		error_type = error_io;
+		error_type = ni_a_errors.IOError;
 		goto cleanup;
 	}
 
 	result = ni_new_memory_ostream(buf_size, error);
 	if (!n_error_ok(error)) { goto cleanup; }
-	
+
 	result->file = file;
 	return result;
 cleanup:
@@ -97,7 +94,7 @@ cleanup:
 
 void
 ni_ostream_close(NOStream* self, NError* error) {
-	
+
 	n_error_reset(error);
 
 	if (self->file != NULL) {
@@ -105,7 +102,7 @@ ni_ostream_close(NOStream* self, NError* error) {
 		if (!n_error_ok(error)) return;
 
 		if (fclose(self->file) == EOF && error != NULL) {
-			error->type = error_io;
+			error->type = ni_a_errors.IOError;
 		}
 		self->file = NULL;
 	}
@@ -115,7 +112,7 @@ ni_ostream_close(NOStream* self, NError* error) {
 void
 ni_ostream_flush(NOStream* self, NError* error) {
 	size_t written = 0;
-	
+
 	if (self->file == NULL) return;
 	if (self->cursor == 0) return;
 
@@ -123,7 +120,7 @@ ni_ostream_flush(NOStream* self, NError* error) {
 
 	written = fwrite(self->buffer, sizeof(char), self->cursor, self->file);
 	if (written < self->cursor) {
-		error->type = error_io;
+		error->type = ni_a_errors.IOError;
 		return;
 	}
 	self->cursor = 0;
@@ -159,12 +156,13 @@ ni_ostream_write_data(NOStream* self,
 	 * Report a buffer size error */
 	if (!can_insert_element(self, final_size)) {
 		if (error != NULL) {
-			error->type = error_buffer_too_small;
+			error->type = ni_a_errors.BufferTooSmall;
+			return;
 		}
 	}
 
 	memcpy(self->buffer + self->cursor, mem_area, final_size);
-	self->cursor += final_size;	
+	self->cursor += final_size;
 }
 
 
@@ -193,19 +191,6 @@ ni_ostream_write_uint64(NOStream* self, uint64_t value, NError* error) {
 
 
 
-void
-ni_init_ostreams() {
-	error_io =
-		n_find_error_type("nuvm.asm.IOError");
-
-	error_bad_alloc =
-		n_find_error_type("nuvm.BadAllocation");
-
-	error_buffer_too_small =
-		n_register_error_type("nuvm.asm.BufferTooSmall", NULL, NULL);
-}
-
-
 static size_t
 available_buffer_space(NOStream* self) {
 	return self->size - self->cursor;
@@ -213,7 +198,7 @@ available_buffer_space(NOStream* self) {
 
 static size_t
 can_insert_element(NOStream* self, size_t size) {
-	return size >= available_buffer_space(self);
+	return size <= available_buffer_space(self);
 }
 
 #ifdef TEST_ACCESSORS

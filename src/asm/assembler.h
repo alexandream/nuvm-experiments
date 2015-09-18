@@ -27,9 +27,6 @@ void
 ni_destroy_assembler(NAssembler* self);
 
 
-void
-ni_init_assembler();
-
 NProgram*
 ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error);
 

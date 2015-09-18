@@ -4,6 +4,7 @@
 
 #include "common/polyfills/p-strdup.h"
 
+#include "errors.h"
 #include "istreams.h"
 
 struct NIStream {
@@ -17,8 +18,6 @@ ni_destroy_istream(NIStream* self) {
 	free(self);
 }
 
-static uint32_t error_io,
-                error_bad_alloc;
 
 NIStream*
 ni_new_istream_from_path(const char* path, NError *error) {
@@ -39,38 +38,38 @@ ni_new_istream_from_path(const char* path, NError *error) {
 
 	file = fopen(path, "rb");
 	if (file == NULL) {
-		error_type = error_io;
+		error_type = ni_a_errors.IOError;
 		goto cleanup;
 	}
 
 	status = fseek(file, 0, SEEK_END);
 	if (status != 0) {
-		error_type = error_io;
+		error_type = ni_a_errors.IOError;
 		goto cleanup;
 	}
 
 	file_size = ftell(file);
 	if (file_size < 0) {
-		error_type = error_io;
+		error_type = ni_a_errors.IOError;
 		goto cleanup;
 	}
 
 	status = fseek(file, 0, SEEK_SET);
 	if (status != 0) {
-		error_type = error_io;
+		error_type = ni_a_errors.IOError;
 		goto cleanup;
 	}
 
 	result = malloc(sizeof(NIStream));
 	if (result == NULL) {
-		error_type = error_bad_alloc;
+		error_type = ni_a_errors.BadAllocation;
 		goto cleanup;
 	}
 
 	if (file_size > 0) {
 		buffer = malloc(sizeof(char) * (file_size + 1));
 		if (buffer == NULL) {
-			error_type = error_bad_alloc;
+			error_type = ni_a_errors.BadAllocation;
 			goto cleanup;
 		}
 
@@ -78,7 +77,7 @@ ni_new_istream_from_path(const char* path, NError *error) {
 		while (!feof(file)) {
 			size_t n = fread(buffer + i, sizeof(char), file_size - i + 1, file);
 			if (ferror(file)) {
-				error_type = error_io;
+				error_type = ni_a_errors.IOError;
 				goto cleanup;
 			}
 			i += n;
@@ -170,13 +169,4 @@ ni_istream_read(NIStream* self, bool* end) {
 		*end = finished;
 	}
 	return result;
-}
-
-void
-ni_init_istreams() {
-	error_io =
-		n_register_error_type("nuvm.asm.IOError", NULL, NULL);
-
-	error_bad_alloc =
-		n_find_error_type("nuvm.BadAllocation");
 }

@@ -53,7 +53,4 @@ void
 ni_read_instruction(NLexer* lexer,
                     NInstruction* instruction,
                     NError* error);
-
-void
-ni_init_reader();
 #endif

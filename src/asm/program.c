@@ -4,7 +4,7 @@ NProgram*
 ni_new_program(NError* error) {
 	NProgram* program;
 	n_error_reset(error);
-	
+
 	program = (NProgram*) malloc(sizeof(NProgram));
 	/* TODO: Put proper error reporting here.
 	 * Should result in a bad allocation error. */

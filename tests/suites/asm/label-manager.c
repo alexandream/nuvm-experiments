@@ -20,7 +20,7 @@ TEARDOWN {
 
 TEST(label_manager_creation_works) {
 	NError error = N_ERROR_INITIALIZER;
-	
+
 	label_man = ni_new_label_manager(&error);
 
 	ASSERT(ERROR_OK(&error));
@@ -30,7 +30,7 @@ TEST(label_manager_creation_works) {
 TEST(first_label_comes_with_id_zero) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
-   
+
 	label_man = ni_new_label_manager(&error);
 
 	id = ni_label_manager_get(label_man, "hello", NULL);
@@ -41,9 +41,9 @@ TEST(first_label_comes_with_id_zero) {
 TEST(repeated_first_label_comes_with_id_zero) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
-   
+
 	label_man = ni_new_label_manager(&error);
-	
+
 	ni_label_manager_get(label_man, "hello", NULL);
 	id = ni_label_manager_get(label_man, "hello", NULL);
 
@@ -54,7 +54,7 @@ TEST(repeated_first_label_comes_with_id_zero) {
 TEST(repeated_labels_ignore_case) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
-   
+
 	label_man = ni_new_label_manager(&error);
 
 	ni_label_manager_get(label_man, "hello", NULL);
@@ -67,7 +67,7 @@ TEST(repeated_labels_ignore_case) {
 TEST(new_label_increases_id) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
-   
+
 	label_man = ni_new_label_manager(&error);
 
 	ni_label_manager_get(label_man, "first_label", NULL);
@@ -80,12 +80,12 @@ TEST(new_label_increases_id) {
 TEST(label_definition_to_zero_works) {
 	NError error = N_ERROR_INITIALIZER;
 	uint32_t definition;
-	
+
 	label_man = ni_new_label_manager(NULL);
 
 	ni_label_manager_define(label_man, "my_label", 0, &error);
 	ASSERT(ERROR_OK(&error));
-	
+
 	definition =
 		ni_label_manager_get_definition(label_man, "my_label", &error);
 	ASSERT(ERROR_OK(&error));
@@ -96,12 +96,12 @@ TEST(label_definition_to_zero_works) {
 TEST(label_definition_to_one_works) {
 	NError error = N_ERROR_INITIALIZER;
 	uint32_t definition;
-	
+
 	label_man = ni_new_label_manager(NULL);
 
 	ni_label_manager_define(label_man, "my_label", 1, &error);
 	ASSERT(ERROR_OK(&error));
-	
+
 	definition =
 		ni_label_manager_get_definition(label_man, "my_label", &error);
 	ASSERT(ERROR_OK(&error));

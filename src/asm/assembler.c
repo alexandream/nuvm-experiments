@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "assembler.h"
+#include "errors.h"
 #include "reader.h"
 
 #include "../common/polyfills/p-strcasecmp.h"
@@ -43,14 +44,7 @@ struct NAssembler {
 	NLabelArray label_pool;
 	NConstantPool constant_pool;
 };
-static uint32_t error_bad_alloc,
-                error_code_not_found,
-                error_code_parsing_failed,
-                error_constant_parsing_failed,
-                error_constants_not_found,
-                error_empty_constants_list,
-                error_entry_point_out_of_bounds,
-                error_unexpected_token;
+
 static void
 consume_code_segment(NAssembler* self, NLexer* lexer, NError* error);
 
@@ -258,7 +252,7 @@ NProgram*
 ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
 	NLexer* lexer = ni_new_lexer(istream);
 	if (lexer == NULL) {
-		n_error_set(error, error_bad_alloc, NULL);
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
 	consume_header_data(self, lexer, error);
@@ -277,60 +271,9 @@ ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
 	return self->program;
 }
 
-/* Destructor for nuvm.asm.assembler.ConstantParsingFailed */
-static void
-destroy_error_with_child(NError* error) {
-	NError* original_error = (NError*) error->data;
-	if (original_error != NULL) {
-		n_error_destroy(original_error);
-		/* FIXME (#4): This should change if we change the cloning */
-		free(original_error);
-	}
-	error->data = NULL;
-}
 
 
 
-void ni_init_assembler() {
-	error_bad_alloc =
-		n_find_error_type("nuvm.BadAllocation");
-
-	error_entry_point_out_of_bounds =
-		n_register_error_type("nuvm.asm.assembler.EntryPointOutOfBounds",
-		                      NULL,
-		                      NULL);
-	assert(error_entry_point_out_of_bounds < N_ERROR_LAST_VALID_ERROR);
-
-	error_constants_not_found =
-		n_register_error_type("nuvm.asm.assembler.ConstantsNotFound",
-		                      NULL,
-		                      NULL);
-	assert(error_constants_not_found < N_ERROR_LAST_VALID_ERROR);
-
-	error_empty_constants_list =
-		n_register_error_type("nuvm.asm.assembler.EmptyConstantsList",
-		                      NULL,
-		                      NULL);
-	assert(error_empty_constants_list < N_ERROR_LAST_VALID_ERROR);
-
-	error_constant_parsing_failed =
-		n_register_error_type("nuvm.asm.assembler.ConstantParsingFailed",
-		                      NULL,
-		                      destroy_error_with_child);
-	assert(error_constant_parsing_failed < N_ERROR_LAST_VALID_ERROR);
-
-	error_code_parsing_failed =
-		n_register_error_type("nuvm.asm.assembler.CodeParsingFailed",
-		                      NULL,
-		                      destroy_error_with_child);
-	assert(error_code_parsing_failed < N_ERROR_LAST_VALID_ERROR);
-
-	error_unexpected_token =
-		n_register_error_type("nuvm.asm.assembler.UnexpectedToken",
-		                      NULL,
-		                      n_error_destroy_by_freeing);
-	assert(error_unexpected_token < N_ERROR_LAST_VALID_ERROR);
-}
 
 
 static void
@@ -357,7 +300,7 @@ consume_code_element(NAssembler* self,
 	}
 	else {
 		NToken token_data = ni_lexer_copy(lexer);
-		error->type = error_unexpected_token;
+		error->type = ni_a_errors.reader.UnexpectedToken;
 		error->data = (void*) ni_token_lift(token_data);
 		return;
 	}
@@ -369,7 +312,7 @@ static void
 consume_code_segment(NAssembler* self, NLexer* lexer, NError* error) {
 	NTokenType next_token = ni_lexer_peek(lexer);
 	if (next_token != NI_TK_KW_CODE) {
-		error->type = error_code_not_found;
+		n_error_set(error, ni_a_errors.assembler.CodeNotFound, NULL);
 		return;
 	}
 
@@ -377,10 +320,11 @@ consume_code_segment(NAssembler* self, NLexer* lexer, NError* error) {
 	next_token = ni_lexer_peek(lexer);
 	while (next_token != NI_TK_EOF) {
 		consume_code_element(self, lexer, next_token, error);
-		if (!n_error_ok(error)) {
+		if (!n_error_ok(error) && error != NULL) {
 			NError* original_error = n_error_clone(error);
-			error->type = error_code_parsing_failed;
-			error->data = (void*) original_error;
+			n_error_set(error,
+			            ni_a_errors.assembler.InvalidCodeSyntax,
+			            (void*) original_error);
 			return;
 		}
 		next_token = ni_lexer_peek(lexer);
@@ -430,7 +374,7 @@ consume_constant(NAssembler* self,
 			break;
 		default:
 			token_data = ni_lexer_copy(lexer);
-			error->type = error_unexpected_token;
+			error->type = ni_a_errors.reader.UnexpectedToken;
 			error->data = (void*) ni_token_lift(token_data);
 			break;
 	}
@@ -441,7 +385,7 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 	uint16_t num_constants_found = 0;
 	NTokenType next_token = ni_lexer_peek(lexer);
 	if (next_token != NI_TK_KW_CONSTANTS)  {
-		error->type = error_constants_not_found;
+		n_error_set(error, ni_a_errors.assembler.ConstantsNotFound, NULL);
 		return;
 	}
 
@@ -450,10 +394,11 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 	next_token = ni_lexer_peek(lexer);
 	while (ni_token_is_constant_keyword(next_token)) {
 		consume_constant(self, lexer, next_token, error);
-		if (!n_error_ok(error)) {
+		if (!n_error_ok(error) && error != NULL) {
 			NError* original_error = n_error_clone(error);
-			error->type = error_constant_parsing_failed;
-			error->data = (void*) original_error;
+			n_error_set(error,
+			            ni_a_errors.assembler.InvalidConstantSyntax,
+			            (void*) original_error);
 			return;
 		}
 		num_constants_found++;
@@ -461,15 +406,14 @@ consume_constant_list(NAssembler* self, NLexer* lexer, NError* error) {
 	}
 
 	if (num_constants_found == 0) {
-		error->type = error_empty_constants_list;
+		n_error_set(error, ni_a_errors.assembler.EmptyConstantsList, NULL);
 		return;
 	}
 	if (num_constants_found <= self->program->entry_point) {
 		/* FIXME: This error handling was rushed. */
 		/* Check if we need to add more data for the error to be meaningful
 		 * for a caller. */
-		error->type = error_entry_point_out_of_bounds;
-		error->data = NULL;
+		n_error_set(error, ni_a_errors.assembler.EntryPointOutOfBounds, NULL);
 	}
 
 }

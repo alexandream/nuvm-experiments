@@ -21,13 +21,13 @@ typedef struct {
 	uint8_t major_version,
 	        minor_version,
 	        revision;
-	
+
 	uint16_t entry_point;
 	uint16_t globals_count;
 
 	NConstantDescriptor* constants;
 	size_t constants_size;
-	
+
 	NInstruction** code;
 	size_t code_size;
 

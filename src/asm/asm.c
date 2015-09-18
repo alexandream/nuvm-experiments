@@ -1,12 +1,14 @@
 #include "common/common.h"
-#include "reader.h"
+#include "errors.h"
 #include "label-manager.h"
-#include "assembler.h"
 
 void
 n_init_asm() {
+	char* error_msg;
+	uint8_t error_code;
 	n_init_common();
-	ni_init_reader();
-	ni_init_label_manager();
-	ni_init_assembler();
+
+	if (!n_init_asm_errors(&error_code, &error_msg)) {
+		/* TODO: Do something with initialization errors here. */
+	}
 }

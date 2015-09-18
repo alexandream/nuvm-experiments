@@ -30,7 +30,4 @@ ni_label_manager_get_definition(NLabelManager* self,
                                 const char* label,
                                 NError* error);
 
-
-void
-ni_init_label_manager();
 #endif /* NHG_A_LABEL_MANAGER */

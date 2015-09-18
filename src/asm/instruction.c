@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "errors.h"
 #include "instruction.h"
 
 #include "../common/polyfills/p-strdup.h"
@@ -8,8 +9,7 @@ NInstruction*
 ni_asm_instruction_clone(NInstruction* instruction, NError* error) {
 	NInstruction* result = (NInstruction*) malloc(sizeof(NInstruction));
 	if (result == NULL) {
-		/* FIXME: Raise a real error here. */
-		error->type = n_find_error_type("nuvm.UnknownError");
+		error->type = ni_a_errors.BadAllocation;
 		return NULL;
 	}
 

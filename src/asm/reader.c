@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include "errors.h"
 #include "reader.h"
 #include "opcodes.h"
 
@@ -15,11 +16,6 @@
 #define INT24_MIN  -8388608
 #define INT24_MAX   8388607
 #define UINT22_MAX  4194303
-static uint32_t error_eof,
-                error_incompatible_register_type,
-                error_register_out_of_range,
-                error_unexpected_token,
-                error_unimplemented_opcode;
 
 static void
 expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error);
@@ -285,7 +281,7 @@ ni_read_instruction(NLexer* lexer,
 			ni_read_return_instruction(lexer, instruction, error);
 			return;
 		default:
-			error->type = error_unimplemented_opcode;
+			n_error_set(error, ni_a_errors.reader.UnimplementedOpcode, NULL);
 			return;
 	}
 }
@@ -355,7 +351,7 @@ ni_read_jump_instruction(NLexer* lexer,
 	offset_tk = ni_lexer_read(lexer);
 	offset = parse_dec_integer(offset_tk.lexeme);
 	if (offset < INT24_MIN || offset > INT24_MAX) {
-		error->type = error_register_out_of_range;
+		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
 	instruction->arg_a.value = offset;
@@ -384,7 +380,7 @@ ni_read_jump_if_instruction(NLexer* lexer,
 	offset_tk = ni_lexer_read(lexer);
 	offset = parse_dec_integer(offset_tk.lexeme);
 	if (offset < INT24_MIN || offset > INT24_MAX) {
-		error->type = error_register_out_of_range;
+		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
 	instruction->arg_b.value = offset;
@@ -412,7 +408,7 @@ ni_read_load_bool_instruction(NLexer* lexer,
 	value_tk = ni_lexer_read(lexer);
 	value = parse_dec_integer(value_tk.lexeme);
 	if (value < 0 || value > 1) {
-		error->type = error_register_out_of_range;
+		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
 	instruction->arg_b.value = value;
@@ -547,7 +543,7 @@ parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
 	if (! (types & type)) {
 		/* TODO: Put more information in this error result. */
 		/* What type did we find? Which are acceptable? Which argument? */
-		error->type = error_incompatible_register_type;
+		n_error_set(error, ni_a_errors.reader.IncompatibleRegisterType, NULL);
 		goto handle_error;
 	}
 
@@ -555,7 +551,7 @@ parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
 	if (value > max_value) {
 		/* TODO: Put more information in this error result. */
 		/* What value did we find? What range is ok? Which argument? */
-		error->type = error_register_out_of_range;
+		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		goto handle_error;
 	}
 	result.type = type;
@@ -569,39 +565,6 @@ handle_error:
 }
 
 
-void
-ni_init_reader() {
-	error_eof =
-		n_register_error_type("nuvm.asm.reader.EOF", NULL, NULL);
-
-	assert(error_eof < N_ERROR_LAST_VALID_ERROR);
-
-	error_unexpected_token =
-		n_register_error_type("nuvm.asm.reader.UnexpectedToken", NULL, NULL);
-
-	assert(error_unexpected_token < N_ERROR_LAST_VALID_ERROR);
-
-	error_incompatible_register_type =
-		n_register_error_type("nuvm.asm.reader.IncompatibleRegisterType",
-		                      NULL,
-		                      NULL);
-	assert(error_incompatible_register_type < N_ERROR_LAST_VALID_ERROR);
-
-	error_unimplemented_opcode =
-		n_register_error_type("nuvm.asm.reader.UnimplementedOpcode",
-		                      NULL,
-		                      NULL);
-	assert(error_unimplemented_opcode < N_ERROR_LAST_VALID_ERROR);
-
-	error_register_out_of_range =
-		n_register_error_type("nuvm.asm.reader.RegisterOutOfRange",
-		                      NULL,
-		                      NULL);
-
-	assert(error_register_out_of_range < N_ERROR_LAST_VALID_ERROR);
-}
-
-
 
 static void
 expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error) {
@@ -610,7 +573,7 @@ expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error) {
 
 	if (cur_token_type != expected_type) {
 		/* TODO (#1): Generate proper error. */
-		error->type = error_unexpected_token;
+		n_error_set(error, ni_a_errors.reader.UnexpectedToken, NULL);
 		return;
 	}
 	return;
@@ -728,7 +691,7 @@ static uint8_t
 consume_opcode(NLexer* lexer, NError* error) {
 	NTokenType token_type = ni_lexer_peek(lexer);
 	if (!ni_token_is_opcode(token_type)) {
-		error->type = error_unexpected_token;
+		n_error_set(error, ni_a_errors.reader.UnexpectedToken, NULL);
 		return 0;
 	}
 	ni_lexer_advance(lexer);
@@ -736,7 +699,7 @@ consume_opcode(NLexer* lexer, NError* error) {
 		#define X( _, op_token, op_code ) case op_token: return op_code;
 		NI_OPCODE_MAPPINGS
 		default:
-			error->type = error_unimplemented_opcode;
+			n_error_set(error, ni_a_errors.reader.UnimplementedOpcode, NULL);
 			return 0;
 	}
 

@@ -4,11 +4,11 @@
 #include "../common/polyfills/p-strcasecmp.h"
 #include "../common/polyfills/p-strdup.h"
 
+#include "errors.h"
 #include "label-manager.h"
 
 #define UNDEFINED_LABEL UINT32_MAX
 
-static uint32_t error_bad_alloc;
 
 typedef struct {
 	char* name;
@@ -33,7 +33,7 @@ ni_new_label_manager(NError* error) {
 
 	result = (NLabelManager*) malloc(sizeof(NLabelManager));
 	if (result == NULL) {
-		n_error_set(error, error_bad_alloc, NULL);
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
 
@@ -89,7 +89,7 @@ ni_label_manager_define(NLabelManager* self,
 	uint16_t label_id;
 
 	n_error_reset(error);
-	
+
 	label_id = ni_label_manager_get(self, label_name, error);
 	if (!n_error_ok(error)) return;
 
@@ -109,12 +109,7 @@ ni_label_manager_get_definition(NLabelManager* self,
 
 	label_id = ni_label_manager_get(self, label_name, error);
 	if (!n_error_ok(error)) return 0;
-	
+
 	label = &nlarray_elements(&self->pool)[label_id];
 	return label->definition;
-}
-void
-ni_init_label_manager() {
-	error_bad_alloc =
-		n_find_error_type("nuvm.BadAllocation");
 }
