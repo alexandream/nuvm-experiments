@@ -66,6 +66,8 @@ count_instructions(NAssembler* self);
 static int32_t
 count_constants(NAssembler* self);
 
+static uint16_t
+get_label(NAssembler* self, const char* label, NError* error);
 
 
 NAssembler*
@@ -120,8 +122,8 @@ ni_destroy_assembler(NAssembler* self) {
 }
 
 
-void
-ni_asm_set_version(NAssembler* self,
+static void
+set_version(NAssembler* self,
                    uint8_t major,
                    uint8_t minor,
                    uint8_t rev) {
@@ -131,20 +133,20 @@ ni_asm_set_version(NAssembler* self,
 }
 
 
-void
-ni_asm_set_entry_point(NAssembler* self, uint16_t entry_point) {
+static void
+set_entry_point(NAssembler* self, uint16_t entry_point) {
 	self->program->entry_point = entry_point;
 }
 
 
-void
-ni_asm_set_globals_count(NAssembler* self, uint16_t globals_count) {
+static void
+set_globals_count(NAssembler* self, uint16_t globals_count) {
 	self->program->globals_count = globals_count;
 }
 
 
-void
-ni_asm_add_instruction(NAssembler* self,
+static void
+add_instruction(NAssembler* self,
                        NInstruction* instruction,
                        NError* error) {
 	NInstruction* owned_instruction =
@@ -152,7 +154,7 @@ ni_asm_add_instruction(NAssembler* self,
 	if (!n_error_ok(error)) return;
 	if (instruction->argument_label != NULL) {
 		owned_instruction->argument_label_id =
-			ni_asm_get_label(self, instruction->argument_label, error);
+			get_label(self, instruction->argument_label, error);
 		if (!n_error_ok(error)) goto cleanup;
 	}
 
@@ -168,8 +170,8 @@ cleanup:
 
 
 
-void
-ni_asm_add_string_constant(NAssembler* self, char* str) {
+static void
+add_string_constant(NAssembler* self, char* str) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_STRING;
 	descriptor.text = str;
@@ -177,8 +179,8 @@ ni_asm_add_string_constant(NAssembler* self, char* str) {
 }
 
 
-void
-ni_asm_add_double_constant(NAssembler* self, double number) {
+static void
+add_double_constant(NAssembler* self, double number) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_DOUBLE;
 	descriptor.real = number;
@@ -186,8 +188,8 @@ ni_asm_add_double_constant(NAssembler* self, double number) {
 }
 
 
-void
-ni_asm_add_character_constant(NAssembler* self, char* utf8_char) {
+static void
+add_character_constant(NAssembler* self, char* utf8_char) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_CHARACTER;
 	descriptor.text = utf8_char;
@@ -195,8 +197,8 @@ ni_asm_add_character_constant(NAssembler* self, char* utf8_char) {
 }
 
 
-void
-ni_asm_add_int32_constant(NAssembler* self, int32_t integer) {
+static void
+add_int32_constant(NAssembler* self, int32_t integer) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_INT32;
 	descriptor.integer = integer;
@@ -204,8 +206,8 @@ ni_asm_add_int32_constant(NAssembler* self, int32_t integer) {
 }
 
 
-void
-ni_asm_add_procedure_constant(NAssembler* self,
+static void
+add_procedure_constant(NAssembler* self,
                               uint16_t label_id,
                               uint16_t nlocals) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
@@ -215,8 +217,8 @@ ni_asm_add_procedure_constant(NAssembler* self,
 	ncopool_append(&self->constant_pool, descriptor);
 }
 
-uint16_t
-ni_asm_get_label(NAssembler* self, const char* label, NError* error) {
+static uint16_t
+get_label(NAssembler* self, const char* label, NError* error) {
 	NLabelArray* pool = &self->label_pool;
 	int32_t size = nlarray_count(pool);
 	NLabel new_element;
@@ -240,11 +242,11 @@ ni_asm_get_label(NAssembler* self, const char* label, NError* error) {
 }
 
 
-void
-ni_asm_define_label(NAssembler* self, const char* label_name, NError* error) {
+static void
+define_label(NAssembler* self, const char* label_name, NError* error) {
 	NLabel* label;
 
-	uint16_t label_id = ni_asm_get_label(self, label_name, error);
+	uint16_t label_id = get_label(self, label_name, error);
 	if (!n_error_ok(error)) return;
 
 	label = &nlarray_elements(&self->label_pool)[label_id];
@@ -341,7 +343,7 @@ consume_code_element(NAssembler* self,
 		size_t label_len = strlen(label_def.lexeme);
 		char* label_name = label_def.lexeme;
 		label_name[label_len-1] = '\0';
-		ni_asm_define_label(self, label_name, error);
+		define_label(self, label_name, error);
 		ni_destroy_token(label_def);
 	}
 	else if (ni_token_is_opcode(token)) {
@@ -349,7 +351,7 @@ consume_code_element(NAssembler* self,
 		ni_read_instruction(lexer, &instruction, error);
 		if (!n_error_ok(error)) return;
 
-		ni_asm_add_instruction(self, &instruction, error);
+		add_instruction(self, &instruction, error);
 		ni_asm_instruction_destroy(&instruction);
 		if (!n_error_ok(error)) return;
 	}
@@ -401,30 +403,30 @@ consume_constant(NAssembler* self,
 		case NI_TK_KW_CHARACTER:
 			ni_read_character_constant(lexer, &string_value, error);
 			if (!n_error_ok(error)) return;
-			ni_asm_add_character_constant(self, string_value);
+			add_character_constant(self, string_value);
 			break;
 		case NI_TK_KW_DOUBLE:
 			ni_read_double_constant(lexer, &double_value, error);
 			if (!n_error_ok(error)) return;
-			ni_asm_add_double_constant(self, double_value);
+			add_double_constant(self, double_value);
 			break;
 		case NI_TK_KW_INT32:
 			ni_read_int32_constant(lexer, &int32_value, error);
 			if (!n_error_ok(error)) return;
-			ni_asm_add_int32_constant(self, int32_value);
+			add_int32_constant(self, int32_value);
 			break;
 		case NI_TK_KW_PROCEDURE:
 			ni_read_procedure_constant(lexer, &label_name, &num_locals, error);
 			if (!n_error_ok(error)) return;
-			label_id = ni_asm_get_label(self, label_name, error);
+			label_id = get_label(self, label_name, error);
 			if (!n_error_ok(error)) return;
 
-			ni_asm_add_procedure_constant(self, label_id, num_locals);
+			add_procedure_constant(self, label_id, num_locals);
 			break;
 		case NI_TK_KW_STRING:
 			ni_read_string_constant(lexer, &string_value, error);
 			if (!n_error_ok(error)) return;
-			ni_asm_add_string_constant(self, string_value);
+			add_string_constant(self, string_value);
 			break;
 		default:
 			token_data = ni_lexer_copy(lexer);
@@ -481,17 +483,17 @@ consume_header_data(NAssembler* self, NLexer* lexer, NError* error) {
 	ni_read_version(lexer, &major, &minor, &revision, error);
 	if (!n_error_ok(error)) return;
 
-	ni_asm_set_version(self, major, minor, revision);
+	set_version(self, major, minor, revision);
 
 	ni_read_entry_point(lexer, &entry_point, error);
 	if (!n_error_ok(error)) return;
 
-	ni_asm_set_entry_point(self, entry_point);
+	set_entry_point(self, entry_point);
 
 	ni_read_globals_count(lexer, &globals_count, error);
 	if (!n_error_ok(error)) return;
 
-	ni_asm_set_globals_count(self, globals_count);
+	set_globals_count(self, globals_count);
 }
 
 
@@ -506,22 +508,6 @@ count_constants(NAssembler* self) {
 }
 
 
-
-void
-ni_asm_print_output(NAssembler* self) {
-	/*
-	uint8_t base_magic_number[] = { 0x7F, 0x4E, 0x55, 0x56, 0x4D };
-	uint8_t reserved_space[] = { 0,0,0,0,0,0,0,0 };
-	fwrite((void*) base_magic_number, 1, 5, stdout);
-	fwrite((void*) &self->version, 1, 3, stdout);
-	fwrite((void*) reserved_space, 1, 8, stdout);
-	fwrite((void*) &self->entry_point, 2, 1, stdout);
-	fwrite((void*) compute_data_segment(self), 4, 1, stdout);
-	fwrite((void*) ncopool_count(&self->constant_pool), 2, 1, stdout);
-	fwrite((void*) self->globals_count, 2, 1, stdout);
-	fwrite((void*) ncpool_count(&self->code_pool), 2, 1, stdout);
-*/
-}
 size_t
 ni_asm_compute_result_size(NAssembler* self, NError* error) {
 	size_t magic_number_size = 8;
