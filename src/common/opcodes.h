@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__OPCODES__H__
-#define __N__COMMON__OPCODES__H__
+#ifndef NHG_C_OPCODES
+#define NHG_C_OPCODES
 
 #include "polyfills/p-stdint.h"
 

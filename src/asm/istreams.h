@@ -1,5 +1,5 @@
-#ifndef __N__ASM__STREAMS__H__
-#define __N__ASM__STREAMS__H__
+#ifndef NHG_A_STREAMS
+#define NHG_A_STREAMS
 
 #include "common/errors.h"
 #include "common/polyfills/p-stdint.h"

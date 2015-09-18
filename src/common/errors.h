@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__ERRORS__H__
-#define __N__COMMON__ERRORS__H__
+#ifndef NHG_C_ERRORS
+#define NHG_C_ERRORS
 
 #include "polyfills/p-stdint.h"
 

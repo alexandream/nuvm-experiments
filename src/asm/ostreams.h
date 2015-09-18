@@ -1,5 +1,5 @@
-#ifndef __N__ASM__OSTREAMS__H__
-#define __N__ASM__OSTREAMS__H__
+#ifndef NHG_A_OSTREAMS
+#define NHG_A_OSTREAMS
 
 #include "common/errors.h"
 #include "common/polyfills/p-stdint.h"
@@ -80,4 +80,4 @@ nt_ostream_file(NOStream* self);
 
 #endif /* TEST_ACCESSORS */
 
-#endif /* __N__ASM__OSTREAMS__H__ */
+#endif /* NHG_A_OSTREAMS */

@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__COMMON_H__
-#define __N__COMMON__COMMON_H__
+#ifndef NHG_C_COMMON
+#define NHG_C_COMMON
 
 
 void

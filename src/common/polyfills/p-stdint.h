@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__STD_TYPES__H__
-#define __N__COMMON__STD_TYPES__H__
+#ifndef NHG_C_STD_TYPES
+#define NHG_C_STD_TYPES
 
 #include <stdint.h>
 #include <stdbool.h>

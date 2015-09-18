@@ -1,5 +1,5 @@
-#ifndef __N__ASM__assembler_H__
-#define __N__ASM__assembler_H__
+#ifndef NHG_A_ASSEMBLER
+#define NHG_A_ASSEMBLER
 #include <stdio.h>
 #include "reader.h"
 
@@ -106,4 +106,4 @@ nt_asm_label_definition(NAssembler* self, int32_t label_id);
 
 #endif /* TEST_ACCESSORS */
 
-#endif /* __N__ASM__assembler_H__ */
+#endif /* NHG_A_ASSEMBLER */

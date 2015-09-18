@@ -1,5 +1,5 @@
-#ifndef __N__ASM__INSTRUCTION_H__
-#define __N__ASM__INSTRUCTION_H__
+#ifndef NHG_A_INSTRUCTION
+#define NHG_A_INSTRUCTION
 
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"

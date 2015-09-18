@@ -1,5 +1,5 @@
-#ifndef __N__ASM__READER_H__
-#define __N__ASM__READER_H__
+#ifndef NHG_A_READER
+#define NHG_A_READER
 
 #include "lexer.h"
 #include "instruction.h"

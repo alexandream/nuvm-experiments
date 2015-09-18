@@ -1,5 +1,5 @@
-#ifndef __N__ASM__TOKENS__H__
-#define __N__ASM__TOKENS__H__
+#ifndef NHG_A_TOKENS
+#define NHG_A_TOKENS
 
 #include <stddef.h>
 

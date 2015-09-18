@@ -1,13 +1,13 @@
-#define ARRAY_USE_STATIC
+#define N_DS_ARRAY_USE_STATIC
 #include "preamble.h"
 
-#define ARRAY_UNDEFINES__SKIP
+#define N_DS_ARRAY_P_SKIP_UNDEFINES
 #include "header.h"
 
-#undef ARRAY_STATIC
+#undef N_DS_ARRAY_STATIC
 #include "code.h"
 
-#undef ARRAY_UNDEFINES__SKIP
+#undef N_DS_ARRAY_P_SKIP_UNDEFINES
 
 #include "undefines.h"
 

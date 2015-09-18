@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__BYTE_STREAM__H__
-#define __N__COMMON__BYTE_STREAM__H__
+#ifndef NHG_C_BYTE_STREAM_
+#define NHG_C_BYTE_STREAM_
 
 #include "polyfills/p-stdint.h"
 

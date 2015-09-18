@@ -1,5 +1,5 @@
-#ifndef __NUVM__TEST__TEST_SUITE_H__
-#define __NUVM__TEST__TEST_SUITE_H__
+#ifndef NHG_T_TEST_SUITE
+#define NHG_T_TEST_SUITE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

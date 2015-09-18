@@ -1,38 +1,38 @@
 #include "preamble.h"
 
-#define ARRAY__STRUCT__SKIP
+#define N_DS_ARRAY_P_SKIP_STRUCT
 #include "header.h"
-#undef ARRAY__STRUCT__SKIP
+#undef N_DS_ARRAY_P_SKIP_STRUCT
 
 
-ARRAY_STATIC
-void ARRAY_INIT(ARRAY_TYPE_NAME*array, int32_t size) {
-	size_t mem_size = sizeof(ARRAY_CONTENTS_TYPE) * size;
+N_DS_ARRAY_STATIC
+void N_DS_ARRAY_INIT(N_DS_ARRAY_TYPE_NAME*array, int32_t size) {
+	size_t mem_size = sizeof(N_DS_ARRAY_CONTENTS_TYPE) * size;
 	array->capacity = size;
 	array->count = 0;
-	array->elements = ARRAY_ALLOCATOR(mem_size);
+	array->elements = N_DS_ARRAY_ALLOCATOR(mem_size);
 }
 
 
-#ifndef ARRAY_DESTROY__SKIP
-ARRAY_STATIC
-void ARRAY_DESTROY(ARRAY_TYPE_NAME* array) {
-	ARRAY_DEALLOCATOR(array->elements);
+#ifndef N_DS_ARRAY_P_SKIP_DESTROY
+N_DS_ARRAY_STATIC
+void N_DS_ARRAY_DESTROY(N_DS_ARRAY_TYPE_NAME* array) {
+	N_DS_ARRAY_DEALLOCATOR(array->elements);
 }
 #endif
 
-#ifndef ARRAY_APPEND__SKIP
-ARRAY_STATIC
-int32_t ARRAY_APPEND(ARRAY_TYPE_NAME* array, ARRAY_CONTENTS_TYPE value) {
-	int32_t capacity = ARRAY_CAPACITY(array);
+#ifndef N_DS_ARRAY_P_SKIP_APPEND
+N_DS_ARRAY_STATIC
+int32_t N_DS_ARRAY_APPEND(N_DS_ARRAY_TYPE_NAME* array, N_DS_ARRAY_CONTENTS_TYPE value) {
+	int32_t capacity = N_DS_ARRAY_CAPACITY(array);
 	int32_t index;
 	if (capacity == array->count) {
 		capacity = (capacity != 0) ? 2 * capacity : 64;
-		if(ARRAY_RESIZE(array, capacity) == -1) {
+		if(N_DS_ARRAY_RESIZE(array, capacity) == -1) {
 			return -1;
 		}
 	}
-	ARRAY_SET(array, array->count, value);
+	N_DS_ARRAY_SET(array, array->count, value);
 	index = array->count;
 	array->count++;
 	return index;
@@ -40,39 +40,39 @@ int32_t ARRAY_APPEND(ARRAY_TYPE_NAME* array, ARRAY_CONTENTS_TYPE value) {
 #endif
 
 
-ARRAY_STATIC
-int32_t ARRAY_CAPACITY(ARRAY_TYPE_NAME* array) {
+N_DS_ARRAY_STATIC
+int32_t N_DS_ARRAY_CAPACITY(N_DS_ARRAY_TYPE_NAME* array) {
 	return array->capacity;
 }
 
 
-ARRAY_STATIC
-int32_t ARRAY_COUNT(ARRAY_TYPE_NAME* array) {
+N_DS_ARRAY_STATIC
+int32_t N_DS_ARRAY_COUNT(N_DS_ARRAY_TYPE_NAME* array) {
 	return array->count;
 }
 
 
-#ifndef ARRAY_ELEMENTS__SKIP
-ARRAY_STATIC
-ARRAY_CONTENTS_TYPE* ARRAY_ELEMENTS(ARRAY_TYPE_NAME* array) {
+#ifndef N_DS_ARRAY_P_SKIP_ELEMENTS
+N_DS_ARRAY_STATIC
+N_DS_ARRAY_CONTENTS_TYPE* N_DS_ARRAY_ELEMENTS(N_DS_ARRAY_TYPE_NAME* array) {
 	return array->elements;
 }
 #endif
 
 
-ARRAY_STATIC
-ARRAY_CONTENTS_TYPE ARRAY_GET(ARRAY_TYPE_NAME* array, int32_t index) {
+N_DS_ARRAY_STATIC
+N_DS_ARRAY_CONTENTS_TYPE N_DS_ARRAY_GET(N_DS_ARRAY_TYPE_NAME* array, int32_t index) {
 	assert(index >= 0);
 	return array->elements[index];
 }
 
 
-ARRAY_STATIC
-int32_t ARRAY_RESIZE(ARRAY_TYPE_NAME* array, int32_t size) {
+N_DS_ARRAY_STATIC
+int32_t N_DS_ARRAY_RESIZE(N_DS_ARRAY_TYPE_NAME* array, int32_t size) {
 	assert(size > 0);
 	if (size < array->count) size = array->count;
 	array->elements =
-		ARRAY_REALLOCATOR(array->elements, size * sizeof(ARRAY_CONTENTS_TYPE));
+		N_DS_ARRAY_REALLOCATOR(array->elements, size * sizeof(N_DS_ARRAY_CONTENTS_TYPE));
 	if (array->elements == NULL) {
 		return -1;
 	}
@@ -82,13 +82,13 @@ int32_t ARRAY_RESIZE(ARRAY_TYPE_NAME* array, int32_t size) {
 }
 
 
-ARRAY_STATIC
-void ARRAY_SET(ARRAY_TYPE_NAME* array,
+N_DS_ARRAY_STATIC
+void N_DS_ARRAY_SET(N_DS_ARRAY_TYPE_NAME* array,
                int32_t index,
-               ARRAY_CONTENTS_TYPE value) {
+               N_DS_ARRAY_CONTENTS_TYPE value) {
 	assert(index >= 0);
 	do {
-		ARRAY_COPY_ELEMENT(&array->elements[index], &value);
+		N_DS_ARRAY_COPY_ELEMENT(&array->elements[index], &value);
 	} while(0);
 }
 

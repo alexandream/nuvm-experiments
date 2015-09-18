@@ -26,23 +26,23 @@ typedef struct {
 
 
 /* Instantiating the resizable-array template for the label pool */
-#define ARRAY_TYPE_NAME NLabelArray
-#define ARRAY_CONTENTS_TYPE NLabel
-#define ARRAY_PREFIX nlarray
+#define N_DS_ARRAY_TYPE_NAME NLabelArray
+#define N_DS_ARRAY_CONTENTS_TYPE NLabel
+#define N_DS_ARRAY_PREFIX nlarray
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the instructions pool */
-#define ARRAY_TYPE_NAME NCodePool
-#define ARRAY_CONTENTS_TYPE NInstruction*
-#define ARRAY_PREFIX ncpool
-#define ARRAY_ELEMENTS__SKIP
+#define N_DS_ARRAY_TYPE_NAME NCodePool
+#define N_DS_ARRAY_CONTENTS_TYPE NInstruction*
+#define N_DS_ARRAY_PREFIX ncpool
+#define N_DS_ARRAY_P_SKIP_ELEMENTS
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the constants pool */
-#define ARRAY_TYPE_NAME NConstantPool
-#define ARRAY_CONTENTS_TYPE NConstantDescriptor
-#define ARRAY_PREFIX ncopool
-#define ARRAY_ELEMENTS__SKIP
+#define N_DS_ARRAY_TYPE_NAME NConstantPool
+#define N_DS_ARRAY_CONTENTS_TYPE NConstantDescriptor
+#define N_DS_ARRAY_PREFIX ncopool
+#define N_DS_ARRAY_P_SKIP_ELEMENTS
 #include "../common/utils/resizable-array/full.h"
 
 

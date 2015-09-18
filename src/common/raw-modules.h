@@ -1,5 +1,5 @@
-#ifndef __N__COMMON__RAW_MODULE__H__
-#define __N__COMMON__RAW_MODULE__H__
+#ifndef NHG_C_RAW_MODULE
+#define NHG_C_RAW_MODULE
 
 #include "polyfills/p-stdint.h"
 

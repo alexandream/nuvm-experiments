@@ -1,5 +1,5 @@
-#ifndef __N__ASM__OPCODES__H__
-#define __N__ASM__OPCODES__H__
+#ifndef NHG_A_OPCODES
+#define NHG_A_OPCODES
 
 #include "tokens.h"
 #include "../common/opcodes.h"

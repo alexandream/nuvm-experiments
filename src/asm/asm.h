@@ -1,5 +1,5 @@
-#ifndef __N__ASM__ASM_H__
-#define __N__ASM__ASM_H__
+#ifndef NHG_A_ASM
+#define NHG_A_ASM
 
 
 void
