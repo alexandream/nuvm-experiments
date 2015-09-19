@@ -9,16 +9,13 @@
 
 #define UNDEFINED_LABEL UINT32_MAX
 
-
-typedef struct {
-	char* name;
-	uint32_t definition;
-} NLabel;
+#define BASE_POOL_SIZE 64
 
 /* Instantiating the resizable-array template for the label pool */
 #define N_DS_ARRAY_TYPE_NAME NLabelArray
 #define N_DS_ARRAY_CONTENTS_TYPE NLabel
 #define N_DS_ARRAY_PREFIX nlarray
+#define N_DS_ARRAY_P_SKIP_STRUCT
 #include "../common/utils/resizable-array/full.h"
 
 struct NLabelManager {
@@ -28,6 +25,7 @@ struct NLabelManager {
 
 NLabelManager*
 ni_new_label_manager(NError* error) {
+	NError inner_error = N_ERROR_INITIALIZER;
 	NLabelManager* result;
 	n_error_reset(error);
 
@@ -37,13 +35,27 @@ ni_new_label_manager(NError* error) {
 		return NULL;
 	}
 
-	nlarray_init(&result->pool, 64);
+	ni_construct_label_manager(result, &inner_error);
+	if (!n_error_ok(&inner_error)) {
+		if (error != NULL) { *error = inner_error; }
+		free(result);
+		return NULL;
+	}
+
 	return result;
 }
 
 
+NLabelManager*
+ni_construct_label_manager(NLabelManager* self, NError* error) {
+	n_error_reset(error);
+	nlarray_init(&self->pool, BASE_POOL_SIZE);
+	return self;
+}
+
+
 void
-ni_destroy_label_manager(NLabelManager* self) {
+ni_destruct_label_manager(NLabelManager* self) {
 	int32_t nelements = nlarray_count(&self->pool);
 	int32_t i;
 	for (i = 0; i < nelements; i++) {
@@ -51,6 +63,12 @@ ni_destroy_label_manager(NLabelManager* self) {
 		free(elem.name);
 	}
 	nlarray_destroy(&self->pool);
+}
+
+
+void
+ni_destroy_label_manager(NLabelManager* self) {
+	ni_destruct_label_manager(self);
 	free(self);
 }
 

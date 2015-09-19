@@ -4,7 +4,20 @@
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
 
-typedef struct NLabelManager NLabelManager;
+typedef struct {
+	char* name;
+	uint32_t definition;
+} NLabel;
+
+
+#define N_DS_ARRAY_TYPE_NAME NLabelArray
+#define N_DS_ARRAY_CONTENTS_TYPE NLabel
+#define N_DS_ARRAY_P_SKIP_PROTOTYPES
+#include "../common/utils/resizable-array/header.h"
+
+typedef struct {
+	NLabelArray pool;
+} NLabelManager;
 
 NLabelManager*
 ni_new_label_manager(NError* error);
@@ -12,6 +25,11 @@ ni_new_label_manager(NError* error);
 void
 ni_destroy_label_manager(NLabelManager* self);
 
+NLabelManager*
+ni_construct_label_manager(NLabelManager* self, NError* error);
+
+void
+ni_destruct_label_manager(NLabelManager* self);
 
 uint16_t
 ni_label_manager_get(NLabelManager* self,

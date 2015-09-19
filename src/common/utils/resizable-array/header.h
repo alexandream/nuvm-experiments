@@ -8,6 +8,7 @@ typedef struct {
 } N_DS_ARRAY_TYPE_NAME;
 #endif
 
+#ifndef N_DS_ARRAY_P_SKIP_PROTOTYPES
 
 N_DS_ARRAY_STATIC
 void N_DS_ARRAY_INIT(N_DS_ARRAY_TYPE_NAME*array, int32_t size);
@@ -52,4 +53,5 @@ void N_DS_ARRAY_SET(N_DS_ARRAY_TYPE_NAME* array,
                int32_t index,
                N_DS_ARRAY_CONTENTS_TYPE value);
 
+#endif /* N_DS_ARRAY_P_SKIP_PROTOTYPES */
 #include "undefines.h"

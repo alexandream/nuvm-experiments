@@ -28,7 +28,7 @@
 
 struct NAssembler {
 	NProgram* program;
-	NLabelManager* label_manager;
+	NLabelManager label_manager;
 	NCodePool code_pool;
 	NConstantPool constant_pool;
 };
@@ -54,6 +54,7 @@ get_label(NAssembler* self, const char* label, NError* error);
 
 NAssembler*
 ni_new_assembler() {
+	NError error;
 	NAssembler* result = (NAssembler*) malloc(sizeof(NAssembler));
 	if (result == NULL) {
 		/* FIXME: Add proper error handling for allocation errors. */
@@ -65,8 +66,8 @@ ni_new_assembler() {
 		return NULL;
 	}
 
-	result->label_manager = ni_new_label_manager(NULL);
-	if (result->label_manager == NULL) {
+	ni_construct_label_manager(&result->label_manager, &error);
+	if (!n_error_ok(&error)) {
 		free(result->program);
 		free(result);
 		return NULL;
@@ -84,7 +85,7 @@ ni_destroy_assembler(NAssembler* self) {
 	int32_t nelements;
 	int32_t i;
 
-	ni_destroy_label_manager(self->label_manager);
+	ni_destruct_label_manager(&self->label_manager);
 
 	nelements = ncopool_count(&self->constant_pool);
 	for (i = 0; i < nelements; i++) {
@@ -203,14 +204,14 @@ add_procedure_constant(NAssembler* self,
 
 static uint16_t
 get_label(NAssembler* self, const char* label, NError* error) {
-	return ni_label_manager_get(self->label_manager, label, error);
+	return ni_label_manager_get(&self->label_manager, label, error);
 }
 
 
 static void
 define_label(NAssembler* self, const char* label, NError* error) {
 	int32_t cur_instruction = count_instructions(self);
-	NLabelManager* label_manager = self->label_manager;
+	NLabelManager* label_manager = &self->label_manager;
 	ni_label_manager_define(label_manager, label, cur_instruction, error);
 }
 
