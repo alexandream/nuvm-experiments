@@ -3,6 +3,7 @@
 
 #include "assembler.h"
 #include "errors.h"
+#include "label-manager.h"
 #include "reader.h"
 
 #include "../common/polyfills/p-strcasecmp.h"
@@ -11,18 +12,6 @@
 #define UNDEFINED_LABEL UINT32_MAX
 
 #define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
-
-typedef struct {
-	char* name;
-	uint32_t definition;
-} NLabel;
-
-
-/* Instantiating the resizable-array template for the label pool */
-#define N_DS_ARRAY_TYPE_NAME NLabelArray
-#define N_DS_ARRAY_CONTENTS_TYPE NLabel
-#define N_DS_ARRAY_PREFIX nlarray
-#include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the instructions pool */
 #define N_DS_ARRAY_TYPE_NAME NCodePool
@@ -39,9 +28,8 @@ typedef struct {
 
 struct NAssembler {
 	NProgram* program;
-
+	NLabelManager* label_manager;
 	NCodePool code_pool;
-	NLabelArray label_pool;
 	NConstantPool constant_pool;
 };
 
@@ -76,9 +64,15 @@ ni_new_assembler() {
 		free(result);
 		return NULL;
 	}
+
+	result->label_manager = ni_new_label_manager(NULL);
+	if (result->label_manager == NULL) {
+		free(result->program);
+		free(result);
+		return NULL;
+	}
 	/* FIXME: This array initializer has no way of signaling errors
 	 * to the caller */
-	nlarray_init(&result->label_pool, 64);
 	ncpool_init(&result->code_pool, 1024);
 	ncopool_init(&result->constant_pool, 128);
 	return result;
@@ -87,13 +81,10 @@ ni_new_assembler() {
 
 void
 ni_destroy_assembler(NAssembler* self) {
-	NLabelArray* pool = &self->label_pool;
-	int32_t nelements = nlarray_count(pool);
+	int32_t nelements;
 	int32_t i;
-	for (i = 0; i < nelements; i++) {
-		NLabel elem = nlarray_get(pool, i);
-		free(elem.name);
-	}
+
+	ni_destroy_label_manager(self->label_manager);
 
 	nelements = ncopool_count(&self->constant_pool);
 	for (i = 0; i < nelements; i++) {
@@ -109,7 +100,6 @@ ni_destroy_assembler(NAssembler* self) {
 		free(instruction);
 	}
 
-	nlarray_destroy(pool);
 	ncpool_destroy(&self->code_pool);
 	ncopool_destroy(&self->constant_pool);
 	free(self);
@@ -213,38 +203,15 @@ add_procedure_constant(NAssembler* self,
 
 static uint16_t
 get_label(NAssembler* self, const char* label, NError* error) {
-	NLabelArray* pool = &self->label_pool;
-	int32_t size = nlarray_count(pool);
-	NLabel new_element;
-	int32_t i;
-	/* Find the label in the pool, if it exists. */
-	for (i = 0; i < size; i++) {
-		NLabel elem = nlarray_get(pool, i);
-		if (strcasecmp(label, elem.name) == 0) {
-			/* FIXME: Should add a proper limiting factor to the for to make
-			 * sure type constraints are preserved in the cast below */
-			return (uint16_t) i;
-		}
-	}
-	/* If we reach this, then the label is not yet present in the pool.
-	 * We should add it. */
-	/* FIXME: What do we do when this returns NULL? */
-	new_element.name = strdup(label);
-	new_element.definition = UNDEFINED_LABEL;
-
-	return (uint16_t) nlarray_append(pool, new_element);
+	return ni_label_manager_get(self->label_manager, label, error);
 }
 
 
 static void
-define_label(NAssembler* self, const char* label_name, NError* error) {
-	NLabel* label;
-
-	uint16_t label_id = get_label(self, label_name, error);
-	if (!n_error_ok(error)) return;
-
-	label = &nlarray_elements(&self->label_pool)[label_id];
-	label->definition = count_instructions(self);
+define_label(NAssembler* self, const char* label, NError* error) {
+	int32_t cur_instruction = count_instructions(self);
+	NLabelManager* label_manager = self->label_manager;
+	ni_label_manager_define(label_manager, label, cur_instruction, error);
 }
 
 

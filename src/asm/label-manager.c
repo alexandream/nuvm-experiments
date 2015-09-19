@@ -57,7 +57,7 @@ ni_destroy_label_manager(NLabelManager* self) {
 
 uint16_t
 ni_label_manager_get(NLabelManager* self, const char* label, NError* error) {
-	NLabelArray* pool = &self->pool;
+	NLabelArray* pool = &(self->pool);
 	int32_t size = nlarray_count(pool);
 	NLabel new_element;
 	int32_t i;
