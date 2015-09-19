@@ -637,8 +637,7 @@ consume_dec_int_u16(NLexer* lexer, uint16_t* value, NError* error) {
 	int32_t value_i32 = 0;
 	consume_dec_int(lexer, &value_i32, error);
 	if (value_i32 < 0 || value_i32 > UINT16_MAX) {
-		/* TODO (#1): Generate proper error. */
-		error->type = 1;
+		n_error_set(error, ni_a_errors.NumberOutOfBounds, NULL);
 		return;
 	}
 	*value = value_i32;
@@ -651,8 +650,7 @@ consume_dec_int_u8(NLexer* lexer, uint8_t* value, NError* error) {
 	int32_t value_i32 = 0;
 	consume_dec_int(lexer, &value_i32, error);
 	if (value_i32 < 0 || value_i32 > UINT8_MAX) {
-		/* TODO (#1): Generate proper error. */
-		error->type = 1;
+		n_error_set(error, ni_a_errors.NumberOutOfBounds, NULL);
 		return;
 	}
 	*value = value_i32;

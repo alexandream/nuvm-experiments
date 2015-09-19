@@ -36,6 +36,9 @@ n_init_asm_errors(uint8_t* error_code, char** error_text) {
 	e->BufferTooSmall =
 		n_register_error_type("nuvm.asm.BufferTooSmall", NULL, NULL);
 
+	e->NumberOutOfBounds =
+		n_register_error_type("nuvm.asm.NumberOutOfBounds", NULL, NULL);
+
 	/* Reader Errors */
 	r->EndOfFile = n_register_error_type("nuvm.asm.reader.EOF", NULL, NULL);
 

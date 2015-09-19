@@ -9,7 +9,7 @@ NInstruction*
 ni_asm_instruction_clone(NInstruction* instruction, NError* error) {
 	NInstruction* result = (NInstruction*) malloc(sizeof(NInstruction));
 	if (result == NULL) {
-		error->type = ni_a_errors.BadAllocation;
+		n_error_set(error,ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
 

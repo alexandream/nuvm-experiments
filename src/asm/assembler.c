@@ -300,8 +300,9 @@ consume_code_element(NAssembler* self,
 	}
 	else {
 		NToken token_data = ni_lexer_copy(lexer);
-		error->type = ni_a_errors.reader.UnexpectedToken;
-		error->data = (void*) ni_token_lift(token_data);
+		n_error_set(error,
+		            ni_a_errors.reader.UnexpectedToken,
+		            (void*) ni_token_lift(token_data));
 		return;
 	}
 
@@ -374,8 +375,9 @@ consume_constant(NAssembler* self,
 			break;
 		default:
 			token_data = ni_lexer_copy(lexer);
-			error->type = ni_a_errors.reader.UnexpectedToken;
-			error->data = (void*) ni_token_lift(token_data);
+			n_error_set(error,
+			            ni_a_errors.reader.UnexpectedToken,
+			            (void*) ni_token_lift(token_data));
 			break;
 	}
 }

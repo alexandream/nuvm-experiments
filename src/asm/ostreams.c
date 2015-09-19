@@ -55,7 +55,7 @@ cleanup:
 		free(buffer);
 	}
 	if (error != NULL) {
-		error->type = error_type;
+		n_error_set(error, error_type, NULL);
 	}
 	return NULL;
 }
@@ -86,7 +86,7 @@ cleanup:
 	}
 
 	if (error != NULL && error_type != 0) {
-		error->type = error_type;
+		n_error_set(error, error_type, NULL);
 	}
 	return NULL;
 }
@@ -102,7 +102,7 @@ ni_ostream_close(NOStream* self, NError* error) {
 		if (!n_error_ok(error)) return;
 
 		if (fclose(self->file) == EOF && error != NULL) {
-			error->type = ni_a_errors.IOError;
+			n_error_set(error, ni_a_errors.IOError, NULL);
 		}
 		self->file = NULL;
 	}
@@ -120,7 +120,7 @@ ni_ostream_flush(NOStream* self, NError* error) {
 
 	written = fwrite(self->buffer, sizeof(char), self->cursor, self->file);
 	if (written < self->cursor) {
-		error->type = ni_a_errors.IOError;
+		n_error_set(error, ni_a_errors.IOError, NULL);
 		return;
 	}
 	self->cursor = 0;
@@ -156,7 +156,7 @@ ni_ostream_write_data(NOStream* self,
 	 * Report a buffer size error */
 	if (!can_insert_element(self, final_size)) {
 		if (error != NULL) {
-			error->type = ni_a_errors.BufferTooSmall;
+			n_error_set(error, ni_a_errors.BufferTooSmall, NULL);
 			return;
 		}
 	}

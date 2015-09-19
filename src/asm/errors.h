@@ -25,7 +25,8 @@ struct NErrorTypes {
 	uint32_t BadAllocation,
 	         IOError,
 	         BufferTooSmall,
-	         UnknownError;
+	         UnknownError,
+	         NumberOutOfBounds;
 
 	struct NReaderErrorTypes reader;
 	struct NAssemblerErrorTypes assembler;

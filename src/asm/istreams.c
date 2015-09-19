@@ -102,7 +102,7 @@ cleanup:
 	}
 	if (error != NULL) {
 		/* TODO: Error should contain more information about the situation */
-		error->type = error_type;
+		n_error_set(error, error_type, NULL);
 	}
 	return NULL;
 }
