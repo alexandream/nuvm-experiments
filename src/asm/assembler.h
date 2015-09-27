@@ -9,9 +9,6 @@
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
 
-typedef struct NAssembler NAssembler;
-
-
 typedef enum {
 	NI_CONSTANT_STRING = 0,
 	NI_CONSTANT_DOUBLE,
@@ -20,14 +17,8 @@ typedef enum {
 	NI_CONSTANT_CHARACTER
 } NConstantType;
 
-NAssembler*
-ni_new_assembler();
-
-void
-ni_destroy_assembler(NAssembler* self);
-
 
 NProgram*
-ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error);
+ni_asm_read_from_istream(NIStream* istream, NError* error);
 
 #endif /* NHG_A_ASSEMBLER */

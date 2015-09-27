@@ -34,12 +34,11 @@ TEST(read_from_istream) {
 		JOINED_STRING(prog_buffer, prog_lines, sizeof(prog_lines));
 
 
-	NAssembler* assembler = ni_new_assembler();
 	NError error = N_ERROR_INITIALIZER;
 	NIStream* stream = ni_new_istream_from_string(prog_text);
 	NProgram* program;
 
-	program = ni_asm_read_from_istream(assembler, stream, &error);
+	program = ni_asm_read_from_istream(stream, &error);
 	ASSERT(ERROR_OK(&error));
 
 	ASSERT(EQ_UINT(program->major_version, 0));

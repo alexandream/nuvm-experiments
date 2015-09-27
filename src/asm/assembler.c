@@ -40,13 +40,17 @@ typedef struct {
 #include "../common/utils/resizable-array/full.h"
 
 
-struct NAssembler {
+typedef struct {
 	NProgram* program;
 
 	NCodePool code_pool;
 	NLabelArray label_pool;
 	NConstantPool constant_pool;
-};
+} NAssembler;
+
+
+static NAssembler*
+construct_assembler(NAssembler* self, NError* error);
 
 static void
 consume_code_segment(NAssembler* self, NLexer* lexer, NError* error);
@@ -68,28 +72,32 @@ get_label(NAssembler* self, const char* label, NError* error);
 
 
 NAssembler*
-ni_new_assembler() {
+ni_new_assembler(NError* error) {
 	NAssembler* result = (NAssembler*) malloc(sizeof(NAssembler));
 	if (result == NULL) {
-		/* FIXME: Add proper error handling for allocation errors. */
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
-	result->program = ni_new_program(NULL);
-	if (result->program == NULL) {
-		free(result);
+	return construct_assembler(result, error);
+}
+
+static NAssembler*
+construct_assembler(NAssembler* self, NError* error) {
+	self->program = ni_new_program(NULL);
+	if (self->program == NULL) {
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
 	/* FIXME: This array initializer has no way of signaling errors
 	 * to the caller */
-	nlarray_init(&result->label_pool, 64);
-	ncpool_init(&result->code_pool, 1024);
-	ncopool_init(&result->constant_pool, 128);
-	return result;
+	nlarray_init(&self->label_pool, 64);
+	ncpool_init(&self->code_pool, 1024);
+	ncopool_init(&self->constant_pool, 128);
+	return self;
 }
 
-
-void
-ni_destroy_assembler(NAssembler* self) {
+static void
+destruct_assembler(NAssembler* self) {
 	NLabelArray* pool = &self->label_pool;
 	int32_t nelements = nlarray_count(pool);
 	int32_t i;
@@ -115,6 +123,9 @@ ni_destroy_assembler(NAssembler* self) {
 	nlarray_destroy(pool);
 	ncpool_destroy(&self->code_pool);
 	ncopool_destroy(&self->constant_pool);
+}
+void
+ni_destroy_assembler(NAssembler* self) {
 	free(self);
 }
 
@@ -252,17 +263,24 @@ define_label(NAssembler* self, const char* label_name, NError* error) {
 
 
 NProgram*
-ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
-	NLexer* lexer = ni_new_lexer(istream);
+ni_asm_read_from_istream(NIStream* istream, NError* error) {
+	NAssembler self_storage;
+	NAssembler* self = NULL;
+	NLexer* lexer = NULL;
+
+	self = construct_assembler(&self_storage, error);
+	if (!n_error_ok(error)) goto cleanup;
+
+	lexer = ni_new_lexer(istream);
 	if (lexer == NULL) {
 		n_error_set(error, ni_a_errors.BadAllocation, NULL);
-		return NULL;
+		goto cleanup;
 	}
 	consume_header_data(self, lexer, error);
-	if (!n_error_ok(error)) return NULL;
+	if (!n_error_ok(error)) goto cleanup;
 
 	consume_constant_list(self, lexer, error);
-	if (!n_error_ok(error)) return NULL;
+	if (!n_error_ok(error)) goto cleanup;
 
 	consume_code_segment(self, lexer, error);
 
@@ -272,6 +290,14 @@ ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
 	self->program->constants = ncopool_elements(&self->constant_pool);
 	self->program->constants_size = ncopool_count(&self->constant_pool);
 	return self->program;
+cleanup:
+	if (self != NULL) {
+		destruct_assembler(self);
+	}
+	if (lexer != NULL) {
+		ni_destroy_lexer(lexer);
+	}
+	return NULL;
 }
 
 
