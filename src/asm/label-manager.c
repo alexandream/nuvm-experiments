@@ -19,6 +19,7 @@ typedef struct {
 #define N_DS_ARRAY_TYPE_NAME NLabelArray
 #define N_DS_ARRAY_CONTENTS_TYPE NLabel
 #define N_DS_ARRAY_PREFIX nlarray
+#define N_DS_ARRAY_P_SKIP_DETACH
 #include "../common/utils/resizable-array/full.h"
 
 struct NLabelManager {

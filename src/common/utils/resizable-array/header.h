@@ -4,6 +4,7 @@
 typedef struct {
 	int32_t count;
 	int32_t capacity;
+	bool attached;
 	N_DS_ARRAY_CONTENTS_TYPE* elements;
 } N_DS_ARRAY_TYPE_NAME;
 #endif
@@ -24,6 +25,11 @@ N_DS_ARRAY_STATIC
 int32_t N_DS_ARRAY_APPEND(N_DS_ARRAY_TYPE_NAME* array, N_DS_ARRAY_CONTENTS_TYPE value);
 #endif
 
+
+#ifndef N_DS_ARRAY_P_SKIP_DETACH
+N_DS_ARRAY_STATIC
+void N_DS_ARRAY_DETACH(N_DS_ARRAY_TYPE_NAME* array);
+#endif
 
 N_DS_ARRAY_STATIC
 int32_t N_DS_ARRAY_CAPACITY(N_DS_ARRAY_TYPE_NAME* array);
