@@ -29,8 +29,6 @@ typedef struct {
 } NInstruction;
 
 
-NInstruction*
-ni_asm_instruction_clone(NInstruction* instruction, NError* error);
 
 void
 ni_asm_instruction_destruct(NInstruction* self);

@@ -14,14 +14,17 @@
 
 /* Instantiating the resizable-array template for the instructions pool */
 #define N_DS_ARRAY_TYPE_NAME NCodePool
-#define N_DS_ARRAY_CONTENTS_TYPE NInstruction*
+#define N_DS_ARRAY_CONTENTS_TYPE NInstruction
 #define N_DS_ARRAY_PREFIX ncpool
+#define N_DS_ARRAY_P_SKIP_DETACH
+#define N_DS_ARRAY_P_SKIP_GET
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the constants pool */
 #define N_DS_ARRAY_TYPE_NAME NConstantPool
 #define N_DS_ARRAY_CONTENTS_TYPE NConstantDescriptor
 #define N_DS_ARRAY_PREFIX ncopool
+#define N_DS_ARRAY_P_SKIP_DETACH
 #include "../common/utils/resizable-array/full.h"
 
 
@@ -31,6 +34,10 @@ struct NAssembler {
 	NCodePool code_pool;
 	NConstantPool constant_pool;
 };
+
+
+static NAssembler*
+construct_assembler(NAssembler* self, NError* error);
 
 static void
 consume_code_segment(NAssembler* self, NLexer* lexer, NError* error);
@@ -52,30 +59,43 @@ get_label(NAssembler* self, const char* label, NError* error);
 
 
 NAssembler*
-ni_new_assembler() {
-	NError error;
+ni_new_assembler(NError* error) {
 	NAssembler* result = (NAssembler*) malloc(sizeof(NAssembler));
 	if (result == NULL) {
-		/* FIXME: Add proper error handling for allocation errors. */
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
+		return NULL;
+	}
+	construct_assembler(result, error);
+	if (!n_error_ok(error)) {
+		free(result);
+	}
+	return result;
+}
+
+static NAssembler*
+construct_assembler(NAssembler* self, NError* error) {
+	self->program = ni_new_program(NULL);
+	if (self->program == NULL) {
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
 
-	ni_construct_label_manager(&result->label_manager, &error);
-	if (!n_error_ok(&error)) {
-		free(result->program);
-		free(result);
+	ni_construct_label_manager(&self->label_manager, error);
+	if (!n_error_ok(error)) {
+		ni_destroy_program(self->program);
 		return NULL;
 	}
 	/* FIXME: This array initializer has no way of signaling errors
 	 * to the caller */
-	ncpool_init(&result->code_pool, 1024);
-	ncopool_init(&result->constant_pool, 128);
-	return result;
+	ncpool_init(&self->code_pool, 1024);
+	ncopool_init(&self->constant_pool, 128);
+	return self;
 }
 
 
-void
-ni_destroy_assembler(NAssembler* self) {
+
+static void
+destruct_assembler(NAssembler* self) {
 	int32_t nelements;
 	int32_t i;
 
@@ -91,12 +111,15 @@ ni_destroy_assembler(NAssembler* self) {
 
 	nelements = count_instructions(self);
 	for (i = 0; i < nelements; i++) {
-		NInstruction* instruction = ncpool_get(&self->code_pool, i);
-		free(instruction);
+		NInstruction* instruction = ncpool_get_ref(&self->code_pool, i);
+		ni_asm_instruction_destruct(instruction);
 	}
 
 	ncpool_destroy(&self->code_pool);
 	ncopool_destroy(&self->constant_pool);
+}
+void
+ni_destroy_assembler(NAssembler* self) {
 	free(self);
 }
 
@@ -128,23 +151,16 @@ static void
 add_instruction(NAssembler* self,
                        NInstruction* instruction,
                        NError* error) {
-	NInstruction* owned_instruction =
-		ni_asm_instruction_clone(instruction, error);
 	if (!n_error_ok(error)) return;
 	if (instruction->argument_label != NULL) {
-		owned_instruction->argument_label_id =
+		instruction->argument_label_id =
 			get_label(self, instruction->argument_label, error);
-		if (!n_error_ok(error)) goto cleanup;
+		if (!n_error_ok(error)) return;
 	}
 
-	ncpool_append(&self->code_pool, owned_instruction);
+	ncpool_append(&self->code_pool, *instruction);
 
 	return;
-cleanup:
-	if (owned_instruction != NULL) {
-		ni_asm_instruction_destruct(owned_instruction);
-		free(owned_instruction);
-	}
 }
 
 
@@ -216,7 +232,7 @@ update_instruction_labels(NAssembler* self, NProgram* prog) {
 	NLabelManager* label_man = &self->label_manager;
 
 	for (i = 0; i < prog->code_size; i++) {
-		NInstruction* instr = prog->code[i];
+		NInstruction* instr = &prog->code[i];
 		if (instr->argument_label != NULL) {
 			uint16_t label_id = instr->argument_label_id;
 			instr->argument_label_definition =
@@ -246,12 +262,19 @@ update_constant_labels(NAssembler* self, NProgram* prog) {
 
 
 NProgram*
-ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
-	NProgram* result;
-	NLexer* lexer = ni_new_lexer(istream);
+ni_asm_read_from_istream(NIStream* istream, NError* error) {
+	NAssembler self_storage;
+	NAssembler* self = NULL;
+	NLexer* lexer = NULL;
+	NProgram* result = NULL;
+
+	self = construct_assembler(&self_storage, error);
+	if (!n_error_ok(error)) goto cleanup;
+
+	lexer = ni_new_lexer(istream);
 	if (lexer == NULL) {
 		n_error_set(error, ni_a_errors.BadAllocation, NULL);
-		return NULL;
+		goto cleanup;
 	}
 	if (self->program != NULL) {
 		ni_destroy_program(self->program);
@@ -260,10 +283,10 @@ ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
 	if (self->program == NULL) { goto cleanup; }
 
 	consume_header_data(self, lexer, error);
-	if (!n_error_ok(error)) { goto cleanup; }
+	if (!n_error_ok(error)) goto cleanup;
 
 	consume_constant_list(self, lexer, error);
-	if (!n_error_ok(error)) { goto cleanup; }
+	if (!n_error_ok(error)) goto cleanup;
 
 	consume_code_segment(self, lexer, error);
 
@@ -278,15 +301,16 @@ ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
 	update_constant_labels(self, result);
 	return result;
 
+	self->program->constants = ncopool_elements(&self->constant_pool);
+	self->program->constants_size = ncopool_count(&self->constant_pool);
+	return self->program;
 cleanup:
+	if (self != NULL) {
+		destruct_assembler(self);
+	}
 	if (lexer != NULL) {
 		ni_destroy_lexer(lexer);
 	}
-	if (self->program != NULL) {
-		ni_destroy_program(self->program);
-		self->program = NULL;
-	}
-	/* TODO: We might want to reset the assembler structure for a fresh start */
 	return NULL;
 }
 

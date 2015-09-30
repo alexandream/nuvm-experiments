@@ -34,12 +34,11 @@ TEST(read_from_istream) {
 		JOINED_STRING(prog_buffer, prog_lines, sizeof(prog_lines));
 
 
-	NAssembler* assembler = ni_new_assembler();
 	NError error = N_ERROR_INITIALIZER;
 	NIStream* stream = ni_new_istream_from_string(prog_text);
 	NProgram* program;
 
-	program = ni_asm_read_from_istream(assembler, stream, &error);
+	program = ni_asm_read_from_istream(stream, &error);
 	ASSERT(ERROR_OK(&error));
 
 	ASSERT(EQ_UINT(program->major_version, 0));
@@ -57,7 +56,7 @@ TEST(read_from_istream) {
 		uint16_t const_uint16;
 		uint16_t const_label_id;
 		uint32_t const_label_def;
-		NInstruction* inst;
+		NInstruction inst;
 
 		/* Check the first constant */
 		const_type = program->constants[0].type;
@@ -86,40 +85,40 @@ TEST(read_from_istream) {
 
 		/* Check first instruction */
 		inst = program->code[0];
-		ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
-		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst->arg_a.value, 0));
+		ASSERT(EQ_UINT(inst.opcode, N_OP_GLOBAL_REF));
+		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst.arg_a.value, 0));
 
-		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
-		ASSERT(EQ_INT(inst->arg_b.value, 1));
+		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_GLOBAL));
+		ASSERT(EQ_INT(inst.arg_b.value, 1));
 
 		/* Check second instruction */
 		inst = program->code[1];
-		ASSERT(EQ_UINT(inst->opcode, N_OP_GLOBAL_REF));
-		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst->arg_a.value, 1));
+		ASSERT(EQ_UINT(inst.opcode, N_OP_GLOBAL_REF));
+		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst.arg_a.value, 1));
 
-		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_GLOBAL));
-		ASSERT(EQ_INT(inst->arg_b.value, 2));
+		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_GLOBAL));
+		ASSERT(EQ_INT(inst.arg_b.value, 2));
 
 		/* Check third instruction */
 		inst = program->code[2];
-		ASSERT(EQ_UINT(inst->opcode, N_OP_ADD));
+		ASSERT(EQ_UINT(inst.opcode, N_OP_ADD));
 
-		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst->arg_a.value, 3));
+		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst.arg_a.value, 3));
 
-		ASSERT(EQ_INT(inst->arg_b.type, NI_RT_CONSTANT));
-		ASSERT(EQ_INT(inst->arg_b.value, 1));
+		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_CONSTANT));
+		ASSERT(EQ_INT(inst.arg_b.value, 1));
 
-		ASSERT(EQ_INT(inst->arg_c.type, NI_RT_CONSTANT));
-		ASSERT(EQ_INT(inst->arg_c.value, 2));
+		ASSERT(EQ_INT(inst.arg_c.type, NI_RT_CONSTANT));
+		ASSERT(EQ_INT(inst.arg_c.value, 2));
 
 		/* Check fourth instruction */
 		inst = program->code[3];
-		ASSERT(EQ_UINT(inst->opcode, N_OP_RETURN));
+		ASSERT(EQ_UINT(inst.opcode, N_OP_RETURN));
 
-		ASSERT(EQ_INT(inst->arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst->arg_a.value, 3));
+		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
+		ASSERT(EQ_INT(inst.arg_a.value, 3));
 	}
 }

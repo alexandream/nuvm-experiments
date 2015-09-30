@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -16,6 +18,7 @@
 #define N_DS_ARRAY_CONTENTS_TYPE NLabel
 #define N_DS_ARRAY_PREFIX nlarray
 #define N_DS_ARRAY_P_SKIP_STRUCT
+#define N_DS_ARRAY_P_SKIP_DETACH
 #include "../common/utils/resizable-array/full.h"
 
 
@@ -30,7 +33,6 @@ ni_new_label_manager(NError* error) {
 		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
-
 	ni_construct_label_manager(result, &inner_error);
 	if (!n_error_ok(&inner_error)) {
 		if (error != NULL) { *error = inner_error; }
@@ -116,7 +118,7 @@ ni_label_manager_define(NLabelManager* self,
 	label_id = ni_label_manager_get(self, label_name, error);
 	if (!n_error_ok(error)) return;
 
-	label = &nlarray_elements(&self->pool)[label_id -1];
+	label = nlarray_get_ref(&self->pool, label_id -1);
 	label->definition = definition;
 	return;
 }

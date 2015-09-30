@@ -12,15 +12,7 @@
 typedef struct NAssembler NAssembler;
 
 
-
-NAssembler*
-ni_new_assembler();
-
-void
-ni_destroy_assembler(NAssembler* self);
-
-
 NProgram*
-ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error);
+ni_asm_read_from_istream(NIStream* istream, NError* error);
 
 #endif /* NHG_A_ASSEMBLER */
