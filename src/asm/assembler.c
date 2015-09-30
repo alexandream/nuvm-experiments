@@ -27,9 +27,10 @@ typedef struct {
 
 /* Instantiating the resizable-array template for the instructions pool */
 #define N_DS_ARRAY_TYPE_NAME NCodePool
-#define N_DS_ARRAY_CONTENTS_TYPE NInstruction*
+#define N_DS_ARRAY_CONTENTS_TYPE NInstruction
 #define N_DS_ARRAY_PREFIX ncpool
 #define N_DS_ARRAY_P_SKIP_DETACH
+#define N_DS_ARRAY_P_SKIP_GET
 #include "../common/utils/resizable-array/full.h"
 
 /* Instantiating the resizable-array template for the constants pool */
@@ -116,8 +117,8 @@ destruct_assembler(NAssembler* self) {
 
 	nelements = count_instructions(self);
 	for (i = 0; i < nelements; i++) {
-		NInstruction* instruction = ncpool_get(&self->code_pool, i);
-		free(instruction);
+		NInstruction* instruction = ncpool_get_ref(&self->code_pool, i);
+		ni_asm_instruction_destroy(instruction);
 	}
 
 	nlarray_destroy(pool);
@@ -157,23 +158,16 @@ static void
 add_instruction(NAssembler* self,
                        NInstruction* instruction,
                        NError* error) {
-	NInstruction* owned_instruction =
-		ni_asm_instruction_clone(instruction, error);
 	if (!n_error_ok(error)) return;
 	if (instruction->argument_label != NULL) {
-		owned_instruction->argument_label_id =
+		instruction->argument_label_id =
 			get_label(self, instruction->argument_label, error);
-		if (!n_error_ok(error)) goto cleanup;
+		if (!n_error_ok(error)) return;
 	}
 
-	ncpool_append(&self->code_pool, owned_instruction);
+	ncpool_append(&self->code_pool, *instruction);
 
 	return;
-cleanup:
-	if (owned_instruction != NULL) {
-		ni_asm_instruction_destroy(owned_instruction);
-		free(owned_instruction);
-	}
 }
 
 

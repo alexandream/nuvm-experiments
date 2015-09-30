@@ -37,7 +37,7 @@ void N_DS_ARRAY_DETACH(N_DS_ARRAY_TYPE_NAME* array) {
 	array->capacity = 0;
 	array->count = 0;
 	array->elements = NULL;
-}	
+}
 #endif
 
 #ifndef N_DS_ARRAY_P_SKIP_APPEND
@@ -84,12 +84,19 @@ N_DS_ARRAY_CONTENTS_TYPE* N_DS_ARRAY_ELEMENTS(N_DS_ARRAY_TYPE_NAME* array) {
 #endif
 
 
+#ifndef N_DS_ARRAY_P_SKIP_GET
 N_DS_ARRAY_STATIC
 N_DS_ARRAY_CONTENTS_TYPE N_DS_ARRAY_GET(N_DS_ARRAY_TYPE_NAME* array, int32_t index) {
-	assert(index >= 0);
-	return array->elements[index];
+	return *N_DS_ARRAY_GET_REF(array, index);
 }
+#endif
 
+
+N_DS_ARRAY_STATIC
+N_DS_ARRAY_CONTENTS_TYPE* N_DS_ARRAY_GET_REF(N_DS_ARRAY_TYPE_NAME* array, int32_t index) {
+	assert(index >= 0);
+	return &(array->elements[index]);
+}
 
 N_DS_ARRAY_STATIC
 int32_t N_DS_ARRAY_RESIZE(N_DS_ARRAY_TYPE_NAME* array, int32_t size) {

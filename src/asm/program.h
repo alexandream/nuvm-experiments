@@ -28,7 +28,7 @@ typedef struct {
 	NConstantDescriptor* constants;
 	size_t constants_size;
 
-	NInstruction** code;
+	NInstruction* code;
 	size_t code_size;
 
 	bool should_free_code;
