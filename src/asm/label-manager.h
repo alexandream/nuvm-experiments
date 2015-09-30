@@ -48,4 +48,9 @@ ni_label_manager_get_definition(NLabelManager* self,
                                 const char* label,
                                 NError* error);
 
+uint32_t
+ni_label_manager_get_definition_by_id(NLabelManager* self,
+                                      uint16_t label_id,
+                                      NError* error);
+
 #endif /* NHG_A_LABEL_MANAGER */

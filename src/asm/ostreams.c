@@ -143,26 +143,28 @@ ni_ostream_write_data(NOStream* self,
                       size_t elem_count,
                       NError* error) {
 	size_t final_size = elem_size * elem_count;
-	n_error_reset(error);
-	/* If the current buffer can't handle the amount of data we want to
-	 * insert, try to flush the buffer before inserting it. */
-	if (!can_insert_element(self, final_size)) {
-		ni_ostream_flush(self, error);
-		if (!n_error_ok(error)) return;
-	}
-
-	/* If it still has no space, it's either an in-memory stream or the
-	 * buffer is too small for it even when empty.
-	 * Report a buffer size error */
-	if (!can_insert_element(self, final_size)) {
-		if (error != NULL) {
-			n_error_set(error, ni_a_errors.BufferTooSmall, NULL);
-			return;
+	if (final_size > 0) {
+		n_error_reset(error);
+		/* If the current buffer can't handle the amount of data we want to
+		 * insert, try to flush the buffer before inserting it. */
+		if (!can_insert_element(self, final_size)) {
+			ni_ostream_flush(self, error);
+			if (!n_error_ok(error)) return;
 		}
-	}
 
-	memcpy(self->buffer + self->cursor, mem_area, final_size);
-	self->cursor += final_size;
+		/* If it still has no space, it's either an in-memory stream or the
+		 * buffer is too small for it even when empty.
+		 * Report a buffer size error */
+		if (!can_insert_element(self, final_size)) {
+			if (error != NULL) {
+				n_error_set(error, ni_a_errors.BufferTooSmall, NULL);
+				return;
+			}
+		}
+
+		memcpy(self->buffer + self->cursor, mem_area, final_size);
+		self->cursor += final_size;
+	}
 }
 
 

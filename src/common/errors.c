@@ -134,6 +134,14 @@ n_error_set(NError* error, uint32_t type, void* data) {
 }
 
 void
+n_error_copy(NError* dest, NError* src) {
+	if (dest != NULL) {
+		dest->type = src->type;
+		dest->data = src->data;
+	}
+}
+
+void
 n_init_errors() {
 	NErrorType* success = &error_type_pool[0];
 	NErrorType* unknown = &error_type_pool[1];

@@ -573,7 +573,12 @@ expect_token_type(NLexer* lexer, NTokenType expected_type, NError* error) {
 
 	if (cur_token_type != expected_type) {
 		/* TODO (#1): Generate proper error. */
-		n_error_set(error, ni_a_errors.reader.UnexpectedToken, NULL);
+		if (cur_token_type == NI_TK_EOF) {
+			n_error_set(error, ni_a_errors.reader.EndOfFile, NULL);
+		}
+		else {
+			n_error_set(error, ni_a_errors.reader.UnexpectedToken, NULL);
+		}
 		return;
 	}
 	return;

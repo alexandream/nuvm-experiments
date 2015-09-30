@@ -18,10 +18,6 @@
 #define N_DS_ARRAY_P_SKIP_STRUCT
 #include "../common/utils/resizable-array/full.h"
 
-struct NLabelManager {
-	NLabelArray pool;
-};
-
 
 NLabelManager*
 ni_new_label_manager(NError* error) {
@@ -75,6 +71,11 @@ ni_destroy_label_manager(NLabelManager* self) {
 
 uint16_t
 ni_label_manager_get(NLabelManager* self, const char* label, NError* error) {
+	/* the backing nlarray we use to store the labels use a 0-based index.
+	 * We want 0 to mean no label, so we add 1 to the indexes whenever we
+	 * return them to client code to make sure we don't get an id 0.
+	 * This means we have to subtract 1 whenever we interact with the array
+	 * using client provided ids. */
 	NLabelArray* pool = &(self->pool);
 	int32_t size = nlarray_count(pool);
 	NLabel new_element;
@@ -85,16 +86,19 @@ ni_label_manager_get(NLabelManager* self, const char* label, NError* error) {
 		if (strcasecmp(label, elem.name) == 0) {
 			/* FIXME: Should add a proper limiting factor to the for to make
 			 * sure type constraints are preserved in the cast below */
-			return (uint16_t) i;
+			return (uint16_t) i + 1;
 		}
 	}
 	/* If we reach this, then the label is not yet present in the pool.
 	 * We should add it. */
-	/* FIXME: What do we do when this returns NULL? */
 	new_element.name = strdup(label);
+	if (new_element.name == NULL) {
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
+		return 0;
+	}
 	new_element.definition = UNDEFINED_LABEL;
 
-	return (uint16_t) nlarray_append(pool, new_element);
+	return (uint16_t) nlarray_append(pool, new_element) +1;
 }
 
 
@@ -103,6 +107,7 @@ ni_label_manager_define(NLabelManager* self,
                         const char* label_name,
                         uint32_t definition,
                         NError* error) {
+	/* TODO: Check if definition != UNDEFINED_LABEL and error out. */
 	NLabel* label;
 	uint16_t label_id;
 
@@ -111,8 +116,9 @@ ni_label_manager_define(NLabelManager* self,
 	label_id = ni_label_manager_get(self, label_name, error);
 	if (!n_error_ok(error)) return;
 
-	label = &nlarray_elements(&self->pool)[label_id];
+	label = &nlarray_elements(&self->pool)[label_id -1];
 	label->definition = definition;
+	return;
 }
 
 
@@ -120,14 +126,21 @@ uint32_t
 ni_label_manager_get_definition(NLabelManager* self,
                                 const char* label_name,
                                 NError* error) {
-	NLabel* label;
 	uint16_t label_id;
 
 	n_error_reset(error);
 
 	label_id = ni_label_manager_get(self, label_name, error);
-	if (!n_error_ok(error)) return 0;
+	if (!n_error_ok(error)) return UNDEFINED_LABEL;
 
-	label = &nlarray_elements(&self->pool)[label_id];
+	return ni_label_manager_get_definition_by_id(self, label_id, error);
+}
+
+
+uint32_t
+ni_label_manager_get_definition_by_id(NLabelManager* self,
+                                      uint16_t label_id,
+                                      NError* error) {
+	NLabel* label = &nlarray_elements(&self->pool)[label_id -1];
 	return label->definition;
 }

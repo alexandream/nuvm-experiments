@@ -12,13 +12,6 @@
 typedef struct NAssembler NAssembler;
 
 
-typedef enum {
-	NI_CONSTANT_STRING = 0,
-	NI_CONSTANT_DOUBLE,
-	NI_CONSTANT_INT32,
-	NI_CONSTANT_PROCEDURE,
-	NI_CONSTANT_CHARACTER
-} NConstantType;
 
 NAssembler*
 ni_new_assembler();

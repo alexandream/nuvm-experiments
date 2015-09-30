@@ -27,18 +27,18 @@ TEST(label_manager_creation_works) {
 	ASSERT(IS_TRUE(label_man != NULL));
 }
 
-TEST(first_label_comes_with_id_zero) {
+TEST(first_label_comes_with_id_one) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
 
 	label_man = ni_new_label_manager(&error);
 
 	id = ni_label_manager_get(label_man, "hello", NULL);
-	ASSERT(EQ_INT(id, 0));
+	ASSERT(EQ_INT(id, 1));
 }
 
 
-TEST(repeated_first_label_comes_with_id_zero) {
+TEST(repeated_first_label_comes_with_id_one) {
 	NError error = N_ERROR_INITIALIZER;
 	int32_t id;
 
@@ -47,7 +47,7 @@ TEST(repeated_first_label_comes_with_id_zero) {
 	ni_label_manager_get(label_man, "hello", NULL);
 	id = ni_label_manager_get(label_man, "hello", NULL);
 
-	ASSERT(EQ_INT(id, 0));
+	ASSERT(EQ_INT(id, 1));
 }
 
 
@@ -60,7 +60,7 @@ TEST(repeated_labels_ignore_case) {
 	ni_label_manager_get(label_man, "hello", NULL);
 	id = ni_label_manager_get(label_man, "hElLo", NULL);
 
-	ASSERT(EQ_INT(id, 0));
+	ASSERT(EQ_INT(id, 1));
 }
 
 
@@ -73,7 +73,7 @@ TEST(new_label_increases_id) {
 	ni_label_manager_get(label_man, "first_label", NULL);
 	id = ni_label_manager_get(label_man, "second_label", NULL);
 
-	ASSERT(EQ_INT(id, 1));
+	ASSERT(EQ_INT(id, 2));
 }
 
 

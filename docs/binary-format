@@ -52,3 +52,11 @@ it sees fit. Here's a list of the most common patterns:
 
 - not divided at all with the 24 bits being a signed or unsigned value the
   instruction will use;
+
+--
+
+Data usage on various constants.
+
+The Procedure constant uses 6 bytes for data: 4 bytes for the uint32
+representing the index in code where that procedure starts, and 2 bytes for
+the uint16 representing the number of locals used by the procedure.

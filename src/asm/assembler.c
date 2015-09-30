@@ -11,7 +11,6 @@
 
 #define UNDEFINED_LABEL UINT32_MAX
 
-#define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
 
 /* Instantiating the resizable-array template for the instructions pool */
 #define N_DS_ARRAY_TYPE_NAME NCodePool
@@ -58,11 +57,6 @@ ni_new_assembler() {
 	NAssembler* result = (NAssembler*) malloc(sizeof(NAssembler));
 	if (result == NULL) {
 		/* FIXME: Add proper error handling for allocation errors. */
-		return NULL;
-	}
-	result->program = ni_new_program(NULL);
-	if (result->program == NULL) {
-		free(result);
 		return NULL;
 	}
 
@@ -148,7 +142,7 @@ add_instruction(NAssembler* self,
 	return;
 cleanup:
 	if (owned_instruction != NULL) {
-		ni_asm_instruction_destroy(owned_instruction);
+		ni_asm_instruction_destruct(owned_instruction);
 		free(owned_instruction);
 	}
 }
@@ -186,7 +180,7 @@ static void
 add_int32_constant(NAssembler* self, int32_t integer) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_INT32;
-	descriptor.integer = integer;
+	descriptor.int32 = integer;
 	ncopool_append(&self->constant_pool, descriptor);
 }
 
@@ -197,8 +191,9 @@ add_procedure_constant(NAssembler* self,
                               uint16_t nlocals) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_PROCEDURE;
-	descriptor.integer = label_id;
-	descriptor.aux_integer = nlocals;
+	descriptor.label_id = label_id;
+	descriptor.label_definition = UNDEFINED_LABEL;
+	descriptor.uint16 = nlocals;
 	ncopool_append(&self->constant_pool, descriptor);
 }
 
@@ -215,28 +210,84 @@ define_label(NAssembler* self, const char* label, NError* error) {
 	ni_label_manager_define(label_manager, label, cur_instruction, error);
 }
 
+static void
+update_instruction_labels(NAssembler* self, NProgram* prog) {
+	int i;
+	NLabelManager* label_man = &self->label_manager;
+
+	for (i = 0; i < prog->code_size; i++) {
+		NInstruction* instr = prog->code[i];
+		if (instr->argument_label != NULL) {
+			uint16_t label_id = instr->argument_label_id;
+			instr->argument_label_definition =
+				ni_label_manager_get_definition_by_id(label_man,
+				                                      label_id,
+				                                      NULL);
+		}
+	}
+}
+
+
+static void
+update_constant_labels(NAssembler* self, NProgram* prog) {
+	int i;
+	NLabelManager* label_man = &self->label_manager;
+
+	for (i = 0; i < prog->constants_size; i++) {
+		NConstantDescriptor* constant = &(prog->constants[i]);
+		if (constant->label_id != 0) {
+			constant->label_definition =
+				ni_label_manager_get_definition_by_id(label_man,
+				                                      constant->label_id,
+				                                      NULL);
+		}
+	}
+}
+
 
 NProgram*
 ni_asm_read_from_istream(NAssembler* self, NIStream* istream, NError* error) {
+	NProgram* result;
 	NLexer* lexer = ni_new_lexer(istream);
 	if (lexer == NULL) {
 		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
+	if (self->program != NULL) {
+		ni_destroy_program(self->program);
+	}
+	self->program = ni_new_program(error);
+	if (self->program == NULL) { goto cleanup; }
+
 	consume_header_data(self, lexer, error);
-	if (!n_error_ok(error)) return NULL;
+	if (!n_error_ok(error)) { goto cleanup; }
 
 	consume_constant_list(self, lexer, error);
-	if (!n_error_ok(error)) return NULL;
+	if (!n_error_ok(error)) { goto cleanup; }
 
 	consume_code_segment(self, lexer, error);
 
-	self->program->code = ncpool_elements(&self->code_pool);
-	self->program->code_size = ncpool_count(&self->code_pool);
+	result = self->program;
+	self->program = NULL;
+	result->code = ncpool_elements(&self->code_pool);
+	result->code_size = ncpool_count(&self->code_pool);
+	update_instruction_labels(self, result);
 
-	self->program->constants = ncopool_elements(&self->constant_pool);
-	self->program->constants_size = ncopool_count(&self->constant_pool);
-	return self->program;
+	result->constants = ncopool_elements(&self->constant_pool);
+	result->constants_size = ncopool_count(&self->constant_pool);
+	update_constant_labels(self, result);
+	return result;
+
+cleanup:
+	if (lexer != NULL) {
+		ni_destroy_lexer(lexer);
+	}
+	if (self->program != NULL) {
+		ni_destroy_program(self->program);
+		self->program = NULL;
+	}
+	/* TODO: We might want to reset the assembler structure for a fresh start */
+	return NULL;
 }
 
 
@@ -263,7 +314,7 @@ consume_code_element(NAssembler* self,
 		if (!n_error_ok(error)) return;
 
 		add_instruction(self, &instruction, error);
-		ni_asm_instruction_destroy(&instruction);
+		ni_asm_instruction_destruct(&instruction);
 		if (!n_error_ok(error)) return;
 	}
 	else {

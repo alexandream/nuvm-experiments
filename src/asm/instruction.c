@@ -24,12 +24,13 @@ ni_asm_instruction_clone(NInstruction* instruction, NError* error) {
 		result->argument_label = NULL;
 	}
 	result->argument_label_id = instruction->argument_label_id;
+	result->argument_label_definition = instruction->argument_label_definition;
 	return result;
 }
 
 
 void
-ni_asm_instruction_destroy(NInstruction* self) {
+ni_asm_instruction_destruct(NInstruction* self) {
 	if (self->argument_label != NULL) {
 		free(self->argument_label);
 	}

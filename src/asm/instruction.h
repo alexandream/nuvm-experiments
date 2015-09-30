@@ -25,6 +25,7 @@ typedef struct {
 	NArgument arg_c;
 	char* argument_label;
 	uint16_t argument_label_id;
+	uint32_t argument_label_definition;
 } NInstruction;
 
 
@@ -32,5 +33,5 @@ NInstruction*
 ni_asm_instruction_clone(NInstruction* instruction, NError* error);
 
 void
-ni_asm_instruction_destroy(NInstruction* self);
+ni_asm_instruction_destruct(NInstruction* self);
 #endif

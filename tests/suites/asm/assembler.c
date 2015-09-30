@@ -53,32 +53,36 @@ TEST(read_from_istream) {
 
 	{
 		uint8_t const_type;
-		int64_t const_integer;
-		uint16_t const_aux_integer;
+		int32_t const_int32;
+		uint16_t const_uint16;
+		uint16_t const_label_id;
+		uint32_t const_label_def;
 		NInstruction* inst;
 
 		/* Check the first constant */
 		const_type = program->constants[0].type;
-		const_integer = program->constants[0].integer;
-		const_aux_integer = program->constants[0].aux_integer;
+		const_label_id = program->constants[0].label_id;
+		const_label_def = program->constants[0].label_definition;
+		const_uint16 = program->constants[0].uint16;
 
 		ASSERT(EQ_UINT(const_type, NI_CONSTANT_PROCEDURE));
-		ASSERT(EQ_INT(const_integer, 0));
-		ASSERT(EQ_UINT(const_aux_integer, 25));
+		ASSERT(EQ_INT(const_label_id, 1));
+		ASSERT(EQ_INT(const_label_def, 0));
+		ASSERT(EQ_UINT(const_uint16, 25));
 
 		/* Check the second constant */
 		const_type = program->constants[1].type;
-		const_integer = program->constants[1].integer;
+		const_int32 = program->constants[1].int32;
 
 		ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
-		ASSERT(EQ_INT(const_integer, 10588));
+		ASSERT(EQ_INT(const_int32, 10588));
 
 		/* Check the third constant */
 		const_type = program->constants[2].type;
-		const_integer = program->constants[2].integer;
+		const_int32 = program->constants[2].int32;
 
 		ASSERT(EQ_INT(const_type, NI_CONSTANT_INT32));
-		ASSERT(EQ_INT(const_integer, 42));
+		ASSERT(EQ_INT(const_int32, 42));
 
 		/* Check first instruction */
 		inst = program->code[0];

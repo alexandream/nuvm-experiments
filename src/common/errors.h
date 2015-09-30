@@ -43,6 +43,9 @@ n_error_reset(NError* error);
 NError*
 n_error_clone(NError* error);
 
+void
+n_error_copy(NError* dest, NError* src);
+
 bool
 n_error_ok(NError* error);
 

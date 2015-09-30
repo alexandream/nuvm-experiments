@@ -8,14 +8,25 @@
 
 #include "instruction.h"
 
+#define NI_CONSTANT_INITIALIZER { 0xFF, 0, 0, 0.0, NULL }
+
+enum NConstantType {
+	NI_CONSTANT_STRING = 0,
+	NI_CONSTANT_DOUBLE,
+	NI_CONSTANT_INT32,
+	NI_CONSTANT_PROCEDURE,
+	NI_CONSTANT_CHARACTER
+};
+
 typedef struct {
 	uint8_t type;
-	int64_t integer;
-	uint16_t aux_integer;
+	int32_t int32;
+	uint16_t uint16;
 	double real;
 	char* text;
+	uint16_t label_id;
+	uint32_t label_definition;
 } NConstantDescriptor;
-
 
 typedef struct {
 	uint8_t major_version,
