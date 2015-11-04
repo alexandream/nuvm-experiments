@@ -166,10 +166,11 @@ add_instruction(NAssembler* self,
 
 
 static void
-add_string_constant(NAssembler* self, char* str) {
+add_string_constant(NAssembler* self, char* str, size_t length) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_STRING;
 	descriptor.text = str;
+	descriptor.text_length = length;
 	ncopool_append(&self->constant_pool, descriptor);
 }
 
@@ -184,10 +185,11 @@ add_double_constant(NAssembler* self, double number) {
 
 
 static void
-add_character_constant(NAssembler* self, char* utf8_char) {
+add_character_constant(NAssembler* self, char* utf8_char, size_t length) {
 	NConstantDescriptor descriptor = NI_CONSTANT_INITIALIZER;
 	descriptor.type = NI_CONSTANT_CHARACTER;
 	descriptor.text = utf8_char;
+	descriptor.text_length = length;
 	ncopool_append(&self->constant_pool, descriptor);
 }
 
@@ -383,15 +385,19 @@ consume_constant(NAssembler* self,
                  NError* error) {
 	NToken token_data;
 	char* string_value;
+	size_t string_length;
 	char* label_name;
 	uint16_t num_locals, label_id;
 	double double_value;
 	int32_t int32_value;
 	switch (token) {
 		case NI_TK_KW_CHARACTER:
-			ni_read_character_constant(lexer, &string_value, error);
+			ni_read_character_constant(lexer,
+			                           &string_value,
+			                           &string_length,
+			                           error);
 			if (!n_error_ok(error)) return;
-			add_character_constant(self, string_value);
+			add_character_constant(self, string_value, string_length);
 			break;
 		case NI_TK_KW_DOUBLE:
 			ni_read_double_constant(lexer, &double_value, error);
@@ -412,9 +418,12 @@ consume_constant(NAssembler* self,
 			add_procedure_constant(self, label_id, num_locals);
 			break;
 		case NI_TK_KW_STRING:
-			ni_read_string_constant(lexer, &string_value, error);
+			ni_read_string_constant(lexer,
+			                        &string_value,
+			                        &string_length,
+			                        error);
 			if (!n_error_ok(error)) return;
-			add_string_constant(self, string_value);
+			add_string_constant(self, string_value, string_length);
 			break;
 		default:
 			token_data = ni_lexer_copy(lexer);

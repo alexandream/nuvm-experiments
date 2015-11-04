@@ -623,6 +623,7 @@ ignore_whitespace(NIStream* stream, bool* end) {
 static void
 ignore_until_eol(NIStream* stream, bool* end) {
 	char chr = ni_istream_peek(stream, end);
+	/* FIXME: This code only handles unix-style end-of-lines (\n) */
 	while (chr != '\n' && !(*end)) {
 		ni_istream_read(stream, end);
 		chr = ni_istream_peek(stream, end);

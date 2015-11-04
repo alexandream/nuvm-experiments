@@ -108,24 +108,28 @@ TEST(read_globals_count_recognizes_input) {
 
 TEST(read_string_constant_recognizes_input) {
 	char* value;
+	size_t length;
 	NError error = N_ERROR_INITIALIZER;
 
 	NLexer* lexer = WITH_INPUT(".string \"hello, world\"");
 
-	ni_read_string_constant(lexer, &value, &error);
+	ni_read_string_constant(lexer, &value, &length, &error);
 	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_UINT(length, 12));
 	ASSERT(EQ_STR(value, "hello, world"));;
 }
 
 
 TEST(read_string_constant_recognizes_input_with_escape_quote) {
 	char* value;
+	size_t length;
 	NError error = N_ERROR_INITIALIZER;
 
 	NLexer* lexer = WITH_INPUT(".string \"hello,\\\" world\"");
 
-	ni_read_string_constant(lexer, &value, &error);
+	ni_read_string_constant(lexer, &value, &length, &error);
 	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_UINT(length, 13));
 	ASSERT(EQ_STR(value, "hello,\" world"));;
 }
 
@@ -144,13 +148,15 @@ TEST(read_double_constant_recognizes_input) {
 
 TEST(read_character_constant_recognizes_input) {
 	char* value;
+	size_t length;
 	NError error = N_ERROR_INITIALIZER;
 
-	NLexer* lexer = WITH_INPUT(".character \"á\"");
+	NLexer* lexer = WITH_INPUT(".character \"a\"");
 
-	ni_read_character_constant(lexer, &value, &error);
+	ni_read_character_constant(lexer, &value, &length, &error);
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_STR(value, "á"));;
+	ASSERT(EQ_UINT(length, 1));
+	ASSERT(EQ_STR(value, "a"));;
 }
 
 

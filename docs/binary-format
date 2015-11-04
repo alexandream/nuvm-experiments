@@ -18,21 +18,17 @@ Then the module description properties are laid out in the following order
 and sizes:
 
 - index of the entry point in the constants (unsigned 16 bits);
-- size of the data segment in bytes (unsigned 32 bits);
-- size of constants description segment (unsigned 16 bits);
 - size of the globals pool of the module (unsigned 16 bits);
+- size of constants description segment in bytes (unsigned 32 bits);
 - size of the code segment in instruction blocks (unsigned 32 bits);
 
 
 Then the segments are laid out as follows:
 
-- The Data segment, a pool of bytes that might be used by the constants to
-  construct their values.
-
 - The constants description segment with the following structure being
   repeated for each entry:
   - type of the constant (unsigned 8 bits);
-  - index on the data pool or immediate value (unsigned 24 bits);
+  - N bytes (where N is defined by the type of constant being described);
 
 - The code segment with the following structure being repeated for each
   instruction:

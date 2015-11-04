@@ -26,6 +26,7 @@ ni_read_globals_count(NLexer* lexer,
 void
 ni_read_string_constant(NLexer* lexer,
                         char** value,
+                        size_t* length,
                         NError* error);
 
 void
@@ -36,6 +37,7 @@ ni_read_double_constant(NLexer* lexer,
 void
 ni_read_character_constant(NLexer* lexer,
                            char** value,
+                           size_t* length,
                            NError* error);
 
 void

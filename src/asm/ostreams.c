@@ -16,7 +16,7 @@ struct NOStream {
 static size_t
 available_buffer_space(NOStream* self);
 
-static size_t
+static bool
 can_insert_element(NOStream* self, size_t size);
 
 
@@ -198,7 +198,7 @@ available_buffer_space(NOStream* self) {
 	return self->size - self->cursor;
 }
 
-static size_t
+static bool
 can_insert_element(NOStream* self, size_t size) {
 	return size <= available_buffer_space(self);
 }

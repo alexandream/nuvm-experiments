@@ -39,7 +39,7 @@ static uint8_t
 consume_opcode(NLexer* lexer, NError* error);
 
 static void
-consume_string(NLexer* lexer, char** value, NError* error);
+consume_string(NLexer* lexer, char** value, size_t* length, NError* error);
 
 static int32_t
 parse_dec_integer(const char* lexeme);
@@ -167,6 +167,7 @@ ni_read_globals_count(NLexer* lexer,
 void
 ni_read_string_constant(NLexer* lexer,
                         char** value,
+						size_t* length,
                         NError* error) {
 	n_error_reset(error);
 	expect_token_type(lexer, NI_TK_KW_STRING, error);
@@ -174,7 +175,7 @@ ni_read_string_constant(NLexer* lexer,
 
 	ni_lexer_advance(lexer);
 
-	consume_string(lexer, value, error);
+	consume_string(lexer, value, length, error);
 }
 
 
@@ -194,6 +195,7 @@ ni_read_double_constant(NLexer* lexer,
 void
 ni_read_character_constant(NLexer* lexer,
                            char** value,
+						   size_t* length,
                            NError* error) {
 	n_error_reset(error);
 	expect_token_type(lexer, NI_TK_KW_CHARACTER, error);
@@ -201,7 +203,7 @@ ni_read_character_constant(NLexer* lexer,
 
 	ni_lexer_advance(lexer);
 
-	consume_string(lexer, value, error);
+	consume_string(lexer, value, length, error);
 }
 
 
@@ -595,7 +597,7 @@ parse_dec_integer(const char* lexeme) {
 
 #include <stdio.h>
 static char*
-parse_string(NToken token) {
+parse_string(NToken token, size_t* len) {
 	char* result;
 	char* input = token.lexeme;
 	size_t length = strlen(input);
@@ -621,6 +623,7 @@ parse_string(NToken token) {
 		j++;
 	}
 	result[j] = '\0';
+	*len = j;
 	return result;
 }
 
@@ -710,13 +713,13 @@ consume_opcode(NLexer* lexer, NError* error) {
 
 
 static void
-consume_string(NLexer* lexer, char** value, NError* error) {
+consume_string(NLexer* lexer, char** value, size_t* length, NError* error) {
 	NToken cur_token;
 	expect_token_type(lexer, NI_TK_STRING, error);
 	if (!n_error_ok(error)) return;
 
 	cur_token = ni_lexer_read(lexer);
-	*value = parse_string(cur_token);
+	*value = parse_string(cur_token, length);
 	ni_destroy_token(cur_token);
 }
 

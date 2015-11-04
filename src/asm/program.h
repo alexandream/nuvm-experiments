@@ -24,6 +24,7 @@ typedef struct {
 	uint16_t uint16;
 	double real;
 	char* text;
+	size_t text_length;
 	uint16_t label_id;
 	uint32_t label_definition;
 } NConstantDescriptor;
