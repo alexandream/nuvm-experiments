@@ -143,6 +143,7 @@ uint32_t
 ni_label_manager_get_definition_by_id(NLabelManager* self,
                                       uint16_t label_id,
                                       NError* error) {
+	/* FIXME: This error is never used, but it should be used here. */
 	NLabel* label = &nlarray_elements(&self->pool)[label_id -1];
 	return label->definition;
 }

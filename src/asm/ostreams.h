@@ -11,14 +11,7 @@ void
 ni_destroy_ostream(NOStream* self);
 
 /*
-void
-ni_ostream_write_int8(NOStream* self, int8_t value, NError* error);
 
-void
-ni_ostream_write_int16(NOStream* self, int16_t value, NError* error);
-
-void
-ni_ostream_write_int32(NOStream* self, int32_t value, NError* error);
 
 void
 ni_ostream_write_int64(NOStream* self, int64_t value, NError* error);
@@ -41,6 +34,18 @@ ni_ostream_write_uint32(NOStream* self, uint32_t value, NError* error);
 
 void
 ni_ostream_write_uint64(NOStream* self, uint64_t value, NError* error);
+
+void
+ni_ostream_write_double(NOStream* self, double value, NError* error);
+
+void
+ni_ostream_write_int8(NOStream* self, int8_t value, NError* error);
+
+void
+ni_ostream_write_int16(NOStream* self, int16_t value, NError* error);
+
+void
+ni_ostream_write_int32(NOStream* self, int32_t value, NError* error);
 
 void
 ni_ostream_write_bytes(NOStream* self,

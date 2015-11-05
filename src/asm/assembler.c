@@ -237,10 +237,14 @@ update_instruction_labels(NAssembler* self, NProgram* prog) {
 		NInstruction* instr = &prog->code[i];
 		if (instr->argument_label != NULL) {
 			uint16_t label_id = instr->argument_label_id;
-			instr->argument_label_definition =
+			/* FIXME: Passing error as NULL should not happen. */
+			uint32_t label_def =
 				ni_label_manager_get_definition_by_id(label_man,
 				                                      label_id,
 				                                      NULL);
+			int32_t  label_offset = i - label_def;
+			instr->argument_label_definition = label_def;
+			instr->argument_label_offset = label_offset;
 		}
 	}
 }

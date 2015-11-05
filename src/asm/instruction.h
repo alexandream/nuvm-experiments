@@ -26,6 +26,7 @@ typedef struct {
 	char* argument_label;
 	uint16_t argument_label_id;
 	uint32_t argument_label_definition;
+	int32_t argument_label_offset;
 } NInstruction;
 
 

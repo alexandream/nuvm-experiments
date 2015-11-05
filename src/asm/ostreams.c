@@ -192,11 +192,35 @@ ni_ostream_write_uint64(NOStream* self, uint64_t value, NError* error) {
 }
 
 
+void
+ni_ostream_write_double(NOStream* self, double value, NError* error) {
+	ni_ostream_write_data(self, &value, sizeof(double), 1, error);
+}
+
+
+void
+ni_ostream_write_int8(NOStream* self, int8_t value, NError* error) {
+	ni_ostream_write_data(self, &value, sizeof(int8_t), 1, error);
+}
+
+
+void
+ni_ostream_write_int16(NOStream* self, int16_t value, NError* error) {
+	ni_ostream_write_data(self, &value, sizeof(int16_t), 1, error);
+}
+
+
+void
+ni_ostream_write_int32(NOStream* self, int32_t value, NError* error) {
+	ni_ostream_write_data(self, &value, sizeof(int32_t), 1, error);
+}
+
 
 static size_t
 available_buffer_space(NOStream* self) {
 	return self->size - self->cursor;
 }
+
 
 static bool
 can_insert_element(NOStream* self, size_t size) {
