@@ -44,18 +44,15 @@ consume_string(NLexer* lexer, char** value, size_t* length, NError* error);
 static int32_t
 parse_dec_integer(const char* lexeme);
 
-static NArgument
-parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error);
+static int32_t
+parse_register(NLexer* lexer, uint8_t bits, NError* error);
 
 static void
 read_register_based_instruction(NLexer* lexer,
                                 NInstruction* instruction,
                                 uint8_t reg_a_bits,
-                                uint8_t reg_a_types,
                                 uint8_t reg_b_bits,
-                                uint8_t reg_b_types,
                                 uint8_t reg_c_bits,
-                                uint8_t reg_c_types,
                                 NError* error);
 
 static void
@@ -292,11 +289,7 @@ static void
 ni_read_arith_rel_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                8,  LREG,
-	                                7,  LREG|CREG,
-									7,  LREG|CREG,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 8, 8, 8, error);
 }
 
 
@@ -304,11 +297,7 @@ static void
 ni_read_move_instruction(NLexer* lexer,
                          NInstruction* instruction,
                          NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                8,  LREG,
-	                               15,  LREG|CREG,
-	                                0,  0,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
 }
 
 
@@ -316,11 +305,7 @@ static void
 ni_read_global_ref_instruction(NLexer* lexer,
                                NInstruction* instruction,
                                NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                 8, LREG,
-	                                16, GREG,
-	                                 0, 0,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
 }
 
 
@@ -328,11 +313,7 @@ static void
 ni_read_global_set_instruction(NLexer* lexer,
                                NInstruction* instruction,
                                NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                16, GREG,
-	                                 8, LREG,
-	                                 0, 0,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 16, 8, 0, error);
 }
 
 
@@ -356,7 +337,7 @@ ni_read_jump_instruction(NLexer* lexer,
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
-	instruction->arg_a.value = offset;
+	instruction->arg_a = offset;
 }
 
 
@@ -372,7 +353,7 @@ ni_read_jump_if_instruction(NLexer* lexer,
 
 	instruction->opcode = opcode;
 
-	instruction->arg_a = parse_register(lexer, 8, LREG, error);
+	instruction->arg_a = parse_register(lexer, 8, error);
 	if (!n_error_ok(error)) return;
 
 
@@ -385,7 +366,7 @@ ni_read_jump_if_instruction(NLexer* lexer,
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
-	instruction->arg_b.value = offset;
+	instruction->arg_b = offset;
 
 }
 
@@ -401,7 +382,7 @@ ni_read_load_bool_instruction(NLexer* lexer,
 
 	instruction->opcode = opcode;
 
-	instruction->arg_a = parse_register(lexer, 8, LREG, error);
+	instruction->arg_a = parse_register(lexer, 8, error);
 	if (!n_error_ok(error)) return;
 
 	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
@@ -413,7 +394,7 @@ ni_read_load_bool_instruction(NLexer* lexer,
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
 	}
-	instruction->arg_b.value = value;
+	instruction->arg_b = value;
 }
 
 
@@ -421,11 +402,7 @@ static void
 ni_read_logical_instruction(NLexer* lexer,
                             NInstruction* instruction,
                             NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                8, LREG,
-	                                8, LREG,
-	                                8, LREG,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 8, 8, 8, error);
 }
 
 
@@ -433,11 +410,7 @@ static void
 ni_read_not_instruction(NLexer* lexer,
                         NInstruction* instruction,
                         NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                 8, LREG,
-	                                15, LREG|GREG,
-	                                 0, 0,
-	                                 error);
+	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
 }
 
 
@@ -445,11 +418,7 @@ static void
 ni_read_return_instruction(NLexer* lexer,
                            NInstruction* instruction,
                            NError* error) {
-	read_register_based_instruction(lexer, instruction,
-	                                22, LREG | GREG | CREG,
-	                                 0, 0,
-	                                 0, 0,
-	                                error);
+	read_register_based_instruction(lexer, instruction, 16, 0, 0, error);
 }
 
 
@@ -457,37 +426,25 @@ static void
 read_register_based_instruction(NLexer* lexer,
                                 NInstruction* instruction,
                                 uint8_t reg_a_bits,
-                                uint8_t reg_a_types,
                                 uint8_t reg_b_bits,
-                                uint8_t reg_b_types,
                                 uint8_t reg_c_bits,
-                                uint8_t reg_c_types,
                                 NError* error) {
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
 	instruction->opcode = opcode;
 
 	if (reg_a_bits > 0) {
-		instruction->arg_a = parse_register(lexer,
-		                                    reg_a_bits,
-		                                    reg_a_types,
-		                                    error);
+		instruction->arg_a = parse_register(lexer, reg_a_bits, error);
 		if (!n_error_ok(error)) return;
 	}
 
 	if (reg_b_bits > 0) {
-		instruction->arg_b = parse_register(lexer,
-		                                    reg_b_bits,
-		                                    reg_b_types,
-		                                    error);
+		instruction->arg_b = parse_register(lexer, reg_b_bits, error);
 		if (!n_error_ok(error)) return;
 	}
 
 	if (reg_c_bits > 0) {
-		instruction->arg_c = parse_register(lexer,
-		                                    reg_c_bits,
-		                                    reg_c_types,
-		                                    error);
+		instruction->arg_c = parse_register(lexer, reg_c_bits, error);
 		if (!n_error_ok(error)) return;
 	}
 }
@@ -495,75 +452,42 @@ read_register_based_instruction(NLexer* lexer,
 
 
 
-static NArgument
-parse_register(NLexer* lexer, uint8_t bits, uint8_t types, NError* error) {
-	NArgument result;
+static int32_t
+parse_register(NLexer* lexer, uint8_t bits, NError* error) {
+	int32_t result;
 	NToken token = NI_TOKEN_INITIALIZER;
 	int32_t max_value, value;
-	uint8_t type;
-	expect_token_type(lexer, NI_TK_REGISTER, error);
+	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
 	if (!n_error_ok(error)) goto handle_error;
 
 	token = ni_lexer_read(lexer);
 
 	switch(bits) {
-		case 7:
-			max_value = INT8_MAX;
-			break;
 		case 8:
 			max_value = UINT8_MAX;
-			break;
-		case 15:
-			max_value = INT16_MAX;
 			break;
 		case 16:
 			max_value = UINT16_MAX;
 			break;
-		case 22:
-			max_value = UINT22_MAX;
-			break;
 		default:
 			/* This shouldn't happen. Just a guard here. */
 			exit(-1);
 	}
 
-	switch(token.lexeme[0]) {
-		case 'C':
-			type = NI_RT_CONSTANT;
-			break;
-		case 'G':
-			type = NI_RT_GLOBAL;
-			break;
-		case 'L':
-			type = NI_RT_LOCAL;
-			break;
-		default:
-			/* This shouldn't happen. Just a guard here. */
-			exit(-1);
-	}
-
-	if (! (types & type)) {
-		/* TODO: Put more information in this error result. */
-		/* What type did we find? Which are acceptable? Which argument? */
-		n_error_set(error, ni_a_errors.reader.IncompatibleRegisterType, NULL);
-		goto handle_error;
-	}
-
-	value = parse_dec_integer(token.lexeme+2);
-	if (value > max_value) {
+	value = parse_dec_integer(token.lexeme);
+	if (value < 0 || value > max_value) {
 		/* TODO: Put more information in this error result. */
 		/* What value did we find? What range is ok? Which argument? */
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		goto handle_error;
 	}
-	result.type = type;
-	result.value = value;
+	result = value;
 
 	ni_destroy_token(token);
 	return result;
 handle_error:
 	ni_destroy_token(token);
-	return result;
+	return -1;
 }
 
 

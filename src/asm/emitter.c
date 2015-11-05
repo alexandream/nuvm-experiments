@@ -186,30 +186,28 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 
 	switch (instruction->opcode) {
 		case N_OP_MOVE:
-			sign = ARG_B.type == NI_RT_LOCAL ? 1 : -1;
 
-			ni_ostream_write_uint8(stream, (uint8_t) ARG_A.value, error);
+			ni_ostream_write_uint8(stream, (uint8_t) ARG_A, error);
 			RETURN_ON_ERROR(error);
 
-			ni_ostream_write_int16(stream, sign * ARG_B.value, error);
+			ni_ostream_write_int16(stream, sign * ARG_B, error);
 			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_GLOBAL_REF:
-			ni_ostream_write_uint8(stream, ARG_A.value, error);
+			ni_ostream_write_uint8(stream, ARG_A, error);
 			RETURN_ON_ERROR(error);
 
-			ni_ostream_write_uint16(stream, ARG_B.value, error);
+			ni_ostream_write_uint16(stream, ARG_B, error);
 			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_GLOBAL_SET:
-			sign = ARG_B.type == NI_RT_LOCAL ? 1 : -1;
 
-			ni_ostream_write_uint16(stream, ARG_A.value, error);
+			ni_ostream_write_uint16(stream, ARG_A, error);
 			RETURN_ON_ERROR(error);
 	
-			ni_ostream_write_int16(stream, sign * ARG_B.value, error);
+			ni_ostream_write_int16(stream, sign * ARG_B, error);
 			RETURN_ON_ERROR(error);
 			break;
 
@@ -228,15 +226,13 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 		case N_OP_SUB:
 		case N_OP_MUL:
 		case N_OP_DIV:
-			ni_ostream_write_uint8(stream, ARG_A.value, error);
+			ni_ostream_write_uint8(stream, ARG_A, error);
 			RETURN_ON_ERROR(error);
 
-			sign = ARG_B.type == NI_RT_LOCAL ? 1 : -1;
-			ni_ostream_write_int8(stream, sign * ARG_B.value, error);
+			ni_ostream_write_int8(stream, sign * ARG_B, error);
 			RETURN_ON_ERROR(error);
 
-			sign = ARG_C.type == NI_RT_LOCAL ? 1 : -1;
-			ni_ostream_write_int8(stream, sign * ARG_C.value, error);
+			ni_ostream_write_int8(stream, sign * ARG_C, error);
 			RETURN_ON_ERROR(error);
 			break;
 

@@ -4,7 +4,7 @@
 #include "../common/errors.h"
 #include "../common/polyfills/p-stdint.h"
 
-#define N_INSTRUCTION_INITIALIZER { 0, {0, 0}, {0, 0}, {0, 0}, NULL, 0}
+#define N_INSTRUCTION_INITIALIZER { 0, 0, 0, 0, NULL, 0}
 
 typedef enum {
 	NI_RT_CONSTANT = 1,
@@ -14,15 +14,10 @@ typedef enum {
 
 
 typedef struct {
-	uint8_t type;
-	int32_t value;
-} NArgument;
-
-typedef struct {
 	uint8_t opcode;
-	NArgument arg_a;
-	NArgument arg_b;
-	NArgument arg_c;
+	int32_t arg_a;
+	int32_t arg_b;
+	int32_t arg_c;
 	char* argument_label;
 	uint16_t argument_label_id;
 	uint32_t argument_label_definition;

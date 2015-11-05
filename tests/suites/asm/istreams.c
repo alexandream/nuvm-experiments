@@ -1,5 +1,5 @@
 #define SUITE_NAME IStreams
-
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -63,6 +63,7 @@ TEARDOWN {
 /* Test Cases */
 
 TEST(empty_istream_has_correct_eof) {
+	assert(EMPTY_STREAM != NULL);
 	ASSERT(IS_TRUE(ni_istream_eof(EMPTY_STREAM) == true));
 }
 

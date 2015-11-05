@@ -214,48 +214,6 @@ TEST(reads_label_def) {
 }
 
 
-TEST(reads_local_register_reference_zero) {
-	WITH_STREAM("L:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "L:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_global_register_reference_zero) {
-	WITH_STREAM("G:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "G:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_constant_register_reference_zero) {
-	WITH_STREAM("C:0");
-	ASSERT_TOKEN(NI_TK_REGISTER, "C:0");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_local_register_reference) {
-	WITH_STREAM("L:1234");
-	ASSERT_TOKEN(NI_TK_REGISTER, "L:1234");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_global_register_reference) {
-	WITH_STREAM("G:4321");
-	ASSERT_TOKEN(NI_TK_REGISTER, "G:4321");
-	ASSERT_EOF();
-}
-
-
-TEST(reads_constant_register_reference) {
-	WITH_STREAM("C:987");
-	ASSERT_TOKEN(NI_TK_REGISTER, "C:987");
-	ASSERT_EOF();
-}
-
-
 TEST(reads_keyword_character) {
 	WITH_STREAM(".character");
 	ASSERT_TOKEN(NI_TK_KW_CHARACTER, ".character");

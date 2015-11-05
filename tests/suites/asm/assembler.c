@@ -23,11 +23,11 @@ TEST(read_from_istream) {
 	    ".code                         \n",
 	    "                              \n",
 	    "INIT:                         \n",
-	    "  global-ref    L:0    G:1    \n",
-	    "  global-ref    L:1    G:2    \n",
-	    "  add L:3 C:1 C:2             \n",
+	    "  global-ref    0    1        \n",
+	    "  global-ref    1    2        \n",
+	    "  add 3 1 2                   \n",
 	    "END:                          \n",
-	    "  return L:3                  \n"
+	    "  return 3                    \n"
 	};
 	char prog_buffer[EXPECTED_SIZE(prog_lines, 80)];
 	const char* prog_text =
@@ -86,39 +86,31 @@ TEST(read_from_istream) {
 		/* Check first instruction */
 		inst = program->code[0];
 		ASSERT(EQ_UINT(inst.opcode, N_OP_GLOBAL_REF));
-		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst.arg_a.value, 0));
+		ASSERT(EQ_INT(inst.arg_a, 0));
 
-		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_GLOBAL));
-		ASSERT(EQ_INT(inst.arg_b.value, 1));
+		ASSERT(EQ_INT(inst.arg_b, 1));
 
 		/* Check second instruction */
 		inst = program->code[1];
 		ASSERT(EQ_UINT(inst.opcode, N_OP_GLOBAL_REF));
-		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst.arg_a.value, 1));
+		ASSERT(EQ_INT(inst.arg_a, 1));
 
-		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_GLOBAL));
-		ASSERT(EQ_INT(inst.arg_b.value, 2));
+		ASSERT(EQ_INT(inst.arg_b, 2));
 
 		/* Check third instruction */
 		inst = program->code[2];
 		ASSERT(EQ_UINT(inst.opcode, N_OP_ADD));
 
-		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst.arg_a.value, 3));
+		ASSERT(EQ_INT(inst.arg_a, 3));
 
-		ASSERT(EQ_INT(inst.arg_b.type, NI_RT_CONSTANT));
-		ASSERT(EQ_INT(inst.arg_b.value, 1));
+		ASSERT(EQ_INT(inst.arg_b, 1));
 
-		ASSERT(EQ_INT(inst.arg_c.type, NI_RT_CONSTANT));
-		ASSERT(EQ_INT(inst.arg_c.value, 2));
+		ASSERT(EQ_INT(inst.arg_c, 2));
 
 		/* Check fourth instruction */
 		inst = program->code[3];
 		ASSERT(EQ_UINT(inst.opcode, N_OP_RETURN));
 
-		ASSERT(EQ_INT(inst.arg_a.type, NI_RT_LOCAL));
-		ASSERT(EQ_INT(inst.arg_a.value, 3));
+		ASSERT(EQ_INT(inst.arg_a, 3));
 	}
 }

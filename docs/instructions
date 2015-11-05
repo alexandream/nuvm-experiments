@@ -3,36 +3,36 @@ Brainstorming on the instructions available on the virtual machine.
 L: Local
 C: Constant
 G: Global
-LC: Local or Constant
-LG: Local or Global
-LCG: Local Constant or Global
 
 s<X><N>: signed X with N bits
 <X><N>: X with N bits
 
-move         L:A8 LC:B15
+move-in      L:A8 L:B16
+move-out     L:A16 L:B8
 global-ref   L:A8 G:B16
-global-set   G:A16 LC:B7
+global-set   G:A16 L:B8
+const-ref    L:A8 C:B16
+
 jump         sA24
 jump-if      L:A8 sB16
 
-eq           L:A8 LC:B7 LC:C7
-lt           L:A8 LC:B7 LC:C7
-le           L:A8 LC:B7 LC:C7
-gt           L:A8 LC:B7 LC:C7
-ge           L:A8 LC:B7 LC:C7
+not          L:A8 L:B16
 
-not          L:A8 LG:B15
+eq           L:A8 L:B8 L:C8
+lt           L:A8 L:B8 L:C8
+le           L:A8 L:B8 L:C8
+gt           L:A8 L:B8 L:C8
+ge           L:A8 L:B8 L:C8
 
 or           L:A8 L:B8 L:C8
 and          L:A8 L:B8 L:C8
 
-add          L:A8 LC:B7 LC:C7
-sub          L:A8 LC:B7 LC:C7
-mul          L:A8 LC:B7 LC:C7
-div          L:A8 LC:B7 LC:C7
+add          L:A8 L:B8 L:C8
+sub          L:A8 L:B8 L:C8
+mul          L:A8 L:B8 L:C8
+div          L:A8 L:B8 L:C8
 
-load-bool    L:A8 0|1
+load-bool    L:A8 B16
 
-return       LCG:A22
+return       L:A16 00000000
 

@@ -59,7 +59,6 @@ typedef enum {
 	S_LABEL_DEFINITION,
 
 	S_REGISTER,
-	S_REGISTER_LEAD,
 	S_REGISTER_PREFIX,
 
 	S_STRING_OPENED,
@@ -112,9 +111,6 @@ handle_S_REAL(char chr);
 
 static tk_state_t
 handle_S_KEYWORD(char chr);
-
-static tk_state_t
-handle_S_REGISTER_LEAD(char chr);
 
 static tk_state_t
 handle_S_REGISTER_PREFIX(char chr);
@@ -280,9 +276,6 @@ ni_get_next_token(NIStream* stream, char* buffer, size_t buffer_last_pos) {
 			case S_LABEL_LEAD:
 				state = handle_S_LABEL_LEAD(chr);
 				break;
-			case S_REGISTER_LEAD:
-				state = handle_S_REGISTER_LEAD(chr);
-				break;
 			case S_REGISTER_PREFIX:
 				state = handle_S_REGISTER_PREFIX(chr);
 				break;
@@ -403,7 +396,6 @@ compute_token_type_from_keyword(const char* keyword) {
 static NTokenType
 compute_token_type_from_state(tk_state_t state) {
 	switch (state) {
-		case S_REGISTER_LEAD: /* fall-through */
 		case S_IDENTIFIER:
 			return NI_TK_UNRECOGNIZED_OPCODE;
 		case S_LEADING_ZERO: /* fall-through */
@@ -441,9 +433,6 @@ feed_store(store_t* buffer, char chr, bool* overflow) {
 
 static tk_state_t
 handle_S_INIT(char chr, bool* handling_spaces, bool* is_label) {
-	if (chr == 'L' || chr == 'G' || chr == 'C') {
-		return S_REGISTER_LEAD;
-	}
 	if (isalpha(chr)) {
 		return S_IDENTIFIER;
 	}
@@ -548,18 +537,6 @@ static tk_state_t
 handle_S_KEYWORD(char chr) {
 	if (islower(chr) || isdigit(chr) || chr == '-') {
 		return S_KEYWORD;
-	}
-	return S_UNKNOWN;
-}
-
-
-static tk_state_t
-handle_S_REGISTER_LEAD(char chr) {
-	if (isalnum(chr) || chr == '-') {
-		return S_IDENTIFIER;
-	}
-	if (chr == ':') {
-		return S_REGISTER_PREFIX;
 	}
 	return S_UNKNOWN;
 }
