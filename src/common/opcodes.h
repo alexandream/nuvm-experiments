@@ -4,9 +4,12 @@
 #include "polyfills/p-stdint.h"
 
 typedef enum NOpcode {
+	N_OP_MOVE_IN,
+	N_OP_MOVE_OUT,
+
 	N_OP_GLOBAL_REF,
 	N_OP_GLOBAL_SET,
-	N_OP_MOVE,
+	N_OP_CONST_REF,
 
 	N_OP_JUMP,
 	N_OP_JUMP_IF,

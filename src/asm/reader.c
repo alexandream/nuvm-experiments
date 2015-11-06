@@ -72,6 +72,11 @@ ni_read_global_set_instruction(NLexer* lexer,
                                NError* error);
 
 static void
+ni_read_const_ref_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error);
+
+static void
 ni_read_jump_instruction(NLexer* lexer,
                          NInstruction* instruction,
                          NError* error);
@@ -92,9 +97,14 @@ ni_read_logical_instruction(NLexer* lexer,
                             NError* error);
 
 static void
-ni_read_move_instruction(NLexer* lexer,
-                         NInstruction* instruction,
-                         NError* error);
+ni_read_move_in_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error);
+
+static void
+ni_read_move_out_instruction(NLexer* lexer,
+                             NInstruction* instruction,
+                             NError* error);
 
 static void
 ni_read_not_instruction(NLexer* lexer,
@@ -255,8 +265,11 @@ ni_read_instruction(NLexer* lexer,
 		case NI_TK_OP_OR:
 			ni_read_logical_instruction(lexer, instruction, error);
 			return;
-		case NI_TK_OP_MOVE:
-			ni_read_move_instruction(lexer, instruction, error);
+		case NI_TK_OP_MOVE_IN:
+			ni_read_move_in_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_MOVE_OUT:
+			ni_read_move_out_instruction(lexer, instruction, error);
 			return;
 		case NI_TK_OP_NOT:
 			ni_read_not_instruction(lexer, instruction, error);
@@ -266,6 +279,9 @@ ni_read_instruction(NLexer* lexer,
 			return;
 		case NI_TK_OP_GLOBAL_SET:
 			ni_read_global_set_instruction(lexer, instruction, error);
+			return;
+		case NI_TK_OP_CONST_REF:
+			ni_read_const_ref_instruction(lexer, instruction, error);
 			return;
 		case NI_TK_OP_LOAD_BOOL:
 			ni_read_load_bool_instruction(lexer, instruction, error);
@@ -294,10 +310,18 @@ ni_read_arith_rel_instruction(NLexer* lexer,
 
 
 static void
-ni_read_move_instruction(NLexer* lexer,
-                         NInstruction* instruction,
-                         NError* error) {
+ni_read_move_in_instruction(NLexer* lexer,
+                            NInstruction* instruction,
+                            NError* error) {
 	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
+}
+
+
+static void
+ni_read_move_out_instruction(NLexer* lexer,
+                             NInstruction* instruction,
+                             NError* error) {
+	read_register_based_instruction(lexer, instruction, 16, 8, 0, error);
 }
 
 
@@ -305,6 +329,14 @@ static void
 ni_read_global_ref_instruction(NLexer* lexer,
                                NInstruction* instruction,
                                NError* error) {
+	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
+}
+
+
+static void
+ni_read_const_ref_instruction(NLexer* lexer,
+                              NInstruction* instruction,
+                              NError* error) {
 	read_register_based_instruction(lexer, instruction, 8, 16, 0, error);
 }
 

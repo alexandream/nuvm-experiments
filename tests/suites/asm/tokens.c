@@ -318,9 +318,16 @@ TEST(reads_label_reference) {
 }
 
 
-TEST(reads_op_move) {
-	WITH_STREAM("move");
-	ASSERT_TOKEN(NI_TK_OP_MOVE, "move");
+TEST(reads_op_move_in) {
+	WITH_STREAM("move-in");
+	ASSERT_TOKEN(NI_TK_OP_MOVE_IN, "move-in");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_move_out) {
+	WITH_STREAM("move-out");
+	ASSERT_TOKEN(NI_TK_OP_MOVE_OUT, "move-out");
 	ASSERT_EOF();
 }
 
@@ -335,6 +342,13 @@ TEST(reads_op_global_ref) {
 TEST(reads_op_global_set) {
 	WITH_STREAM("global-set");
 	ASSERT_TOKEN(NI_TK_OP_GLOBAL_SET, "global-set");
+	ASSERT_EOF();
+}
+
+
+TEST(reads_op_const_ref) {
+	WITH_STREAM("const-ref");
+	ASSERT_TOKEN(NI_TK_OP_CONST_REF, "const-ref");
 	ASSERT_EOF();
 }
 

@@ -5,9 +5,11 @@
 #include "../common/opcodes.h"
 
 #define NI_OPCODE_MAPPINGS \
-	X( "move"      , NI_TK_OP_MOVE      ,  N_OP_MOVE       )\
+	X( "move-in"   , NI_TK_OP_MOVE_IN   ,  N_OP_MOVE_IN    )\
+	X( "move-out"  , NI_TK_OP_MOVE_OUT  ,  N_OP_MOVE_OUT   )\
 	X( "global-ref", NI_TK_OP_GLOBAL_REF,  N_OP_GLOBAL_REF )\
 	X( "global-set", NI_TK_OP_GLOBAL_SET,  N_OP_GLOBAL_SET )\
+	X( "const-ref" , NI_TK_OP_CONST_REF ,  N_OP_CONST_REF  )\
 	X( "jump"      , NI_TK_OP_JUMP      ,  N_OP_JUMP       )\
 	X( "jump-if"   , NI_TK_OP_JUMP_IF   ,  N_OP_JUMP_IF    )\
 	X( "eq"        , NI_TK_OP_EQ        ,  N_OP_EQ         )\

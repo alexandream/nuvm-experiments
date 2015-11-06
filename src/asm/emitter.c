@@ -185,7 +185,7 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 	RETURN_ON_ERROR(error);
 
 	switch (instruction->opcode) {
-		case N_OP_MOVE:
+		case N_OP_MOVE_IN:
 
 			ni_ostream_write_uint8(stream, (uint8_t) ARG_A, error);
 			RETURN_ON_ERROR(error);

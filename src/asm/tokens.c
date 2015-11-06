@@ -168,7 +168,9 @@ ni_get_token_name(NTokenType type) {
 
 		case NI_TK_OP_GLOBAL_REF: return "OP_GLOBAL_REF";
 		case NI_TK_OP_GLOBAL_SET: return "OP_GLOBAL_SET";
-		case NI_TK_OP_MOVE: return "OP_MOVE";
+		case NI_TK_OP_CONST_REF: return "OP_CONST_REF";
+		case NI_TK_OP_MOVE_IN: return "OP_MOVE_IN";
+		case NI_TK_OP_MOVE_OUT: return "OP_MOVE_OUT";
 
 		case NI_TK_OP_JUMP: return "OP_JUMP";
 		case NI_TK_OP_JUMP_IF: return "OP_JUMP_IF";
@@ -365,6 +367,7 @@ ni_token_is_opcode(NTokenType token_type) {
 
 static NTokenType
 compute_token_type_from_table(const char* lexeme, lexeme_table_t* table) {
+	/* TODO: Use a real map-like structure for this. Performance only. */
 	int i = 0;
 
 	while (true) {

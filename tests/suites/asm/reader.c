@@ -216,19 +216,32 @@ TEST(read_instruction_recognizes_logical_or) {
 }
 
 
-TEST(read_instruction_recognizes_move_local) {
+TEST(read_instruction_recognizes_move_in) {
 	NInstruction ins = N_INSTRUCTION_INITIALIZER;
 	NError error = N_ERROR_INITIALIZER;
 
-	NLexer* lexer = WITH_INPUT("move 1 300");
+	NLexer* lexer = WITH_INPUT("move-in 1 300");
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
-	ASSERT(EQ_UINT(ins.opcode, N_OP_MOVE));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_MOVE_IN));
 	ASSERT(EQ_INT(ins.arg_a, 1));
 	ASSERT(EQ_INT(ins.arg_b, 300));
 }
 
+
+TEST(read_instruction_recognizes_move_out) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("move-out 300 1");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_MOVE_OUT));
+	ASSERT(EQ_INT(ins.arg_a, 300));
+	ASSERT(EQ_INT(ins.arg_b, 1));
+}
 
 TEST(read_instruction_recognizes_logical_not) {
 	NInstruction ins = N_INSTRUCTION_INITIALIZER;
@@ -269,6 +282,20 @@ TEST(read_instruction_recognizes_global_set) {
 	ASSERT(EQ_UINT(ins.opcode, N_OP_GLOBAL_SET));
 	ASSERT(EQ_INT(ins.arg_a, 12255));
 	ASSERT(EQ_INT(ins.arg_b, 123));
+}
+
+
+TEST(read_instruction_recognizes_const_ref) {
+	NInstruction ins = N_INSTRUCTION_INITIALIZER;
+	NError error = N_ERROR_INITIALIZER;
+
+	NLexer* lexer = WITH_INPUT("const-ref 255 12345");
+	ni_read_instruction(lexer, &ins, &error);
+
+	ASSERT(ERROR_OK(&error));
+	ASSERT(EQ_UINT(ins.opcode, N_OP_CONST_REF));
+	ASSERT(EQ_INT(ins.arg_a, 255));
+	ASSERT(EQ_INT(ins.arg_b, 12345));
 }
 
 
