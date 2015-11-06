@@ -181,6 +181,17 @@ ni_ostream_write_uint16(NOStream* self, uint16_t value, NError* error) {
 
 
 void
+ni_ostream_write_int24(NOStream* self, int32_t value, NError* error) {
+	uint32_t uvalue = value;
+	uint8_t data[3];
+	/* FIXME: This is meaningful only in little endian machines. */
+	data[0] =  0xFF & uvalue;
+	data[1] =  0xFF & (uvalue >> 8);
+	data[2] =  0xFF & (uvalue >> 16);
+}
+
+
+void
 ni_ostream_write_uint32(NOStream* self, uint32_t value, NError* error) {
 	ni_ostream_write_data(self, &value, sizeof(uint32_t), 1, error);
 }

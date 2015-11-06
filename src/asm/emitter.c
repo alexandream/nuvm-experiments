@@ -8,6 +8,9 @@ static void
 emit_constants_segment(NProgram* program, NOStream* stream, NError* error);
 
 static void
+emit_code_segment(NProgram* program, NOStream* stream, NError* error);
+
+static void
 emit_headers(NProgram* program, NOStream* stream, NError* error);
 
 static void
@@ -44,7 +47,7 @@ typedef struct {
 void
 ni_emit_program(NProgram* program, NOStream* stream, NError* error) {
 	n_error_reset(error);
-	
+
 	emit_magic_number(program, stream, error);
 	RETURN_ON_ERROR(error);
 
@@ -55,6 +58,9 @@ ni_emit_program(NProgram* program, NOStream* stream, NError* error) {
 	RETURN_ON_ERROR(error);
 
 	emit_constants_segment(program, stream, error);
+	RETURN_ON_ERROR(error);
+
+	emit_code_segment(program, stream, error);
 	RETURN_ON_ERROR(error);
 }
 
@@ -155,7 +161,7 @@ emit_headers(NProgram* program, NOStream* stream, NError* error) {
 	uint32_t constants_segment_size;
 	ni_ostream_write_uint16(stream, program->entry_point, error);
 	RETURN_ON_ERROR(error);
-	
+
 	ni_ostream_write_uint16(stream, program->globals_count, error);
 	RETURN_ON_ERROR(error);
 
@@ -180,17 +186,27 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 #define ARG_A (instruction->arg_a)
 #define ARG_B (instruction->arg_b)
 #define ARG_C (instruction->arg_c)
-	int8_t sign = 1;
+	NOpcode opcode;
 	ni_ostream_write_uint8(stream, instruction->opcode, error);
 	RETURN_ON_ERROR(error);
 
-	switch (instruction->opcode) {
+	opcode = instruction->opcode;
+	switch (opcode) {
 		case N_OP_MOVE_IN:
 
 			ni_ostream_write_uint8(stream, (uint8_t) ARG_A, error);
 			RETURN_ON_ERROR(error);
 
-			ni_ostream_write_int16(stream, sign * ARG_B, error);
+			ni_ostream_write_int16(stream, ARG_B, error);
+			RETURN_ON_ERROR(error);
+			break;
+
+		case N_OP_MOVE_OUT:
+
+			ni_ostream_write_uint16(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
+
+			ni_ostream_write_int8(stream, ARG_B, error);
 			RETURN_ON_ERROR(error);
 			break;
 
@@ -206,15 +222,34 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 
 			ni_ostream_write_uint16(stream, ARG_A, error);
 			RETURN_ON_ERROR(error);
-	
-			ni_ostream_write_int16(stream, sign * ARG_B, error);
+
+			ni_ostream_write_int16(stream, ARG_B, error);
+			RETURN_ON_ERROR(error);
+			break;
+
+		case N_OP_CONST_REF:
+			ni_ostream_write_uint8(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
+
+			ni_ostream_write_uint16(stream, ARG_B, error);
 			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_JUMP:
+			ni_ostream_write_int24(stream,
+			                       instruction->argument_label_offset,
+			                       error);
+			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_JUMP_IF:
+			ni_ostream_write_uint8(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
+
+			ni_ostream_write_int16(stream,
+			                       instruction->argument_label_offset,
+			                       error);
+			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_EQ:
@@ -226,26 +261,39 @@ emit_instruction(NInstruction* instruction, NOStream* stream, NError* error) {
 		case N_OP_SUB:
 		case N_OP_MUL:
 		case N_OP_DIV:
+		case N_OP_OR:
+		case N_OP_AND:
 			ni_ostream_write_uint8(stream, ARG_A, error);
 			RETURN_ON_ERROR(error);
 
-			ni_ostream_write_int8(stream, sign * ARG_B, error);
+			ni_ostream_write_int8(stream, ARG_B, error);
 			RETURN_ON_ERROR(error);
 
-			ni_ostream_write_int8(stream, sign * ARG_C, error);
+			ni_ostream_write_int8(stream, ARG_C, error);
 			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_NOT:
-			break;
+			ni_ostream_write_uint8(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
 
-		case N_OP_OR:
-		case N_OP_AND:
+			ni_ostream_write_uint16(stream, ARG_B, error);
+			RETURN_ON_ERROR(error);
 			break;
 
 		case N_OP_LOAD_BOOL:
+			ni_ostream_write_uint8(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
+
+			ni_ostream_write_uint16(stream, ARG_B, error);
+			RETURN_ON_ERROR(error);
 			break;
 		case N_OP_RETURN:
+			ni_ostream_write_uint16(stream, ARG_A, error);
+			RETURN_ON_ERROR(error);
+
+			ni_ostream_write_uint8(stream, 0, error);
+			RETURN_ON_ERROR(error);
 			break;
 	}
 #undef ARG_A

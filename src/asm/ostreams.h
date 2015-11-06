@@ -45,6 +45,9 @@ void
 ni_ostream_write_int16(NOStream* self, int16_t value, NError* error);
 
 void
+ni_ostream_write_int24(NOStream* self, int32_t value, NError* error);
+
+void
 ni_ostream_write_int32(NOStream* self, int32_t value, NError* error);
 
 void
