@@ -80,7 +80,10 @@ struct NToken {
 
 
 void
-ni_destroy_token(NToken token);
+ni_delete_token(NToken* token);
+
+void
+ni_destruct_token(NToken* token);
 
 const char*
 ni_get_token_name(NTokenType type);
@@ -89,7 +92,7 @@ NTokenType
 ni_get_next_token(NIStream* stream, char* buffer, size_t bufsize);
 
 NToken*
-ni_token_lift(NToken token);
+ni_token_clone(NToken token);
 
 
 bool

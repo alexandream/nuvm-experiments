@@ -393,7 +393,6 @@ static void
 ni_read_load_bool_instruction(NLexer* lexer,
                               NInstruction* instruction,
                               NError* error) {
-	NToken value_tk;
 	int32_t value = 0;
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
@@ -403,11 +402,9 @@ ni_read_load_bool_instruction(NLexer* lexer,
 	instruction->arg_a = parse_register(lexer, 8, error);
 	if (!n_error_ok(error)) return;
 
-	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	consume_dec_int(lexer, &value, error);
 	if (!n_error_ok(error)) return;
 
-	value_tk = ni_lexer_read(lexer);
-	value = parse_dec_integer(value_tk.lexeme);
 	if (value < 0 || value > 1) {
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
 		return;
@@ -472,13 +469,7 @@ read_register_based_instruction(NLexer* lexer,
 
 static int32_t
 parse_register(NLexer* lexer, uint8_t bits, NError* error) {
-	int32_t result;
-	NToken token = NI_TOKEN_INITIALIZER;
 	int32_t max_value, value;
-	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
-	if (!n_error_ok(error)) goto handle_error;
-
-	token = ni_lexer_read(lexer);
 
 	switch(bits) {
 		case 8:
@@ -492,20 +483,16 @@ parse_register(NLexer* lexer, uint8_t bits, NError* error) {
 			exit(-1);
 	}
 
-	value = parse_dec_integer(token.lexeme);
+	consume_dec_int(lexer, &value, error);
+	if (!n_error_ok(error)) return INT32_MIN;
+
 	if (value < 0 || value > max_value) {
 		/* TODO: Put more information in this error result. */
 		/* What value did we find? What range is ok? Which argument? */
 		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
-		goto handle_error;
+		return INT32_MIN;
 	}
-	result = value;
-
-	ni_destroy_token(token);
-	return result;
-handle_error:
-	ni_destroy_token(token);
-	return -1;
+	return value;
 }
 
 
@@ -578,7 +565,7 @@ consume_dec_int(NLexer* lexer, int32_t* value, NError* error) {
 
 	cur_token = ni_lexer_read(lexer);
 	*value = parse_dec_integer(cur_token.lexeme);
-	ni_destroy_token(cur_token);
+	ni_destruct_token(&cur_token);
 }
 
 
@@ -612,14 +599,16 @@ static void
 consume_double(NLexer* lexer, double* value, NError* error) {
 	char* end_ptr;
 	NToken cur_token;
+	int stored_errno = 0;
 	expect_token_type(lexer, NI_TK_REAL, error);
 	if (!n_error_ok(error)) return;
 
 	cur_token = ni_lexer_read(lexer);
 	*value = strtod(cur_token.lexeme, &end_ptr);
-	ni_destroy_token(cur_token);
+	stored_errno = errno;
+	ni_destruct_token(&cur_token);
 	assert(*end_ptr == '\0');
-	assert(errno != ERANGE);
+	assert(stored_errno != ERANGE);
 }
 
 
@@ -631,7 +620,7 @@ consume_label(NLexer* lexer, char** value, NError* error) {
 
 	cur_token = ni_lexer_read(lexer);
 	*value = strdup(&cur_token.lexeme[1]);
-	ni_destroy_token(cur_token);
+	ni_destruct_token(&cur_token);
 }
 
 
@@ -662,6 +651,6 @@ consume_string(NLexer* lexer, char** value, size_t* length, NError* error) {
 
 	cur_token = ni_lexer_read(lexer);
 	*value = parse_string(cur_token, length);
-	ni_destroy_token(cur_token);
+	ni_destruct_token(&cur_token);
 }
 

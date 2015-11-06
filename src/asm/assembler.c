@@ -321,10 +321,6 @@ cleanup:
 }
 
 
-
-
-
-
 static void
 consume_code_element(NAssembler* self,
                      NLexer* lexer,
@@ -336,7 +332,7 @@ consume_code_element(NAssembler* self,
 		char* label_name = label_def.lexeme;
 		label_name[label_len-1] = '\0';
 		define_label(self, label_name, error);
-		ni_destroy_token(label_def);
+		ni_destruct_token(&label_def);
 	}
 	else if (ni_token_is_opcode(token)) {
 		NInstruction instruction = N_INSTRUCTION_INITIALIZER;
@@ -351,7 +347,8 @@ consume_code_element(NAssembler* self,
 		NToken token_data = ni_lexer_copy(lexer);
 		n_error_set(error,
 		            ni_a_errors.reader.UnexpectedToken,
-		            (void*) ni_token_lift(token_data));
+		            (void*) ni_token_clone(token_data));
+		ni_destruct_token(&token_data);
 		return;
 	}
 
@@ -433,7 +430,8 @@ consume_constant(NAssembler* self,
 			token_data = ni_lexer_copy(lexer);
 			n_error_set(error,
 			            ni_a_errors.reader.UnexpectedToken,
-			            (void*) ni_token_lift(token_data));
+			            (void*) ni_token_clone(token_data));
+			ni_destruct_token(&token_data);
 			break;
 	}
 }

@@ -5,6 +5,8 @@
 #include "tokens.h"
 #include "opcodes.h"
 
+#include "common/polyfills/p-strdup.h"
+
 #ifndef LEXEME_BUFFER_SIZE
 #define LEXEME_BUFFER_SIZE 256
 #endif
@@ -132,9 +134,16 @@ init_store(store_t* buffer, char* store, uint16_t capacity);
 
 
 void
-ni_destroy_token(NToken token) {
-	if (token.lexeme != NULL) {
-		free(token.lexeme);
+ni_delete_token(NToken* token) {
+	ni_destruct_token(token);
+	free(token);
+}
+
+
+void
+ni_destruct_token(NToken* token) {
+	if (token->lexeme != NULL) {
+		free(token->lexeme);
 	}
 }
 
@@ -328,16 +337,15 @@ ni_get_next_token(NIStream* stream, char* buffer, size_t buffer_last_pos) {
 }
 
 
-/* Takes a stack allocated token value and turns it into a heap allocated.
- * The lexeme, which is already stored in a heap value, is maintained, so the
- * original stack allocated token should not be modified after being lifted. */
+/* Takes a stack allocated token value and creates a heap allocated clone
+   of it. */
 NToken*
-ni_token_lift(NToken token) {
+ni_token_clone(NToken token) {
 	/* FIXME (#1): Double check this allocation when GC comes up. */
 	NToken* result = (NToken*) malloc(sizeof(NToken));
 	if (result != NULL) {
 		result->type = token.type;
-		result->lexeme = token.lexeme;
+		result->lexeme = strdup(token.lexeme);
 	}
 	return result;
 }

@@ -2,7 +2,7 @@
 
 #include "errors.h"
 #include "../common/errors.h"
-
+#include "tokens.h"
 
 
 struct NErrorTypes ni_a_errors;
@@ -17,6 +17,14 @@ destroy_error_with_child(NError* error) {
 		free(original_error);
 	}
 	error->data = NULL;
+}
+
+static void
+destroy_error_with_lifted_token(NError* error) {
+	NToken* token = (NToken*) error->data;
+	if (token != NULL) {
+		ni_delete_token(token);
+	}
 }
 
 
@@ -43,7 +51,9 @@ n_init_asm_errors(uint8_t* error_code, char** error_text) {
 	r->EndOfFile = n_register_error_type("nuvm.asm.reader.EOF", NULL, NULL);
 
 	r->UnexpectedToken =
-		n_register_error_type("nuvm.asm.reader.UnexpectedToken", NULL, NULL);
+		n_register_error_type("nuvm.asm.reader.UnexpectedToken",
+		                      NULL,
+		                      destroy_error_with_lifted_token);
 
 	r->IncompatibleRegisterType =
 		n_register_error_type("nuvm.asm.reader.IncompatibleRegisterType",
