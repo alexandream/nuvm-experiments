@@ -341,11 +341,11 @@ TEST(read_instruction_recognizes_jump) {
 	NInstruction ins = N_INSTRUCTION_INITIALIZER;
 	NError error = N_ERROR_INITIALIZER;
 
-	NLexer* lexer = WITH_INPUT("jump -8000000");
+	NLexer* lexer = WITH_INPUT("jump @dest");
 	ni_read_instruction(lexer, &ins, &error);
 	ASSERT(ERROR_OK(&error));
 	ASSERT(EQ_UINT(ins.opcode, N_OP_JUMP));
-	ASSERT(EQ_INT(ins.arg_a, -8000000));
+	ASSERT(EQ_STR(ins.argument_label, "dest"));
 }
 
 
@@ -353,13 +353,13 @@ TEST(read_instruction_recognizes_jump_if) {
 	NInstruction ins = N_INSTRUCTION_INITIALIZER;
 	NError error = N_ERROR_INITIALIZER;
 
-	NLexer* lexer = WITH_INPUT("jump-if 127 65535");
+	NLexer* lexer = WITH_INPUT("jump-if 127 @somewhere");
 	ni_read_instruction(lexer, &ins, &error);
 
 	ASSERT(ERROR_OK(&error));
 	ASSERT(EQ_UINT(ins.opcode, N_OP_JUMP_IF));
 	ASSERT(EQ_INT(ins.arg_a, 127));
-	ASSERT(EQ_INT(ins.arg_b, 65535));
+	ASSERT(EQ_STR(ins.argument_label, "somewhere"));
 }
 
 

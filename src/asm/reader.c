@@ -353,23 +353,17 @@ static void
 ni_read_jump_instruction(NLexer* lexer,
                          NInstruction* instruction,
                          NError* error) {
-	NToken offset_tk;
-	int32_t offset = 0;
+	char* label_name = NULL;
 	uint8_t opcode = consume_opcode(lexer, error);
+
 	if (!n_error_ok(error)) return;
 
 	instruction->opcode = opcode;
 
-	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	consume_label(lexer, &label_name, error);
 	if (!n_error_ok(error)) return;
 
-	offset_tk = ni_lexer_read(lexer);
-	offset = parse_dec_integer(offset_tk.lexeme);
-	if (offset < INT24_MIN || offset > INT24_MAX) {
-		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
-		return;
-	}
-	instruction->arg_a = offset;
+	instruction->argument_label = label_name;
 }
 
 
@@ -377,8 +371,7 @@ static void
 ni_read_jump_if_instruction(NLexer* lexer,
                             NInstruction* instruction,
                             NError* error) {
-	NToken offset_tk;
-	int32_t offset = 0;
+	char* label_name = NULL;
 	uint8_t opcode = consume_opcode(lexer, error);
 	if (!n_error_ok(error)) return;
 
@@ -389,17 +382,10 @@ ni_read_jump_if_instruction(NLexer* lexer,
 	if (!n_error_ok(error)) return;
 
 
-	expect_token_type(lexer, NI_TK_DEC_INTEGER, error);
+	consume_label(lexer, &label_name, error);
 	if (!n_error_ok(error)) return;
 
-	offset_tk = ni_lexer_read(lexer);
-	offset = parse_dec_integer(offset_tk.lexeme);
-	if (offset < INT24_MIN || offset > INT24_MAX) {
-		n_error_set(error, ni_a_errors.reader.RegisterOutOfRange, NULL);
-		return;
-	}
-	instruction->arg_b = offset;
-
+	instruction->argument_label = label_name;
 }
 
 

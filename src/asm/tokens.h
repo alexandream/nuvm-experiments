@@ -70,6 +70,7 @@ typedef enum {
 	NI_TK_UNKNOWN = -1
 } NTokenType;
 
+
 typedef struct NToken NToken;
 
 struct NToken {
