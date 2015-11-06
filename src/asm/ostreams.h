@@ -8,14 +8,10 @@
 typedef struct NOStream NOStream;
 
 void
-ni_destroy_ostream(NOStream* self);
+ni_delete_ostream(NOStream* self);
 
-/*
-
-
-void
-ni_ostream_write_int64(NOStream* self, int64_t value, NError* error);
-*/
+NOStream*
+ni_new_ostream_on_buffer(char* buffer, size_t buffer_size, NError* error);
 
 NOStream*
 ni_new_memory_ostream(size_t size, NError* error);

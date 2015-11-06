@@ -42,7 +42,7 @@ TEST(newly_created_streams_have_cursor_set_to_zero) {
 TEST(writing_uint8_adds_one_to_cursor) {
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint8(stream, 123, &error);
 	ASSERT(ERROR_OK(&error));
@@ -53,7 +53,7 @@ TEST(writing_uint8_adds_one_to_cursor) {
 TEST(writing_uint16_adds_two_to_cursor) {
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint16(stream, 12345, &error);
 	ASSERT(ERROR_OK(&error));
@@ -64,7 +64,7 @@ TEST(writing_uint16_adds_two_to_cursor) {
 TEST(writing_uint32_adds_four_to_cursor) {
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint32(stream, 123456, &error);
 	ASSERT(ERROR_OK(&error));
@@ -75,7 +75,7 @@ TEST(writing_uint32_adds_four_to_cursor) {
 TEST(writing_uint64_adds_eight_to_cursor) {
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint64(stream, 12345678901, &error);
 	ASSERT(ERROR_OK(&error));
@@ -114,7 +114,7 @@ TEST(writing_uint8_puts_correct_value_on_buffer) {
 	uint8_t value;
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint8(stream, 123, &error);
 	ASSERT(ERROR_OK(&error));
@@ -129,7 +129,7 @@ TEST(writing_uint16_puts_correct_value_on_buffer) {
 	uint16_t value;
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint16(stream, 12345, &error);
 	ASSERT(ERROR_OK(&error));
@@ -144,7 +144,7 @@ TEST(writing_uint32_puts_correct_value_on_buffer) {
 	uint32_t value;
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint32(stream, 123, &error);
 	ASSERT(ERROR_OK(&error));
@@ -159,7 +159,7 @@ TEST(writing_uint64_puts_correct_value_on_buffer) {
 	uint64_t value;
 	NError error = N_ERROR_INITIALIZER;
 	NOStream* stream =
-		ni_new_memory_ostream(1, NULL);
+		ni_new_memory_ostream(1, &error);
 
 	ni_ostream_write_uint64(stream, 123, &error);
 	ASSERT(ERROR_OK(&error));

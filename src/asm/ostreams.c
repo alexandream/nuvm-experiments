@@ -10,6 +10,7 @@ struct NOStream {
 	size_t size;
 	size_t cursor;
 	FILE* file;
+	bool must_free_buffer;
 };
 
 
@@ -19,12 +20,33 @@ available_buffer_space(NOStream* self);
 static bool
 can_insert_element(NOStream* self, size_t size);
 
+void
+ni_delete_ostream(NOStream* self) {
+
+}
+
+NOStream*
+ni_new_ostream_on_buffer(char* buffer, size_t buffer_size, NError* error) {
+	NOStream* result = NULL;
+
+	result = (NOStream*) malloc(sizeof(NOStream));
+	if(result == NULL) {
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
+		return NULL;
+	}
+
+	result->buffer = buffer;
+	result->size = buffer_size;
+	result->cursor = 0;
+	result->file = NULL;
+	result->must_free_buffer = false;
+	return result;
+}
 
 NOStream*
 ni_new_memory_ostream(size_t size, NError* error) {
 	char* buffer = NULL;
 	NOStream* result = NULL;
-	uint32_t error_type = 0;
 
 	if (size < N_OSTREAM_MIN_BUFFER_SIZE) {
 		size = N_OSTREAM_MIN_BUFFER_SIZE;
@@ -32,20 +54,15 @@ ni_new_memory_ostream(size_t size, NError* error) {
 
 	buffer = (char*) malloc(sizeof(char) * size);
 	if (buffer == NULL) {
-		error_type = ni_a_errors.BadAllocation;
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		goto cleanup;
 	}
 
-	result = (NOStream*) malloc(sizeof(NOStream));
-	if(result == NULL) {
-		error_type = ni_a_errors.BadAllocation;
-		goto cleanup;
-	}
+	result = ni_new_ostream_on_buffer(buffer, size, error);
+	if (!n_error_ok(error)) goto cleanup;
 
-	result->buffer = buffer;
-	result->size = size;
-	result->cursor = 0;
-	result->file = NULL;
+	result->must_free_buffer = true;
+
 	return result;
 cleanup:
 	if (result != NULL) {
@@ -53,9 +70,6 @@ cleanup:
 	}
 	if (buffer != NULL) {
 		free(buffer);
-	}
-	if (error != NULL) {
-		n_error_set(error, error_type, NULL);
 	}
 	return NULL;
 }
@@ -66,8 +80,6 @@ ni_new_file_ostream(const char* path, size_t buf_size, NError* error) {
 	NOStream* result;
 	FILE* file = NULL;
 	uint32_t error_type = 0;
-
-	n_error_reset(error);
 
 	file = fopen(path, "wb");
 	if (file == NULL) {
@@ -95,7 +107,6 @@ cleanup:
 void
 ni_ostream_close(NOStream* self, NError* error) {
 
-	n_error_reset(error);
 
 	if (self->file != NULL) {
 		ni_ostream_flush(self, error);
@@ -116,7 +127,6 @@ ni_ostream_flush(NOStream* self, NError* error) {
 	if (self->file == NULL) return;
 	if (self->cursor == 0) return;
 
-	n_error_reset(error);
 
 	written = fwrite(self->buffer, sizeof(char), self->cursor, self->file);
 	if (written < self->cursor) {
@@ -144,7 +154,6 @@ ni_ostream_write_data(NOStream* self,
                       NError* error) {
 	size_t final_size = elem_size * elem_count;
 	if (final_size > 0) {
-		n_error_reset(error);
 		/* If the current buffer can't handle the amount of data we want to
 		 * insert, try to flush the buffer before inserting it. */
 		if (!can_insert_element(self, final_size)) {
@@ -156,10 +165,8 @@ ni_ostream_write_data(NOStream* self,
 		 * buffer is too small for it even when empty.
 		 * Report a buffer size error */
 		if (!can_insert_element(self, final_size)) {
-			if (error != NULL) {
-				n_error_set(error, ni_a_errors.BufferTooSmall, NULL);
-				return;
-			}
+			n_error_set(error, ni_a_errors.BufferTooSmall, NULL);
+			return;
 		}
 
 		memcpy(self->buffer + self->cursor, mem_area, final_size);

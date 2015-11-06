@@ -102,4 +102,5 @@ JOINED_STRING(char* dst, const char **src, size_t src_size) {
 #define EQ_STR(VV, EE)   EQ_STR_IMPL(#VV, VV, EE)
 #define EQ_SZT(VV, EE)   EQ_SZT_IMPL(#VV, VV, EE)
 #define EQ_UINT(VV, EE)  EQ_UINT_IMPL(#VV, VV, EE)
+#define EQ_UINT8(VV, EE) EQ_UINT_IMPL(#VV, (uint8_t) VV, (uint8_t) EE)
 #endif

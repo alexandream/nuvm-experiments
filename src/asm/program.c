@@ -1,16 +1,22 @@
 #include "program.h"
-
+#include "errors.h"
 NProgram*
 ni_new_program(NError* error) {
 	NProgram* program;
-	n_error_reset(error);
 
 	program = (NProgram*) malloc(sizeof(NProgram));
-	/* TODO: Put proper error reporting here.
-	 * Should result in a bad allocation error. */
 	if (program == NULL) {
+		n_error_set(error, ni_a_errors.BadAllocation, NULL);
 		return NULL;
 	}
+
+	ni_construct_program(program);
+
+	return program;
+}
+
+void
+ni_construct_program(NProgram* program) {
 	program->major_version = 0;
 	program->minor_version = 0;
 	program->revision = 0;
@@ -23,8 +29,6 @@ ni_new_program(NError* error) {
 
 	program->should_free_code = false;
 	program->should_free_constants = false;
-
-	return program;
 }
 
 void

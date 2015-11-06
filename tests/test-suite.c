@@ -69,8 +69,8 @@ EQ_SZT_IMPL(const char* expression, size_t value, size_t expected) {
 NCheckResult
 EQ_UINT_IMPL(const char* expression, uint64_t value, uint64_t expected) {
 	NI_DO_CHECK(value == expected,
-		MF("Expression (%s) expected to have value %ld but found "
-		   "to have value %ld.",
+		MF("Expression (%s) expected to have value %lu but found "
+		   "to have value %lu.",
 		   expression, expected, value));
 }
 

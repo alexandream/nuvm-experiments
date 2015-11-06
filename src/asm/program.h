@@ -51,6 +51,9 @@ NProgram*
 ni_new_program(NError* error);
 
 void
+ni_construct_program(NProgram* program);
+
+void
 ni_destroy_program();
 
 
