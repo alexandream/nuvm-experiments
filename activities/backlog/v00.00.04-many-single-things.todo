@@ -1,0 +1,39 @@
+Target Version:
+  v00.00.04 - Many Single Things
+
+Target Description:
+
+  Add Singleton values to the machine. These are values of which there's
+  only one occurrence in memory, no matter how many times they're referenced
+  in a program. For now we have three singleton values: Boolean True,
+  Boolean False and Undefined.
+
+  Boolean True & False are our familiar friends from boolean algebra,
+  representing truthiness or falsehood of statements like comparisons and
+  predicates.
+
+  The Undefined value is a staple value used whenever we know something
+  should have a value eventually, but that value isn't there yet (for
+  example, our globals and locals before they're assigned).
+
+  The implementation of these is such that they're simply pointers which
+  point to an object with a type describing their type (Boolean or
+  Undefined) but where these pointers are to memory never touched by nothing
+  else on the code except their initialization. All comparisons and checks
+  on these values is done by dealing with the encoding of their NValue
+  values, leaving the internal structure of them completley opaque.
+
+  In order to work on them we also add a bunch instructions to handle
+  Boolean values. Below is a description of each of the instructions added:
+
+  1) not: takes the index for two locals (A and B) and if B is True A is set
+          to False, otherwise A is set to True;
+  2) 
+
+
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Task;

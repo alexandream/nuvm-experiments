@@ -1,0 +1,40 @@
+Target Version:
+  v00.00.03 - Arithmetically Challenged
+
+Target Description:
+
+  On this version we create support for five arithmetic operations: add,
+  subtract, divide, modulus and multiply. With this we can create
+  not-so-useless programs, although they're still not so useful anyways.
+
+  This takes the evaluator little further ahead, but enables us to grow what
+  kinds of programs we can think of in the machine. It's be a small version
+  change, but one that prepares the ground for future work.
+
+  The five instructions are simple, and all are formed from three 8bit local
+  index arguments: The first argument is where it'll store the result (A),
+  the next two arguments are where to find the other two fixnum arguments (B
+  and C).
+  
+  The instructions are described below:
+  1) add: stores into A the result of adding the values of B and C;
+  2) sub: stores into A the result of subtracting the value of C from the
+          value of B;
+  3) div: stores into A the result of dividing the value of B by the value
+          of C;
+  4) mod: stores into A the remainder of the division of the value of B by
+          the value of C;
+  5) mul: stores into A the result of multiplying the value of B by the
+          value of C;
+
+  On each of the instructions above, when either B or C does not hold a
+  fixnum value an error is signalled.
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Create opcodes and decoders for each of the 5 instructions;
+  - Create evaluator behaviour for each of the 5 instrucitions;
+  - Create error types for the exceptional situations, like division by zero
+    or attempting to operate on non fixnum values;

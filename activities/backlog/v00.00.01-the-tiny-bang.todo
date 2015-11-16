@@ -1,0 +1,53 @@
+Target Version:
+  v00.00.01 - The Tiny Bang
+
+Target Description:
+
+  The virtual machine is nowhere near a "machine" yet. It recognizes one
+  typeof value (32 bits integers, implemented through the NValue struct)
+  and is capable of running pseudo-programs that consist only of returning a
+  constant value stored in the program.
+
+  No virtual machine instruction are supported so far, and programs
+  (implemented through the NModule struct) are simply a structure wrapping
+  a single register of type NValue, which represents the value it will
+  return.
+
+  To complete the interface needed to support the above mechanisms, the
+  error handling system used in the assembler is reused here, with the
+  possibility of extending it where needed. Each function capable of
+  notifying errors receive a last argument of type NError* on which it
+  records whatever error was found.
+  
+  Finally, in order to describe the Fixnum type (the type of the integers
+  we're using so far) we need to create a mechanism to handle types. We'll
+  have a representation for types and a type registry to guarantee unique
+  identification of each type via a type id.
+
+  This version is absolutely useless, as will be a few of the following
+  versions, but it gives us the following basic results that are needed as
+  foundational work:
+
+  1) A representation for values, so far limited to int32, but this is easy
+  to extend to other values as we'll see in a few versions ahead;
+
+  2) A basic representation for our evaluator, which starts to define the
+  interface client code can use to manipulate it;
+
+  3) A simple representation for modules which can be used to represent our
+  programs (each program is a package of one or more modules);
+
+  4) Some infrastructure to perform tests on what we have so far;
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Create value representation for int32s (NValue);
+  - Create representation for the programs (NModule);
+  - Create representation for the evaluator (NEvaluator);
+  - Create the runner method of the evaluator returning the constant;
+  - Create the representation for types;
+  - Create the type registry;
+  - Create and register the type for Fixnum;
+

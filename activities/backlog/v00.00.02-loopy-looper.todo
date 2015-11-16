@@ -1,0 +1,81 @@
+Target Version:
+  v00.00.02 - Loopy Looper
+
+Target Description:
+
+  This version create support for the first instructions on our machine. The
+  program starts to be composed of user-defined procedures: pieces of code
+  grouped together by a procedure constant.
+  
+  So far, we have so few instructions that the machine is still pretty much
+  useless. But we're able to replicate the machine of v00.00.01 with the
+  logic inside the program written by the user, instead of relying on the
+  evaluator knowing that simple specific case.
+
+  A procedure is composed of a reference to the module in which it is
+  defined, and entry point index that points to what instruction in the
+  module is the first instruction of the procedure and the number of
+  registers it has available for local values.
+
+  For now, our procedures receive nos arguments, as they'll be called by the
+  process of running a full module, and they return a single result only,
+  which will also be the result of the program execution.
+
+  Since we can't call other procedures yet, the evaluator stops executing as
+  soon as it executes a return instruction. The execution loop for the
+  machine (called fetch-run loop) then is as follows:
+    1) fetch the instruction (from the current module) at the index pointed
+       by the code_pointer;
+    2) execute the instruction fetched in step (1);
+    3) calculate the change needed to be made on code pointer;
+    4) update code pointer;
+    5) go back to step (1);
+
+  This loop ends when the instruction executed in step (2) is a return
+  instruction. When that happens, the evaluator copies the value received by
+  the return instruction as its result and stops executing.
+
+  For all this to work, the evaluator starts resembling a real machine: it
+  has an internal counter for the current instruction (code pointer), a set
+  of local registers (which are created whenever we execute a procedure) and
+  a list of instructions that belong to the module.
+
+  The following instructions are implemented:
+  1) global-ref: it takes the index of a local and of a global, then copies
+                 the value currently in the global to the local.
+  2) global-set: it takes the index of a global and of a local, then copies
+                 the value currently in the local to the global.
+  3) const-ref: it takes the index of a local and of a constant, then copies
+                the value currently in the constant to the local.
+  4) return: it takes the index of a local where it will find the value it
+             is supposed to return to the evaluator. After the execution of
+             return the evaluator must stop the fetch-run loop.
+
+  The encoding of instruction is for now fixed-size, using 32 bits to encode
+  each instruction: 8 bits for the opcode and the remaining 24 bits encode
+  its arguments.
+
+  With this structure we're able to write simple, albeit still useless,
+  programs: A global setter, that takes a constant and sets its value into a
+  global register; and the constant value program, which reads the value of
+  a constant into a local and returns it.
+
+  This adds the following elements to our previous machine:
+    1) modules now have a code segment that holds instructions;
+    2) a representation for instructions on the virtual machine;
+    3) a type and representation for procedures;
+    4) the fetch-run loop of the evaluator;
+    5) four instructions (global-ref, global-set, const-ref and return);
+
+
+Activity start:  xxxx-xx-xx xx:xx
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Representation for instructions on the machine;
+  - Add code segment to modules;
+  - Create type and structure for procedures;
+  - Alter module structure to be able to handle globals;
+  - Create opcodes, and decoders for the instructions;
+  - Create evaluator behaviour for the instructions;
+  - Create the fetch-run loop in the evaluator;
