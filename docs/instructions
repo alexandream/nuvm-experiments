@@ -26,6 +26,7 @@ ge           L:A8 L:B8 L:C8
 
 or           L:A8 L:B8 L:C8
 and          L:A8 L:B8 L:C8
+xor          L:A8 L:B8 L:C8
 
 add          L:A8 L:B8 L:C8
 sub          L:A8 L:B8 L:C8
@@ -34,5 +35,6 @@ div          L:A8 L:B8 L:C8
 
 load-bool    L:A8 B16
 
+is-undef     L:A8 L:B16
 return       L:A16 00000000
 

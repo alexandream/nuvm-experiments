@@ -74,6 +74,7 @@ Activity finish: xxxx-xx-xx xx:xx
 Target Tasks: 
   - Representation for instructions on the machine;
   - Add code segment to modules;
+  - Create type verification schema for arbitrary pointers;
   - Create type and structure for procedures;
   - Alter module structure to be able to handle globals;
   - Create opcodes, and decoders for the instructions;

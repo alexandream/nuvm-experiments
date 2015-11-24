@@ -26,14 +26,50 @@ Target Description:
   In order to work on them we also add a bunch instructions to handle
   Boolean values. Below is a description of each of the instructions added:
 
-  1) not: takes the index for two locals (A and B) and if B is True A is set
-          to False, otherwise A is set to True;
-  2) 
+  1) not: takes the indexes for two locals (A and B) and if B is True A is
+          set to False, otherwise A is set to True;
+  2) and: takes the indexes for three locals (A, B and C) and if both B and
+          C hold True values A is set to True, otherwise A is set to False;
+  3) or: takes the indexes for three locals (A, B and C) and if either B or
+         C hold True values A is set to True, otherwise A is set to False;
+  4) xor: takes the indexes for three locals (A, B and C) and if one (and
+          only one) of B or C hold a True value A is set to True, otherwise
+          A is set to False;
+  5) eq: takes the indexes for three locals (A, B and C) and if the value in
+         B is equal to the value in C then A is set to True, otherwise A is
+         set to False;
+  6) lt: takes the indexes for three locals (A, B and C) and if the value in
+         B is less than the value in C then A is set to True, otherwise A is
+         set to False;
+  7) le: takes the indexes for three locals (A, B and C) and if the value in
+         B is less than the value in C or equal to the value in C then A is
+         set to True, otherwise A is set to False;
+  8) gt: takes the indexes for three locals (A, B and C) and if the value in
+         B is greater than the value in C then A is set to True, otherwise A
+         is set to False;
+  9) ge: takes the indexes for three locals (A, B and C) and if the value in
+         B is greater than the value in C or equal to the value in C then A
+         is set to True, otherwise A is set to False;
+  10) is-undef: takes the indexes of two locals (A and B) and if the
+                value in B is undefined, stores True in A, otherwise
+                stores False in A;
 
+  For the instructions "not", "and", "or", and "xor" an error is signalled
+  if the value held in any of the non destination arguments is not a Boolean
+  value.
 
+  For the instructions "eq", "lt", "le", "gt", and "ge" an error is
+  signalled if the value held in any of the non destination arguments is not
+  a number value (for now Fixnums, eventually Real numbers).
 
 Activity start:  xxxx-xx-xx xx:xx
 Activity finish: xxxx-xx-xx xx:xx
 
-Target Tasks: 
-  - Task;
+Target Tasks:
+  - Create and register type for Booleans;
+  - Create singleton values for True and False;
+  - Create and register type for Undefined;
+  - Create singleton values for Undefined;
+  - Create opcodes and decoders for each of the instructions;
+  - Create evaluator behaviour for each of the instrucitions;
+  - Create error types for the type errors indicated above;
