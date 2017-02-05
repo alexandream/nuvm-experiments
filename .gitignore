@@ -28,6 +28,13 @@
 *.x86_64
 *.hex
 
+# Editor files
+.*.swp
+
 # Debug files
 *.dSYM/
 *.su
+
+# Build directories
+/dist/
+/build/
