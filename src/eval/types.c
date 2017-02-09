@@ -98,8 +98,21 @@ int ni_init_types() {
 }
 
 
-void n_construct_type(NType* type, const char* name) {
+void
+n_construct_type(NType* type, const char* name) {
     type->name = name;
+}
+
+
+NType*
+n_find_type(const char* name, NError* error) {
+	return find_type(&DEFAULT_REGISTRY, name, error);
+}
+
+
+void
+n_register_type(NType* type, NError* error) {
+	register_type(&DEFAULT_REGISTRY, type, error);
 }
 
 
