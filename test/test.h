@@ -36,6 +36,7 @@ is_error_type(const char* expr, NError* err, NErrorType* type_name);
 #define EQ_STR(VALUE, EXPECTED) AT_EQ_STR(VALUE, EXPECTED)
 
 #define EQ_INT(VALUE, EXPECTED)  AT_EQ_INT(VALUE, EXPECTED)
+#define EQ_UINT(VALUE, EXPECTED) AT_EQ_UINT(VALUE, EXPECTED)
 #define EQ_LONG(VALUE, EXPECTED) AT_EQ_LONG(VALUE, EXPECTED)
 
 

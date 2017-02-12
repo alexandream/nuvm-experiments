@@ -29,7 +29,7 @@
 *.hex
 
 # Editor files
-.*.swp
+*.swp
 
 # Debug files
 *.dSYM/
