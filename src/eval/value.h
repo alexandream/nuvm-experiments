@@ -8,6 +8,7 @@ typedef struct NValue NValue;
 
 union NValueAlternatives {
 	void* pointer;
+    NFixnum fixnum;
 };
 
 

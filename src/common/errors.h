@@ -1,6 +1,8 @@
 #ifndef N_C_ERRORS_H
 #define N_C_ERRORS_H
 
+#include <stdlib.h>
+
 typedef struct NErrorType NErrorType;
 typedef struct NError NError;
 

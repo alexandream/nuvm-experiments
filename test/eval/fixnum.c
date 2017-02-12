@@ -55,7 +55,7 @@ DD_TEST(correctly_identifies_values, fixnums_iter, NFixnum, fixnum) {
 }
 
 
-DD_TEST(wrap_unwrap_is_fixnums, fixnums_iter, NFixnum, fixnum) {
+DD_TEST(wrap_unwrap_is_fixnum, fixnums_iter, NFixnum, fixnum) {
     NValue wrap = n_wrap_fixnum(*fixnum);
     NFixnum unwrap = n_unwrap_fixnum(wrap);
     ASSERT(EQ_LONG(unwrap, *fixnum));
@@ -68,7 +68,8 @@ AtTest* tests[] = {
     &min_fixnum_is_negative,
     &max_fixnum_is_positive,
     &correctly_identifies_values,
-    &wrap_unwrap_is_fixnums,
+    &wrap_unwrap_is_fixnum,
+	&wakka,
     NULL
 };
 
