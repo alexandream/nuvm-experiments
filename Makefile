@@ -79,10 +79,13 @@ build/test/%.run: test/%.c \
 
 
 .PHONY: clean
-clean:
+clean: clean-tests
 	@rm -f build/nuvm/common/*.o build/nuvm/common/*.d
 	@rm -f build/nuvm/eval/*.o build/nuvm/eval/*.d
 	@rm -f build/nuvm/asm/*.o build/nuvm/asm/*.d
+	@rm -f dist/*
+
+.PHONY: clean-tests
+clean-tests:
 	@rm -f build/test/common/*.run
 	@rm -f build/test/eval/*.run
-	@rm -f dist/*

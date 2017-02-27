@@ -1,0 +1,18 @@
+#!/bin/sh
+CC=clang CFLAGS="-std=c89 -O0 -Wextra -Wno-unused-parameter" N_TEST=1 \
+   N_DEBUG=1  ATEST_PREFIX=../atest/dist/ make clean-tests
+CC=clang CFLAGS="-std=c89 -O0 -Wextra -Wno-unused-parameter" N_TEST=1 \
+   N_DEBUG=1  ATEST_PREFIX=../atest/dist/ make test
+
+RUNNERS=$(find "build/test/" -name '*.run')
+REPORTS=""
+
+for R in ${RUNNERS}; do
+    R_NAME="${R#build/test/}"
+	R_NAME="${R_NAME%.run}"
+    REPORT="build/test-reports/${R_NAME}.report"
+	${R} > ${REPORT} 
+	REPORTS="${REPORTS} ${REPORT}"
+done
+
+../atest/dist/atreport ${REPORTS}
