@@ -1,0 +1,127 @@
+#include <stdlib.h>
+
+#include "../test.h"
+
+#include "common/errors.h"
+#include "common/instructions.h"
+#include "eval/evaluator.h"
+#include "eval/fixnum.h"
+
+
+#define CODE_SIZE 16
+#define NUM_REGISTERS 16
+
+static
+NInstructionWord CODE[CODE_SIZE];
+
+
+static
+NValue REGISTERS[NUM_REGISTERS];
+
+
+static
+NEvaluator EVAL;
+
+
+CONSTRUCTOR(constructor) {
+    if (ni_init_evaluator() < 0) {
+        ERROR("Can't initialize evaluator module.", NULL);
+    }
+}
+
+
+SETUP(setup) {
+    int i;
+    for (i = 0; i < CODE_SIZE; i++) {
+        n_encode_op_nop(&CODE[i]);
+    }
+
+    for (i = 0; i < NUM_REGISTERS; i++) {
+        REGISTERS[i] = n_wrap_fixnum(0);
+    }
+    nt_construct_evaluator(&EVAL, CODE, CODE_SIZE, REGISTERS, NUM_REGISTERS);
+}
+
+
+TEST(pc_starts_on_zero) {
+    ASSERT(EQ_INT(EVAL.pc, 0));
+}
+
+
+TEST(step_nop_increases_pc) {
+    NError error = n_error_ok();
+    n_encode_op_nop(CODE);
+    n_evaluator_step(&EVAL, &error);
+
+    ASSERT(IS_OK(error));
+    ASSERT(EQ_INT(EVAL.pc, 1));
+}
+
+
+TEST(step_halt_sets_halted) {
+    NError error = n_error_ok();
+    n_encode_op_halt(CODE);
+    n_evaluator_step(&EVAL, &error);
+
+    ASSERT(IS_OK(error));
+    ASSERT(IS_TRUE(n_evaluator_is_halted(&EVAL)));
+}
+
+
+
+TEST(run_stops_on_halt) {
+    NError error = n_error_ok();
+    n_encode_op_nop(CODE);
+    n_encode_op_nop(CODE+1);
+    n_encode_op_nop(CODE+2);
+    n_encode_op_halt(CODE+3);
+    n_encode_op_nop(CODE+4);
+    n_encode_op_nop(CODE+5);
+
+    n_evaluator_run(&EVAL, &error);
+
+    ASSERT(IS_OK(error));
+    ASSERT(IS_TRUE(n_evaluator_is_halted(&EVAL)));
+    ASSERT(EQ_INT(EVAL.pc, 3));
+}
+
+
+
+TEST(get_register_gives_correct_value) {
+    NValue value;
+    NError error = n_error_ok();
+
+    REGISTERS[3] = n_wrap_fixnum(99);
+
+    value = n_evaluator_get_register(&EVAL, 3, &error);
+    
+    ASSERT(IS_OK(error));
+    ASSERT(EQ_INT(n_unwrap_fixnum(value), 99));
+}
+
+
+
+TEST(get_register_detects_out_of_range) {
+    NError error = n_error_ok();
+    n_evaluator_get_register(&EVAL, NUM_REGISTERS, &error);
+    
+    ASSERT(IS_ERROR(error, "nuvm.evaluator.IndexOutOfBounds"));
+}
+
+
+
+
+
+
+AtTest* tests[] = {
+    &step_nop_increases_pc,
+    &pc_starts_on_zero,
+    &step_halt_sets_halted,
+    &run_stops_on_halt,
+    &get_register_gives_correct_value,
+    &get_register_detects_out_of_range,
+    NULL
+};
+
+
+TEST_RUNNER("Evaluator", tests, constructor, NULL, setup, NULL)
