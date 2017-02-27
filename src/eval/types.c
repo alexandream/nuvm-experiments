@@ -46,9 +46,6 @@ NErrorType* BAD_ALLOCATION = NULL;
 static void
 construct_registry(NTypeRegistry* self, NError* error);
 
-static void
-destruct_registry(NTypeRegistry* self);
-
 static NType*
 find_type(NTypeRegistry* self, const char* name, NError* error);
 
@@ -117,6 +114,11 @@ n_register_type(NType* type, NError* error) {
 
 
 #ifdef N_TEST
+static void
+destruct_registry(NTypeRegistry* self) {
+    ni_destruct_name_registry(&self->reg);
+}
+
 
 NTypeRegistry* nt_create_type_registry() {
     NError error = n_error_ok();
@@ -162,12 +164,6 @@ construct_registry(NTypeRegistry* self, NError* error) {
                     "Can't allocate registry pool.", NULL, NULL);
         return;
     }
-}
-
-
-static void
-destruct_registry(NTypeRegistry* self) {
-    ni_destruct_name_registry(&self->reg);
 }
 
 

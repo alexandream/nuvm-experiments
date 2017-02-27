@@ -3,7 +3,7 @@
 
 #include "../test.h"
 
-#include "common/instructions.h"
+#include "common/instruction-formats.h"
 #include "common/compatibility/stdint.h"
 
 
@@ -315,4 +315,4 @@ AtTest* tests[] = {
 };
 
 
-TEST_RUNNER("Instructions", tests, NULL, NULL, NULL, NULL)
+TEST_RUNNER("Instruction-Formats", tests, NULL, NULL, NULL, NULL)

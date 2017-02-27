@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 typedef struct NErrorType NErrorType;
+typedef struct NErrorRegistry NErrorRegistry;
 typedef struct NError NError;
 
 struct NErrorType {
@@ -50,7 +51,6 @@ n_destroy_error(NError* self);
 
 #ifdef N_TEST
 
-typedef struct NErrorRegistry NErrorRegistry;
 
 NErrorRegistry*
 nt_create_error_registry();
