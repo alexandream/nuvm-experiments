@@ -13,7 +13,6 @@ int n_encode_instruction_4_4(NInstructionWord* stream, uint8_t opcode,
 
 int n_encode_instruction_8(NInstructionWord* stream, uint8_t opcode,
                              uint8_t arg) {
-
 	unsigned char* bytes = (unsigned char*) stream;
 	bytes[0] = opcode;
 	bytes[1] = arg;
