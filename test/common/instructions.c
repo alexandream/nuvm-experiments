@@ -18,7 +18,7 @@ struct Instruction {
 
 
 
-TEST(encode_4_4_is_big_endian) {
+TEST(encode_4_4_has_right_opcode) {
     NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
     uint8_t bytes[2] = { 0, 0 };
 
@@ -56,7 +56,7 @@ static Instruction array_4_4[] = {
 };
 AtArrayIterator iter_4_4 = at_static_array_iterator(array_4_4);
 
-DD_TEST(encode_decode_4_4_preserves_data, iter_4_4, Instruction, instr) {
+DD_TEST(decode_4_4_reverses_encode, iter_4_4, Instruction, instr) {
     uint8_t opcode = instr->opcode;
     unsigned int arg1 = instr->arg1;
     unsigned int arg2 = instr->arg2;
@@ -74,7 +74,17 @@ DD_TEST(encode_decode_4_4_preserves_data, iter_4_4, Instruction, instr) {
 }
 
 
-TEST(encode_8_is_big_endian) {
+TEST(encode_4_4_is_big_endian) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+
+    n_encode_instruction_4_4(words, 0x11, 0x2, 0x3);
+    ASSERT(EQ_UINT(bytes[0], 0x11));
+    ASSERT(EQ_UINT(bytes[1], 0x23));
+}
+
+
+TEST(encode_8_has_right_opcode) {
     NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
     uint8_t bytes[2] = { 0, 0 };
 
@@ -82,7 +92,6 @@ TEST(encode_8_is_big_endian) {
     memcpy(bytes, words, 2);
 
     ASSERT(EQ_UINT(bytes[0], 0x12));
-    ASSERT(EQ_UINT(bytes[1], 0x34));
 }
 
 
@@ -113,7 +122,7 @@ static Instruction array_8[] = {
 };
 AtArrayIterator iter_8 = at_static_array_iterator(array_8);
 
-DD_TEST(encode_decode_8_preserves_data, iter_8, Instruction, instr) {
+DD_TEST(decode_8_reverses_encode, iter_8, Instruction, instr) {
     uint8_t opcode = instr->opcode;
     unsigned int arg = instr->arg1;
     uint8_t d_opcode;
@@ -128,7 +137,17 @@ DD_TEST(encode_decode_8_preserves_data, iter_8, Instruction, instr) {
 }
 
 
-TEST(encode_8_8_8_is_big_endian) {
+TEST(encode_8_is_big_endian) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+
+    n_encode_instruction_8(words, 0x11, 0x22);
+    ASSERT(EQ_UINT(bytes[0], 0x11));
+    ASSERT(EQ_UINT(bytes[1], 0x22));
+}
+
+
+TEST(encode_8_8_8_has_right_opcode) {
     NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
     uint8_t bytes[4] = { 0, 0, 0, 0 };
 
@@ -136,9 +155,6 @@ TEST(encode_8_8_8_is_big_endian) {
     memcpy(bytes, words, 4);
 
     ASSERT(EQ_UINT(bytes[0], 0x12));
-    ASSERT(EQ_UINT(bytes[1], 0x34));
-    ASSERT(EQ_UINT(bytes[2], 0x56));
-    ASSERT(EQ_UINT(bytes[3], 0x78));
 }
 
 
@@ -169,7 +185,7 @@ static Instruction array_8_8_8[] = {
 };
 AtArrayIterator iter_8_8_8 = at_static_array_iterator(array_8_8_8);
 
-DD_TEST(encode_decode_8_8_8_preserves_data, iter_8_8_8, Instruction, instr) {
+DD_TEST(decode_8_8_8_reverses_encode, iter_8_8_8, Instruction, instr) {
     uint8_t opcode = instr->opcode;
     unsigned int arg1 = instr->arg1;
     unsigned int arg2 = instr->arg2;
@@ -190,8 +206,19 @@ DD_TEST(encode_decode_8_8_8_preserves_data, iter_8_8_8, Instruction, instr) {
 }
 
 
+TEST(encode_8_8_8_is_big_endian) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
 
-TEST(encode_8_16_is_big_endian) {
+    n_encode_instruction_8_8_8(words, 0x11, 0x22, 0x33, 0x44);
+    ASSERT(EQ_UINT(bytes[0], 0x11));
+    ASSERT(EQ_UINT(bytes[1], 0x22));
+    ASSERT(EQ_UINT(bytes[2], 0x33));
+    ASSERT(EQ_UINT(bytes[3], 0x44));
+}
+
+
+TEST(encode_8_16_has_right_opcode) {
     NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
     uint8_t bytes[4] = { 0, 0, 0, 0 };
 
@@ -199,9 +226,6 @@ TEST(encode_8_16_is_big_endian) {
     memcpy(bytes, words, 4);
 
     ASSERT(EQ_UINT(bytes[0], 0x12));
-    ASSERT(EQ_UINT(bytes[1], 0x34));
-    ASSERT(EQ_UINT(bytes[2], 0x56));
-    ASSERT(EQ_UINT(bytes[3], 0x78));
 }
 
 
@@ -233,7 +257,7 @@ static Instruction array_8_16[] = {
 };
 AtArrayIterator iter_8_16 = at_static_array_iterator(array_8_16);
 
-DD_TEST(encode_decode_8_16_preserves_data, iter_8_16, Instruction, instr) {
+DD_TEST(decode_8_16_reverses_encode, iter_8_16, Instruction, instr) {
     uint8_t opcode = instr->opcode;
     unsigned int arg1 = instr->arg1;
     unsigned int arg2 = instr->arg2;
@@ -249,25 +273,44 @@ DD_TEST(encode_decode_8_16_preserves_data, iter_8_16, Instruction, instr) {
     ASSERT(EQ_UINT(d_arg1, arg1));
     ASSERT(EQ_UINT(d_arg2, arg2));
 }
- 
+
+
+TEST(encode_8_16_is_big_endian) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+
+    n_encode_instruction_8_16(words, 0x11, 0x22, 0x3344);
+    ASSERT(EQ_UINT(bytes[0], 0x11));
+    ASSERT(EQ_UINT(bytes[1], 0x22));
+    ASSERT(EQ_UINT(bytes[2], 0x33));
+    ASSERT(EQ_UINT(bytes[3], 0x44));
+}
+
 
 AtTest* tests[] = {
-    &encode_4_4_is_big_endian,
+    &encode_4_4_has_right_opcode,
     &encode_4_4_uses_one_word,
     &decode_4_4_uses_one_word,
-    &encode_decode_4_4_preserves_data,
-    &encode_8_is_big_endian,
+    &decode_4_4_reverses_encode,
+    &encode_4_4_is_big_endian,
+
+    &encode_8_has_right_opcode,
     &encode_8_uses_one_word,
     &decode_8_uses_one_word,
-    &encode_decode_8_preserves_data,
-    &encode_8_8_8_is_big_endian,
+    &decode_8_reverses_encode,
+    &encode_8_is_big_endian,
+
+    &encode_8_8_8_has_right_opcode,
     &encode_8_8_8_uses_two_words,
     &decode_8_8_8_uses_two_words,
-    &encode_decode_8_8_8_preserves_data,
-    &encode_8_16_is_big_endian,
+    &decode_8_8_8_reverses_encode,
+    &encode_8_8_8_is_big_endian,
+
+    &encode_8_16_has_right_opcode,
     &encode_8_16_uses_two_words,
     &decode_8_16_uses_two_words,
-    &encode_decode_8_16_preserves_data,
+    &decode_8_16_reverses_encode,
+    &encode_8_16_is_big_endian,
     NULL
 };
 
