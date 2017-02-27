@@ -36,7 +36,7 @@ ASM_TSTS=$(wildcard test/asm/*.c)
 ASM_RUNS=$(ASM_TSTS:test/eval/%.c=build/test/eval/%.run)
 
 TEST_CC_FLAGS=-I "src/"
-TEST_CC_LIBS=-L "dist/" -lnuvm-common -lnuvm-eval -lnuvm-asm $(ATEST_LIBS)
+TEST_CC_LIBS=-L "dist/" -lnuvm-eval -lnuvm-common -lnuvm-asm $(ATEST_LIBS)
 
 .PHONY: all
 all: build test

@@ -7,10 +7,19 @@ CC=clang CFLAGS="-std=c89 -O0 -Wextra -Wno-unused-parameter" N_TEST=1 \
 RUNNERS=$(find "build/test/" -name '*.run')
 REPORTS=""
 
+VERBOSE=""
+
+if [ "$1" = "verbose" ]; then
+  VERBOSE="yes"
+fi
+
 for R in ${RUNNERS}; do
     R_NAME="${R#build/test/}"
 	R_NAME="${R_NAME%.run}"
     REPORT="build/test-reports/${R_NAME}.report"
+	if [ -n "${VERBOSE}" ]; then
+	    echo "Running test runner ${R}."
+	fi
 	${R} > ${REPORT} 
 	REPORTS="${REPORTS} ${REPORT}"
 done

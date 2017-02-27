@@ -10,9 +10,14 @@ is_error(const char* expr, NError* err, const char* type_name) {
 		                     NULL);
 	}
 	else if (!(err->type)) {
-		return at_make_error("Received an error without type to test "
-		                     "for errors.",
-		                     NULL);
+		const char* msg =
+			at_allocf("Expression (%s) expected to have error type "
+		              "\"%s\" but found to be successful.",
+                       expr, type_name);
+		if (msg == NULL) {
+			at_make_error("Allocation error building failure message.", NULL);
+		}
+		return at_make_failure(msg, at_freef);
 	}
 	else if (!(err->type->name)) {
 		return at_make_error("Received an error with an unnamed type to test "

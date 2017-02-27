@@ -2,13 +2,12 @@
 #define N_E_VALUE_H
 
 #include "types.h"
-#include "fixnum.h"
 
 typedef struct NValue NValue;
 
 union NValueAlternatives {
 	void* pointer;
-    NFixnum fixnum;
+    long  fixnum;
 };
 
 
