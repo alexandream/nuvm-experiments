@@ -69,7 +69,6 @@ AtTest* tests[] = {
     &max_fixnum_is_positive,
     &correctly_identifies_values,
     &wrap_unwrap_is_fixnum,
-	&wakka,
     NULL
 };
 
