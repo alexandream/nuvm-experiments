@@ -63,7 +63,6 @@ dist/libnuvm-asm.a: $(ASM_OBJS)
 
 
 build/nuvm/%.o: src/%.c
-	$(info Building $@)
 	@$(CC) -c $< -o $@ $(CC_FLAGS)
 	@$(CC) -MM -MT $@ $(CC_FLAGS) $< > $(@:.o=.d)
 
@@ -73,7 +72,6 @@ build/test/%.run: test/%.c \
                   dist/libnuvm-asm.a \
                   dist/libnuvm-common.a \
                   ; $(ATEST_CHECK_ERROR)
-	$(info Building $@)
 	@$(CC) -o $@ $< $(TEST_HELPER_SRCS) $(CC_FLAGS) \
                     $(TEST_CC_FLAGS) $(TEST_CC_LIBS)
 

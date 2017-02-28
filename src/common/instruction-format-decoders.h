@@ -1,9 +1,7 @@
-#ifndef N_C_INSTRUCTIONS_FORMATS_H
-#define N_C_INSTRUCTIONS_FORMATS_H
+#ifndef N_C_INSTRUCTION_FMT_DECODERS_H
+#define N_C_INSTRUCTION_FMT_DECODERS_H
 
 #include "compatibility/stdint.h"
-
-#define N_MAX_INSTRUCTION_WORDS 4
 
 
 
@@ -52,5 +50,6 @@ n_decode_instruction_8_16(NInstructionWord* stream, uint8_t* opcode,
 	arg2_bytes[1] = bytes[2];
     return 2;
 }
-#endif /*N_C_INSTRUCTIONS_FORMATS_H*/
+
+#endif /*N_C_INSTRUCTION_FMT_DECODERS_H*/
 
