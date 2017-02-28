@@ -15,6 +15,9 @@ NErrorType FIXNUM_OVERFLOW = { "nuvm.math.Overflow", NULL };
 static int
 do_op_add(NEvaluator *self, NInstructionWord *code, NError *error);
 
+static int
+do_op_sub(NEvaluator *self, NInstructionWord *code, NError *error);
+
 int
 ni_init_evaluator(void) {
     NError error = n_error_ok();
@@ -55,6 +58,9 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
         case N_OP_ADD:
             self->pc += do_op_add(self, words, error);
             break;
+		case N_OP_SUB:
+			self->pc += do_op_sub(self, words, error);
+			break;
         default: {
             self->halted = 1;
             break;
@@ -122,6 +128,13 @@ addition_would_overflow(NFixnum left, NFixnum right) {
 
 
 static int
+subtraction_would_overflow(NFixnum left, NFixnum right) {
+	return (right == N_FIXNUM_MIN) ? left >= 0
+		                           : addition_would_overflow(left, -right);
+}
+
+
+static int
 do_op_add(NEvaluator *self, NInstructionWord *code, NError *error) {
     uint8_t dest, arg1, arg2;
     NValue val1, val2;
@@ -147,5 +160,35 @@ do_op_add(NEvaluator *self, NInstructionWord *code, NError *error) {
         return 0;
     }
     set_register(self, dest, n_wrap_fixnum(num1 + num2), error);
+    return increment;
+}
+
+
+static int
+do_op_sub(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    NFixnum num1, num2;
+    int increment = n_decode_op_sub(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+
+    if (subtraction_would_overflow(num1, num2)) {
+        n_set_error(error, &FIXNUM_OVERFLOW, "The addition would overflow.",
+                    NULL, NULL);
+        return 0;
+    }
+    set_register(self, dest, n_wrap_fixnum(num1 - num2), error);
     return increment;
 }
