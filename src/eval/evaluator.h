@@ -14,7 +14,7 @@ struct NEvaluator {
     NInstructionWord *code;
     int code_size;
     NValue *registers;
-    int registers_size;
+    int num_registers;
 
     int pc;
     int halted;

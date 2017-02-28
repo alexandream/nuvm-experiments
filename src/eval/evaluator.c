@@ -4,13 +4,16 @@
 #include "fixnum.h"
 
 #include "../common/opcodes.h"
+#include "../common/instruction-decoders.h"
 
 static
 NErrorType INDEX_OO_BOUNDS =  { "nuvm.evaluator.IndexOutOfBounds", NULL };
 
-static uint8_t
-get_current_opcode(NEvaluator *self);
+static
+NErrorType FIXNUM_OVERFLOW = { "nuvm.math.Overflow", NULL };
 
+static int
+do_op_add(NEvaluator *self, NInstructionWord *code, NError *error);
 
 int
 ni_init_evaluator(void) {
@@ -25,6 +28,11 @@ ni_init_evaluator(void) {
         n_destroy_error(&error);
         return -2;
     }
+    n_register_error_type(&FIXNUM_OVERFLOW, &error);
+    if (!n_is_ok(&error)) {
+        n_destroy_error(&error);
+        return -2;
+    }
     return 0;
 }
 
@@ -35,13 +43,17 @@ int n_evaluator_is_halted(NEvaluator* self) {
 
 
 void n_evaluator_step(NEvaluator *self, NError *error) {
-    uint8_t opcode = get_current_opcode(self);
+    NInstructionWord *words = self->code + self->pc;
+    uint8_t opcode = n_decode_opcode(words);
     switch (opcode) {
         case N_OP_NOP:
             self->pc++;
             break;
         case N_OP_HALT:
             self->halted = 1;
+            break;
+        case N_OP_ADD:
+            self->pc += do_op_add(self, words, error);
             break;
         default: {
             self->halted = 1;
@@ -60,7 +72,7 @@ void n_evaluator_run(NEvaluator *self, NError *error) {
 
 NValue
 n_evaluator_get_register(NEvaluator *self, int index, NError *error) {
-    if (index < self->code_size) {
+    if (index < self->num_registers) {
         return self->registers[index];
     }
     else {
@@ -80,13 +92,60 @@ nt_construct_evaluator(NEvaluator* self, NInstructionWord* code,
     self->code = code;
     self->code_size = code_size;
     self->registers = registers;
+    self->num_registers = num_registers;
     self->pc = 0;
     self->halted = 0;
 }
 #endif /* N_TEST */
 
+static void
+set_register(NEvaluator *self, uint8_t index, NValue value, NError *error) {
+    if (index < self->num_registers) {
+        self->registers[index] = value;
+    }
+    else {
+        n_set_error(error, &INDEX_OO_BOUNDS, "The given index is larger "
+                    "than the number of addressable registers "
+                    "in this evaluator.", NULL, NULL);
+        return;
 
-static uint8_t
-get_current_opcode(NEvaluator *self) {
-    return n_decode_opcode((self->code+self->pc));
+    }
+
+}
+
+
+static int
+addition_would_overflow(NFixnum left, NFixnum right) {
+    return (left >= 0) ? right > (N_FIXNUM_MAX - left)
+                       : right < (N_FIXNUM_MIN - left);
+}
+
+
+static int
+do_op_add(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    NFixnum num1, num2;
+    int increment = n_decode_op_add(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+
+    if (addition_would_overflow(num1, num2)) {
+        n_set_error(error, &FIXNUM_OVERFLOW, "The addition would overflow.",
+                    NULL, NULL);
+        return 0;
+    }
+    set_register(self, dest, n_wrap_fixnum(num1 + num2), error);
+    return increment;
 }

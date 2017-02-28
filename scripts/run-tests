@@ -4,7 +4,7 @@ CC=clang CFLAGS="-std=c89 -O0 -Wall -Wextra -Wno-unused-parameter -Wno-unused-fu
 CC=clang CFLAGS="-std=c89 -O0 -Wall -Wextra -Wno-unused-parameter -Wno-unused-function" N_TEST=1 \
    N_DEBUG=1  ATEST_PREFIX=../atest/dist/ make test
 
-RUNNERS=$(find "build/test/" -name '*.run')
+RUNNERS=$(find "build/test/" -name '*.run' | sed 's_\(build/test/\w\w*\)/\(.*\)_\2 \1/\2_' | sort | sed 's_\(^[^ ]* \)__')
 REPORTS=""
 
 VERBOSE=""
