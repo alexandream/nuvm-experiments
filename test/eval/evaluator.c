@@ -3,7 +3,9 @@
 #include "../test.h"
 
 #include "common/errors.h"
+
 #include "common/instructions.h"
+
 #include "eval/evaluator.h"
 #include "eval/fixnum.h"
 

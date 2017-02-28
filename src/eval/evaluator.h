@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+#
 #include "../common/instruction-formats.h"
 #include "value.h"
 
@@ -11,9 +12,9 @@ typedef struct NEvaluator NEvaluator;
 
 struct NEvaluator {
     NInstructionWord *code;
-    size_t code_size;
+    int code_size;
     NValue *registers;
-    size_t registers_size;
+    int registers_size;
 
     int pc;
     int halted;
@@ -35,8 +36,7 @@ n_evaluator_get_register(NEvaluator *self, int index, NError *error);
 #ifdef N_TEST
 void
 nt_construct_evaluator(NEvaluator* self, NInstructionWord* code,
-                       size_t code_size, NValue* registers,
-                       size_t num_registers);
+                       int code_size, NValue* registers, int num_registers);
 
 #endif /* N_TEST */
 

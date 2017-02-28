@@ -67,17 +67,16 @@ n_evaluator_get_register(NEvaluator *self, int index, NError *error) {
         n_set_error(error, &INDEX_OO_BOUNDS, "The given index is larger "
                     "than the number of addressable registers "
                     "in this evaluator.", NULL, NULL);
+        return n_wrap_fixnum(-1);
 
     }
 }
 
 
 #ifdef N_TEST
-
 void
 nt_construct_evaluator(NEvaluator* self, NInstructionWord* code,
-                       size_t code_size, NValue* registers,
-                       size_t num_registers) {
+                       int code_size, NValue* registers, int num_registers) {
     self->code = code;
     self->code_size = code_size;
     self->registers = registers;
