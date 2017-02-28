@@ -3,9 +3,7 @@
 
 #include "../test.h"
 
-#define N_INSTRUCTIONS_IGNORE_DECODE
 #include "common/instructions.h"
-#undef N_INSTRUCTIONS_IGNORE_DECODE
 #include "common/compatibility/stdint.h"
 
 

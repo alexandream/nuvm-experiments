@@ -1,4 +1,3 @@
-#define N_INSTRUCTIONS_IGNORE_DECODE
 #include "instruction-formats.h"
 
 

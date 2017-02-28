@@ -1,7 +1,7 @@
 #!/bin/sh
-CC=clang CFLAGS="-std=c89 -O0 -Wextra -Wno-unused-parameter" N_TEST=1 \
+CC=clang CFLAGS="-std=c89 -O0 -Wall -Wextra -Wno-unused-parameter" N_TEST=1 \
    N_DEBUG=1  ATEST_PREFIX=../atest/dist/ make clean-tests
-CC=clang CFLAGS="-std=c89 -O0 -Wextra -Wno-unused-parameter" N_TEST=1 \
+CC=clang CFLAGS="-std=c89 -O0 -Wall -Wextra -Wno-unused-parameter" N_TEST=1 \
    N_DEBUG=1  ATEST_PREFIX=../atest/dist/ make test
 
 RUNNERS=$(find "build/test/" -name '*.run')

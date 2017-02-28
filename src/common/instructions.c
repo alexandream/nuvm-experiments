@@ -1,6 +1,4 @@
-#define N_INSTRUCTIONS_IGNORE_DECODE
 #include "instructions.h"
-#undef N_INSTRUCTIONS_IGNORE_DECODE
 
 #include "opcodes.h"
 
