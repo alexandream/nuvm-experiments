@@ -12,6 +12,9 @@ NErrorType INDEX_OO_BOUNDS =  { "nuvm.evaluator.IndexOutOfBounds", NULL };
 static
 NErrorType FIXNUM_OVERFLOW = { "nuvm.math.Overflow", NULL };
 
+static
+NErrorType DIV_BY_ZERO = { "nuvm.math.DivisionByZero", NULL };
+
 static int
 do_op_add(NEvaluator *self, NInstructionWord *code, NError *error);
 
@@ -20,6 +23,9 @@ do_op_sub(NEvaluator *self, NInstructionWord *code, NError *error);
 
 static int
 do_op_mul(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_div(NEvaluator *self, NInstructionWord *code, NError *error);
 
 int
 ni_init_evaluator(void) {
@@ -35,6 +41,11 @@ ni_init_evaluator(void) {
         return -2;
     }
     n_register_error_type(&FIXNUM_OVERFLOW, &error);
+    if (!n_is_ok(&error)) {
+        n_destroy_error(&error);
+        return -2;
+    }
+    n_register_error_type(&DIV_BY_ZERO, &error);
     if (!n_is_ok(&error)) {
         n_destroy_error(&error);
         return -2;
@@ -61,12 +72,14 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
         case N_OP_ADD:
             self->pc += do_op_add(self, words, error);
             break;
-		case N_OP_SUB:
-			self->pc += do_op_sub(self, words, error);
-			break;
-		case N_OP_MUL:
-			self->pc += do_op_mul(self, words, error);
-			break;
+        case N_OP_SUB:
+            self->pc += do_op_sub(self, words, error);
+            break;
+        case N_OP_MUL:
+            self->pc += do_op_mul(self, words, error);
+            break;
+        case N_OP_DIV:
+            self->pc += do_op_div(self, words, error);
         default: {
             self->halted = 1;
             break;
@@ -78,6 +91,9 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
 void n_evaluator_run(NEvaluator *self, NError *error) {
     while (! self->halted ) {
         n_evaluator_step(self, error);
+        if (!n_is_ok(error)) {
+            self->halted = 1;
+        }
     }
 }
 
@@ -120,9 +136,7 @@ set_register(NEvaluator *self, uint8_t index, NValue value, NError *error) {
                     "than the number of addressable registers "
                     "in this evaluator.", NULL, NULL);
         return;
-
     }
-
 }
 
 
@@ -135,28 +149,34 @@ addition_would_overflow(NFixnum left, NFixnum right) {
 
 static int
 subtraction_would_overflow(NFixnum left, NFixnum right) {
-	return (right == N_FIXNUM_MIN) ? left >= 0
-		                           : addition_would_overflow(left, -right);
+    return (right == N_FIXNUM_MIN) ? left >= 0
+                                   : addition_would_overflow(left, -right);
 }
 
 
 static int
 multiplication_would_overflow(NFixnum left, NFixnum right) {
-	int same_sign = !((left < 0) ^ (right < 0));
-	/* We can't have overflow if one of the operands is zero for the
-	 * result would then be zero. */
-	if (left == 0 || right == 0) return 0;
-	if (same_sign) {
-		return (left < 0) ? left < (N_FIXNUM_MAX / right)
-			              : left > (N_FIXNUM_MAX / right);
-	}
-	else {
-		/* if right == -1, the division would overflow, but then, we know
-		 * the multiplication wouldn't overflow because left would then
-		 * have to be positive, and any positive number can be made
-		 * negative without overflowing. */
-		return right == -1 || left < N_FIXNUM_MIN / right;
-	}
+    int same_sign = !((left < 0) ^ (right < 0));
+    /* We can't have overflow if one of the operands is zero for the
+     * result would then be zero. */
+    if (left == 0 || right == 0) return 0;
+    if (same_sign) {
+        return (left < 0) ? left < (N_FIXNUM_MAX / right)
+                          : left > (N_FIXNUM_MAX / right);
+    }
+    else {
+        /* if right == -1, the division would overflow, but then, we know
+         * the multiplication wouldn't overflow because left would then
+         * have to be positive, and any positive number can be made
+         * negative without overflowing. */
+        return right == -1 || left < N_FIXNUM_MIN / right;
+    }
+}
+
+
+static int
+division_would_overflow(NFixnum left, NFixnum right) {
+    return left == N_FIXNUM_MIN && right == -1;
 }
 
 
@@ -211,13 +231,14 @@ do_op_sub(NEvaluator *self, NInstructionWord *code, NError *error) {
     num2 = n_unwrap_fixnum(val2);
 
     if (subtraction_would_overflow(num1, num2)) {
-        n_set_error(error, &FIXNUM_OVERFLOW, "The addition would overflow.",
+        n_set_error(error, &FIXNUM_OVERFLOW, "The subtraction would overflow.",
                     NULL, NULL);
         return 0;
     }
     set_register(self, dest, n_wrap_fixnum(num1 - num2), error);
     return increment;
 }
+
 
 static int
 do_op_mul(NEvaluator *self, NInstructionWord *code, NError *error) {
@@ -240,10 +261,45 @@ do_op_mul(NEvaluator *self, NInstructionWord *code, NError *error) {
     num2 = n_unwrap_fixnum(val2);
 
     if (multiplication_would_overflow(num1, num2)) {
-        n_set_error(error, &FIXNUM_OVERFLOW, "The addition would overflow.",
-                    NULL, NULL);
+        n_set_error(error, &FIXNUM_OVERFLOW,
+                    "The multiplication would overflow.", NULL, NULL);
         return 0;
     }
     set_register(self, dest, n_wrap_fixnum(num1 * num2), error);
+    return increment;
+}
+
+
+static int
+do_op_div(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    NFixnum num1, num2;
+    int increment = n_decode_op_div(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+
+    if (num2 == 0) {
+        n_set_error(error, &DIV_BY_ZERO, "Division by zero.", NULL, NULL);
+        return 0;
+    }
+
+    if (division_would_overflow(num1, num2)) {
+        n_set_error(error, &FIXNUM_OVERFLOW, "The division would overflow.",
+                    NULL, NULL);
+        return 0;
+    }
+    set_register(self, dest, n_wrap_fixnum(num1 / num2), error);
     return increment;
 }
