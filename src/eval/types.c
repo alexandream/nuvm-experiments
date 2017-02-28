@@ -66,7 +66,8 @@ int ni_init_types() {
 
         construct_registry(&DEFAULT_REGISTRY, &error);
         if (!n_is_ok(&error)) {
-            return -2;
+            n_destroy_error(&error);
+            return -3;
         }
 
         {
@@ -74,7 +75,8 @@ int ni_init_types() {
             while(next_type->name != NULL) {
                 n_register_error_type(next_type, &error);
                 if (!n_is_ok(&error)) {
-                    return -3;
+                    n_destroy_error(&error);
+                    return -4;
                 }
                 next_type++;
             }
@@ -82,13 +84,15 @@ int ni_init_types() {
 
         ILLEGAL_ARGUMENT = n_error_type("nuvm.IllegalArgument", &error);
         if (!n_is_ok(&error)) {
-            return -4;
-        }
-        BAD_ALLOCATION = n_error_type("nuvm.BadAllocation", &error);
-        if (!n_is_ok(&error)) {
+            n_destroy_error(&error);
             return -5;
         }
 
+        BAD_ALLOCATION = n_error_type("nuvm.BadAllocation", &error);
+        if (!n_is_ok(&error)) {
+            n_destroy_error(&error);
+            return -6;
+        }
         INITIALIZED = 1;
     }
     return 0;
@@ -129,6 +133,7 @@ NTypeRegistry* nt_create_type_registry() {
 
     construct_registry(self, &error);
     if (!n_is_ok(&error)) {
+        n_destroy_error(&error);
         free(self);
         return NULL;
     }

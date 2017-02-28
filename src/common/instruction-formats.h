@@ -8,6 +8,7 @@
 typedef uint16_t NInstructionWord;
 
 
+#define n_decode_opcode(STREAM) ((uint8_t)((unsigned char*)STREAM[0]))
 int
 n_encode_instruction_4_4(NInstructionWord* stream, uint8_t opcode,
          uint8_t arg1, uint8_t arg2);
@@ -35,6 +36,7 @@ n_decode_instruction_4_4(NInstructionWord* stream, uint8_t* opcode,
 	*arg2 = bytes[1] & 0x0F;
     return 1;
 }
+
 
 
 static int

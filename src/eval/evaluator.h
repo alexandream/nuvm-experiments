@@ -16,6 +16,7 @@ struct NEvaluator {
     size_t registers_size;
 
     int pc;
+    int halted;
 };
 
 int

@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <stdio.h>
 #include "../test.h"
 
 #include "common/errors.h"
@@ -42,9 +42,18 @@ SETUP(setup) {
     nt_construct_evaluator(&EVAL, CODE, CODE_SIZE, REGISTERS, NUM_REGISTERS);
 }
 
-
 TEST(pc_starts_on_zero) {
     ASSERT(EQ_INT(EVAL.pc, 0));
+}
+
+
+TEST(index_error_is_registered) {
+    NError error = n_error_ok();
+    NErrorType* error_type =
+        n_error_type("nuvm.evaluator.IndexOutOfBounds", &error);
+
+    ASSERT(IS_TRUE(error_type != NULL));
+    ASSERT(IS_OK(error));
 }
 
 
@@ -68,16 +77,13 @@ TEST(step_halt_sets_halted) {
 }
 
 
-
 TEST(run_stops_on_halt) {
     NError error = n_error_ok();
+
     n_encode_op_nop(CODE);
     n_encode_op_nop(CODE+1);
     n_encode_op_nop(CODE+2);
     n_encode_op_halt(CODE+3);
-    n_encode_op_nop(CODE+4);
-    n_encode_op_nop(CODE+5);
-
     n_evaluator_run(&EVAL, &error);
 
     ASSERT(IS_OK(error));
@@ -94,7 +100,7 @@ TEST(get_register_gives_correct_value) {
     REGISTERS[3] = n_wrap_fixnum(99);
 
     value = n_evaluator_get_register(&EVAL, 3, &error);
-    
+
     ASSERT(IS_OK(error));
     ASSERT(EQ_INT(n_unwrap_fixnum(value), 99));
 }
@@ -104,16 +110,13 @@ TEST(get_register_gives_correct_value) {
 TEST(get_register_detects_out_of_range) {
     NError error = n_error_ok();
     n_evaluator_get_register(&EVAL, NUM_REGISTERS, &error);
-    
+
     ASSERT(IS_ERROR(error, "nuvm.evaluator.IndexOutOfBounds"));
 }
 
 
-
-
-
-
 AtTest* tests[] = {
+    &index_error_is_registered,
     &step_nop_increases_pc,
     &pc_starts_on_zero,
     &step_halt_sets_halted,
