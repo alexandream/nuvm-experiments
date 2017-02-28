@@ -4,7 +4,7 @@
 #include "../test.h"
 
 #include "common/instruction-formats.h"
-#include "common/instruction-decoders.h"
+#include "common/instruction-format-decoders.h"
 #include "common/compatibility/stdint.h"
 
 
