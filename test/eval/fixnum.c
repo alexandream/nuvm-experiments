@@ -3,10 +3,10 @@
 #include "../test.h"
 
 #include "common/errors.h"
-#include "eval/fixnum.h"
+#include "eval/values.h"
 
 CONSTRUCTOR(constructor) {
-    if (ni_init_fixnum() < 0) {
+    if (ni_init_values() < 0) {
         ERROR("Can't initialize fixnum module.", NULL);
     }
 }

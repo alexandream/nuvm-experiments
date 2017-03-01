@@ -3,9 +3,8 @@
 
 #include <stdlib.h>
 
-#
 #include "../common/instruction-formats.h"
-#include "value.h"
+#include "values.h"
 
 typedef struct NEvaluator NEvaluator;
 

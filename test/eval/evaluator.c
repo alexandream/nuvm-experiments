@@ -7,7 +7,7 @@
 #include "common/instructions.h"
 
 #include "eval/evaluator.h"
-#include "eval/fixnum.h"
+#include "eval/values.h"
 
 
 #define CODE_SIZE 16

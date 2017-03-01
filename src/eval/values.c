@@ -1,9 +1,9 @@
-#include "fixnum.h"
+#include "values.h"
 
 static NType _fixnum_type;
 
 int
-ni_init_fixnum() {
+ni_init_values() {
     NError error = n_error_ok();
 
     n_construct_type(&_fixnum_type, "nuvm.Fixnum");

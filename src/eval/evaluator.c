@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "evaluator.h"
-#include "fixnum.h"
 
 #include "../common/opcodes.h"
 #include "../common/instruction-decoders.h"
@@ -39,7 +38,7 @@ ni_init_evaluator(void) {
     if (ni_init_errors() < 0) {
         return -1;
     }
-    if (ni_init_fixnum() < 0) {
+    if (ni_init_values() < 0) {
         return -3;
     }
     n_register_error_type(&INDEX_OO_BOUNDS, &error);
