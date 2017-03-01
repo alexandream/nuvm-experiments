@@ -19,6 +19,12 @@ typedef struct {
 } FixnumBinopData;
 
 
+typedef struct {
+    uint8_t dest;
+    NFixnum value;
+} FixnumLoadData;
+
+
 static
 NInstructionWord CODE[CODE_SIZE];
 
@@ -56,6 +62,68 @@ SETUP(setup) {
 
 TEARDOWN(teardown) {
     n_destroy_error(&ERROR);
+}
+
+
+TEST(op_load_int4_increments_pc_by_1) {
+    n_encode_op_load_int4(CODE, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 1));
+}
+
+
+FixnumLoadData load4_array[] = {
+    { 0, 7 },
+    { 15, -8 },
+    { 3, 0 }
+};
+AtArrayIterator load4_iter = at_static_array_iterator(load4_array);
+DD_TEST(op_load4_loads_correct_value, load4_iter, FixnumLoadData, load) {
+    uint8_t dest = load->dest;
+    NFixnum value = load->value;
+    NFixnum result;
+
+    n_encode_op_load_int4(CODE, dest, value);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_unwrap_fixnum(n_evaluator_get_register(&EVAL, dest, &ERROR));
+    ASSERT(IS_OK(ERROR));
+
+    ASSERT(EQ_INT(result, value));
+}
+
+
+TEST(op_load_int16_increments_pc_by_2) {
+    n_encode_op_load_int16(CODE, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumLoadData load16_array[] = {
+    { 0, 32767 },
+    { 15, -32768 },
+    { 3, 0 }
+};
+AtArrayIterator load16_iter = at_static_array_iterator(load16_array);
+DD_TEST(op_load16_loads_correct_value, load16_iter, FixnumLoadData, load) {
+    uint8_t dest = load->dest;
+    NFixnum value = load->value;
+    NFixnum result;
+
+    n_encode_op_load_int16(CODE, dest, value);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_unwrap_fixnum(n_evaluator_get_register(&EVAL, dest, &ERROR));
+    ASSERT(IS_OK(ERROR));
+
+    ASSERT(EQ_INT(result, value));
 }
 
 
@@ -319,6 +387,11 @@ TEST(op_div_detects_div_by_zero) {
 
 
 AtTest* tests[] = {
+    &op_load_int4_increments_pc_by_1,
+    &op_load4_loads_correct_value,
+    &op_load_int16_increments_pc_by_2,
+    &op_load16_loads_correct_value,
+
     &op_add_increments_pc_by_2,
     &op_add_correctly_adds,
     &op_add_detects_overflow,

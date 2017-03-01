@@ -27,6 +27,11 @@ do_op_mul(NEvaluator *self, NInstructionWord *code, NError *error);
 static int
 do_op_div(NEvaluator *self, NInstructionWord *code, NError *error);
 
+static int
+do_op_load4(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_load16(NEvaluator *self, NInstructionWord *code, NError *error);
 int
 ni_init_evaluator(void) {
     NError error = n_error_ok();
@@ -34,7 +39,9 @@ ni_init_evaluator(void) {
     if (ni_init_errors() < 0) {
         return -1;
     }
-
+    if (ni_init_fixnum() < 0) {
+        return -3;
+    }
     n_register_error_type(&INDEX_OO_BOUNDS, &error);
     if (!n_is_ok(&error)) {
         n_destroy_error(&error);
@@ -80,6 +87,13 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
             break;
         case N_OP_DIV:
             self->pc += do_op_div(self, words, error);
+            break;
+        case N_OP_LOAD_INT4:
+            self->pc += do_op_load4(self, words, error);
+            break;
+        case N_OP_LOAD_INT16:
+            self->pc += do_op_load16(self, words, error);
+            break;
         default: {
             self->halted = 1;
             break;
@@ -301,5 +315,27 @@ do_op_div(NEvaluator *self, NInstructionWord *code, NError *error) {
         return 0;
     }
     set_register(self, dest, n_wrap_fixnum(num1 / num2), error);
+    return increment;
+}
+
+
+static int
+do_op_load4(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest;
+    int8_t value;
+    int increment = n_decode_op_load_int4(code, &dest, &value);
+    
+    set_register(self, dest, n_wrap_fixnum(value), error);
+    return increment;
+}
+
+
+static int
+do_op_load16(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest;
+    int16_t value;
+    int increment = n_decode_op_load_int16(code, &dest, &value);
+    
+    set_register(self, dest, n_wrap_fixnum(value), error);
     return increment;
 }
