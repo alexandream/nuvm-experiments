@@ -24,4 +24,7 @@ for R in ${RUNNERS}; do
 	REPORTS="${REPORTS} ${REPORT}"
 done
 
+if [ -n "${VERBOSE}" ]; then
+    echo "Running reporter."
+fi
 ../atest/dist/atreport ${REPORTS}

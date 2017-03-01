@@ -35,7 +35,7 @@ CONSTRUCTOR(constructor) {
 SETUP(setup) {
     int i;
     for (i = 0; i < CODE_SIZE; i++) {
-        n_encode_op_nop(&CODE[i]);
+        n_encode_op_nop(CODE+i);
     }
 
     for (i = 0; i < NUM_REGISTERS; i++) {
