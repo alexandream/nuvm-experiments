@@ -19,19 +19,17 @@ ni_init_fixnum() {
 
 NValue
 n_wrap_fixnum(NFixnum fixnum) {
-    NValue result = { &_fixnum_type, { 0 } };
-    result.alt.fixnum = fixnum;
-    return result;
+	return fixnum << 2;
 }
 
 
 NFixnum
 n_unwrap_fixnum(NValue value) {
-    return value.alt.fixnum;
+    return value >> 2;
 }
 
 
 int
 n_is_fixnum(NValue value) {
-    return value.type == &_fixnum_type;
+    return (value & ~0X3) == value;
 }
