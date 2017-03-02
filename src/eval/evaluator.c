@@ -31,6 +31,24 @@ do_op_load4(NEvaluator *self, NInstructionWord *code, NError *error);
 
 static int
 do_op_load16(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_load_bool(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_not(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_and(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_or(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_xor(NEvaluator *self, NInstructionWord *code, NError *error);
+
+
+
 int
 ni_init_evaluator(void) {
     NError error = n_error_ok();
@@ -92,6 +110,21 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
             break;
         case N_OP_LOAD_INT16:
             self->pc += do_op_load16(self, words, error);
+            break;
+        case N_OP_LOAD_BOOL:
+            self->pc += do_op_load_bool(self, words, error);
+            break;
+        case N_OP_NOT:
+            self->pc += do_op_not(self, words, error);
+            break;
+        case N_OP_AND:
+            self->pc += do_op_and(self, words, error);
+            break;
+        case N_OP_OR:
+            self->pc += do_op_or(self, words, error);
+            break;
+        case N_OP_XOR:
+            self->pc += do_op_xor(self, words, error);
             break;
         default: {
             self->halted = 1;
@@ -323,7 +356,7 @@ do_op_load4(NEvaluator *self, NInstructionWord *code, NError *error) {
     uint8_t dest;
     int8_t value;
     int increment = n_decode_op_load_int4(code, &dest, &value);
-    
+
     set_register(self, dest, n_wrap_fixnum(value), error);
     return increment;
 }
@@ -334,7 +367,119 @@ do_op_load16(NEvaluator *self, NInstructionWord *code, NError *error) {
     uint8_t dest;
     int16_t value;
     int increment = n_decode_op_load_int16(code, &dest, &value);
-    
+
     set_register(self, dest, n_wrap_fixnum(value), error);
+    return increment;
+}
+
+
+static int
+do_op_load_bool(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest;
+    uint8_t value;
+    int increment = n_decode_op_load_bool(code, &dest, &value);
+
+    set_register(self, dest, n_wrap_boolean(value), error);
+    return increment;
+}
+
+
+static int
+do_op_not(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest;
+    uint8_t arg;
+    NValue val;
+    NValue result;
+    int increment = n_decode_op_not(code, &dest, &arg);
+
+    val = n_evaluator_get_register(self, arg, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+    if (n_eq_values(val, N_TRUE)) {
+        result = N_FALSE;
+    }
+    else {
+        result = N_TRUE;
+    }
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_and(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    int left, right;
+    int increment = n_decode_op_and(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    left = n_unwrap_boolean(val1);
+    right = n_unwrap_boolean(val2);
+
+    set_register(self, dest, n_wrap_boolean(left & right), error);
+
+    return increment;
+}
+
+
+static int
+do_op_or(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    int left, right;
+    int increment = n_decode_op_or(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    left = n_unwrap_boolean(val1);
+    right = n_unwrap_boolean(val2);
+
+    set_register(self, dest, n_wrap_boolean(left | right), error);
+
+    return increment;
+}
+
+
+static int
+do_op_xor(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2;
+    int left, right;
+    int increment = n_decode_op_or(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    left = n_unwrap_boolean(val1);
+    right = n_unwrap_boolean(val2);
+
+    set_register(self, dest, n_wrap_boolean(left ^ right), error);
+
     return increment;
 }
