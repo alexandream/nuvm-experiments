@@ -66,7 +66,7 @@ TEST(sum_of_arithmetic_progression) {
     offset += n_encode_op_add(CODE+offset, 4, 4, 5);
     offset += n_encode_op_mul(CODE+offset, 3, 3, 4);
     offset += n_encode_op_halt(CODE+offset);
-    
+
     REGISTERS[0] = n_wrap_fixnum(1);
     REGISTERS[1] = n_wrap_fixnum(3);
     REGISTERS[2] = n_wrap_fixnum(20);
@@ -80,8 +80,32 @@ TEST(sum_of_arithmetic_progression) {
 }
 
 
+TEST(two_to_one_multiplex) {
+    int offset = 0;
+    NValue result;
+
+    offset += n_encode_op_not(CODE, 3, 0);
+    offset += n_encode_op_and(CODE+offset, 3, 3, 1);
+    offset += n_encode_op_and(CODE+offset, 4, 2, 0);
+    offset += n_encode_op_or(CODE+offset, 3, 3, 4);
+    offset += n_encode_op_halt(CODE+offset);
+
+    REGISTERS[0] = N_TRUE;
+    REGISTERS[1] = N_FALSE;
+    REGISTERS[2] = N_TRUE;
+
+    n_evaluator_run(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, 3, &ERROR);
+    ASSERT(IS_OK(ERROR));
+    ASSERT(IS_TRUE(n_eq_values(result, N_TRUE)));
+}
+
+
 AtTest* tests[] = {
     &sum_of_arithmetic_progression,
+    &two_to_one_multiplex,
     NULL
 };
 
