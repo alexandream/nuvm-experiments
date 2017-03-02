@@ -60,32 +60,32 @@ n_encode_op_div(NInstructionWord* words, uint8_t dest,
 
 int
 n_encode_op_load_bool(NInstructionWord *words, uint8_t dest, uint8_t val) {
-    return 0;
+    return n_encode_instruction_4_4(words, N_OP_LOAD_BOOL, dest, val);
 }
 
 
 int
 n_encode_op_not(NInstructionWord *words, uint8_t dest, uint8_t arg) {
-    return 0;
+    return n_encode_instruction_4_4(words, N_OP_NOT, dest, arg);
 }
 
 
 int
 n_encode_op_and(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_AND, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_or(NInstructionWord* words, uint8_t dest,
                uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_OR, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_xor(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_XOR, dest, arg1, arg2);
 }
