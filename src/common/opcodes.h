@@ -9,5 +9,9 @@
 #define N_OP_SUB        0x05
 #define N_OP_MUL        0x06
 #define N_OP_DIV        0x07
-
+#define N_OP_LOAD_BOOL  0x08
+#define N_OP_NOT        0x09
+#define N_OP_AND        0x0A
+#define N_OP_OR         0x0B
+#define N_OP_XOR        0x0C
 #endif /* N_C_OPCODES_H */
