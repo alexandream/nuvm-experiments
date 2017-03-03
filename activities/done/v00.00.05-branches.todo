@@ -1,0 +1,44 @@
+Target Version:
+  v00.00.05
+
+Target Description:
+  After this version we take a huge step towards being a machine
+  capable of executing interesting programs: we add support both for
+  conditional branches and unconditional jumps.
+
+  The result is not really useful yet because we don't have value
+  manipulation instructions nor a way to call primitive functions from
+  inside interpreted code, which limits what we can do with our data a
+  lot.
+
+  We add three new instructions to the machine: jump, which give us
+  unconditional flow control; jump-if which gives us conditional
+  branches; and jump-unless, which is just like jump-if but with its
+  condition negated.
+
+  The three instructions receive a signed argument representing the
+  offset to add to our current code-pointer if the jump is to be made.
+  There's a difference in the size of this argument, though: jump-if
+  and jump-unless also receive a local holding the value to test to
+  see if the branch should be taken, so they only have 16 bits to
+  encode the jump offset; jump, since it's unconditional, can use the
+  full 24bits to encode the offset.
+
+  For now we can't jump more than 32K instructions in either direction
+  with conditional jumps or around 80M instructions in either
+  direction with unconditional jumps, but I doubt it'll be a problem
+  for the current machine, regardless.
+
+Activity start:  2013-12-15 22:55
+Activity finish: 2013-12-16 00:07
+
+Target Tasks:
+  x Create instruction encoder for jump;
+  x Create instruction encoder for jump-if;
+  x Create instruction encoder for jump-unless;
+  x Create instruction behaviour for jump;
+  x Create instruction behaviour for jump-if;
+  x Create instruction behaviour for jump-unless;
+  x Add instructions to fetch-run-loop;
+  x Create sample test program (select between two registers);
+

@@ -1,0 +1,38 @@
+Target Version:
+  v00.00.10
+
+Target Description:
+  It's time to add new types to our machine again. This time it's all
+  about strings and their interned unique counterparts, symbols.
+
+  Even though the machine is supposed to deal with strings and symbols
+  by storing them in unicode's UTF-8 encoding, since most of the work
+  related to it is concerning library functions, for now it'll just
+  store byte arrays like conventional C strings.
+
+  Strings will have their type, a constructor going from C strings to
+  nuvm strings and a method that compares two strings for equality.
+  They are also are going to be immutable, but this is not
+  apparent right now for lack of library functions associated with it.
+
+  Symbols are pretty much strings, only they're unique for their
+  representation. That is, for a given string contents, there's only
+  one symbol instance that correspond to it, and all references to it
+  are equal among themselves. This is basically mapping a string
+  content to a unique value, so it can be used for faster lookups and
+  things like that.
+
+  Just like strings, symbols are immutable and have their own type, a
+  constructor that takes a C-string and returns a symbol and a method
+  to get the string contents of the symbol.
+
+
+Activity start:  2013-12-19 23:13
+Activity finish: 2013-12-21 23:14
+
+Target Tasks:
+  x Create type for strings;
+  x Create constructor for strings;
+  x Create accessor method is-equal;
+  x Create type for symbols;
+  x Create constructor for symbols;

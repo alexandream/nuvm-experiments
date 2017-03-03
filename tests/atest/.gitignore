@@ -2,8 +2,8 @@
 *.slo
 *.lo
 *.o
+*.d
 build/*
-test/runner
 
 # Compiled Dynamic libraries
 *.so
@@ -17,3 +17,7 @@ test/runner
 # Editor backup files.
 .*.swp
 *~
+
+# Test garbage
+/test/runner
+/runner.c

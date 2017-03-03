@@ -1,0 +1,45 @@
+Target Version:
+  v00.00.01
+
+Target Description:
+  The virtual machine is nowhere near a "machine" yet. It recognizes
+  one type of value (pointers, implemented through the NValue struct)
+  and is capable of running "programs" that consist solely of
+  returning a constant value stored in the program.
+
+  No virtual machine operations are supported so far, and programs
+  (implemented through the NModule struct) are simply a structure
+  wrapping a single register of type NValue, which represents the
+  value it will return.
+
+  To complete the interface needed to support the above mechanisms,
+  a simple error reporting convention will be used, of threading an
+  "error" variable to functions which can be modified to describe the
+  error resulting from the execution of the function, if any.
+
+  This version is absolutely useless, but gives us the following basic
+  results that are needed for future improvement: 
+
+  1) A representation for values, so far limited to pointers, but this
+     is easy to extended to other values, as we'll see in a couple
+     versions ahead;
+
+  2) A basic representation for our evaluator, which starts to define
+     the interface client code can use to manipulate it;
+
+  3) A simple representation for modules which can be used to
+     represent our programs (each program is a package of one or more
+     modules).
+
+  4) A nice infra-structure to perform tests on what we have so far.
+
+Activity start:  2013-12-09 02:00
+Activity finish: 2013-12-11 00:41
+
+Target Tasks:
+  x Create value representation of pointers (NValue);
+  x Create error representation (NError);
+  x Create representation for the programs (NModule);
+  x Create representation for the evaluator (NEvaluator);
+  x Create runner method for evaluator;
+

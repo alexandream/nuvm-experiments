@@ -1,0 +1,38 @@
+Target Version:
+  v00.00.08
+
+Target Description:
+  This version extends our machine to allow for calling primitives
+  passing more than one argument. In order to enable this, we need to
+  introduce handling of instructions that are not fixed size.
+
+  In order to indicate which of a caller's locals will compose the
+  arguments to the primitive we use a new instruction (call) which is
+  encoded as a series of instruction words (32 bits words), where the
+  first word is encoded as follows: 
+
+  [          opcode           ] uint8_t
+  [   arg1:  return storage   ] uint8_t
+  [ arg2: local for primitive ] uint8_t
+  [ arg3: number of arguments ] uint8_t
+
+  And the rest of the words are packs of 4 uint8_t arguments each,
+  where each argument defines a local to be passed as parameter.
+  Because of that, a call instruction is encoded in 1 +
+  ceiling(number-of-arguments/4) instruction words.
+
+Activity start:  2013-12-17 01:17
+Activity finish: 2013-12-17 15:48
+
+Target Tasks: 
+  x Update NInstruction to allow for another union case: words
+    of extra arguments;
+  x Update primitives to receive an array of arguments together with
+    the length of the array (argument count);
+  x Update call-sva to pass its parameters to primitives with a single
+    element array and argument count;
+  x Create encoder for the call instruction;
+  x Create behaviour of call instruction;
+  x Insert call instruction on the fetch-run loop;
+  x Write simple test program (integer addition with many arguments);
+  x write simple test program (binary less-than on integers);

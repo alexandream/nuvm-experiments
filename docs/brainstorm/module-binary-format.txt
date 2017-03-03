@@ -1,0 +1,18 @@
+Header:
+  Magic Number [8 bytes]:
+    <ESC>   : 0x1B
+    NUVM    : 0x4E 0x55 0x56 0x4D
+    Version : 3 bytes.
+  Host Description [8 bytes]:
+    Reserved: 8 bytes.
+  Module description:
+    Number of registers [2 bytes] (REG_COUNT);
+    Entry point [2 bytes];
+	Number of Initializers [2 bytes] (INIT_COUNT);
+    Number of Data Blocks  [4 bytes] (DATA_COUNT);
+    Number of Instructions [4 bytes] (INST_COUNT);
+  Initializer Segment (repeated INIT_COUNT times):
+    Register Index   [2 bytes];
+    Type Identifier  [2 bytes];
+    Data Block Index [4 bytes];
+  

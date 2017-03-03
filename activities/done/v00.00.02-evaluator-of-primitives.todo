@@ -1,0 +1,29 @@
+Target Version:
+  v00.00.02
+
+Target Description:
+  This version adds support for primitive procedures implemented in
+  the host to be called from our evaluator. Much like our previous
+  version, this is still a useless machine, although this time it's
+  able to do a little bit more than return constants.
+
+  To be able to identify the primitives as a special kind of pointer a
+  rudimentary type system is created so our pointers are now typed.
+  That means we'll have representations for types and a simple
+  registry of types to guarantee a consistent view of all types
+  present in the evaluator while at the same time uniquely identifying
+  each type with a type id.
+
+
+Activity start:  2013-12-11 10:52
+Activity finish: 2013-12-11 15:45
+
+Target Tasks:
+  x Create the representation for types;
+  x Create the registry of types;
+  x Create a representation and type representation for primitive
+    procedures;
+  x Update the evaluator to call the primitive when the entry point of
+    a module refers to a primitive, and return the result of the call
+    as the result of running the module.
+

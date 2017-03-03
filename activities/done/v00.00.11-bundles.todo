@@ -1,0 +1,65 @@
+Target Version:
+  v00.00.11
+
+Target Description:
+  Continuing with new data types to our machine, increasing our
+  vocabulary. This time we're adding Bundles, which are mere
+  dictionaries mapping from symbols to general values. Bundles are
+  similar to general maps or dictionaries but more limited in that
+  they only accept symbols as keys.
+
+  A bundle's main purpose is to map a module's public interface, and
+  to be able to do so are created and modified through new
+  instructions on the machine. This ensures that a module can expose a
+  bundle without depending on any other external library function.
+
+  A bundle is, at any time, on one of two states: open or closed.  It
+  is open during the process of setting its mappings, when it's a
+  write-only structure -- trying to read from it is an error. It then
+  gets closed by a bundle-close instruction and, from then on it's a
+  read-only structure -- trying to write on it is an error.
+
+  The interface to manipulate a bundle is defined as the following
+  instructions:
+
+  new-bundle: Takes a local index used to store the resulting bundle
+  and a number of slots that should be allocated in a bundle. Returns
+  a new open bundle with capacity for storing mapping for up to as much
+  slots as indicated;
+
+  bundle-set: Takes a local index pointing to the open bundle being
+  used, a local index pointing to the symbol being set and a local
+  index pointing to the value that should be set on the bundle. Trying
+  to set a value on a closed bundle is an error;
+
+  bundle-get: Takes a local index used to store the resulting value, a
+  local index pointing to the closed bundle being used and a local
+  index pointing to the symbol used as key. Returns the value stored
+  under that key in the bundle specified, Trying to get a value from
+  an open bundle is an error;
+
+  bundle-close: Takes a local index pointing to an open bundle and
+  turns it into a closed bundle. Trying to close an already closed
+  bundle does nothing;
+
+
+Activity start:  2013-12-21 23:21
+Activity finish: 2013-12-23 03:15
+
+Target Tasks:
+  x Create type for bundles;
+  x Create bundle constructor;
+  x Create bundle constructing instruction (new-bundle);
+  x Create bundle setter;
+  x Create bundle setter instruction (bundle-set);
+  x Create bundle close method;
+  x Create bundle close instruction (bundle-close);
+  x Create bundle getter;
+  x Create bundle getter instruction (bundle-get);
+  x Create instruction behavior for the instructions above;
+  x Sample program: Given 4 registers specifying symbols and 4
+    registers specifying values, return the bundle of 4 elements
+    composed of the pairs.
+  x Sample program: Given a bundle with 4 mappings and 4 symbols in
+    registers, substitute the value of the symbol registers for the
+    value mapped to that symbol in the bundle;

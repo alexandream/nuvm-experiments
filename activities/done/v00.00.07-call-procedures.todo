@@ -1,0 +1,72 @@
+Target Version:
+  v00.00.07
+
+Target Description:
+  This version adds support for procedures to call on other
+  procedures, still with the limitations of previous version: Only
+  with a single argument and returning only a single value.
+
+  This extends the call-sva instruction to allow for calling
+  procedures along with primitives. The evaluator structure now has to
+  be changed to accommodate returning from one procedure to its
+  caller (another procedure).
+
+  For that situation, we now get a stack that keeps track of the chain
+  of procedures being called, which needs to keep a pointer to which
+  instruction is to be executed after returning to the caller and
+  where to store the result of a return instruction when returning to
+  the caller.
+
+  There's also the need to maintain the locals of the current
+  procedure when transferring the control to the called procedure. For
+  all that we will use a stack of procedure frames, with the structure
+  detailed below: 
+
+  1) a reference to the caller procedure [NValue];
+  2) the code pointer at the moment of the call [uint32_t];
+  3) the caller local used to store return value [uint8_t];
+  4) the values of the callee's locals [many NValue];
+  5) the value of the argument passed to the callee;
+
+  Where each of these elements are composed of one (or more, in case
+  of locals) 64bits value in the stack of frames shown as below: 
+
+  [       callee  argument         ] NValue
+  [        callee local N          ] NValue
+                ...
+  [        callee local 2          ] NValue
+  [        callee local 1          ] NValue
+  [        callee local 0          ] NValue
+  [   number of locals in callee   ] uint8_t
+  [   caller return storage local  ] uint8_t
+  [      caller stack-pointer      ] uint32_t
+  [       caller code-pointer      ] uint32_t
+  [        caller procedure        ] NValue
+
+  Where addresses grow from bottom to top.
+
+  Along with the stack, the evaluator gets a new member to tell where
+  in the stack the frame of the currently executing procedure is,
+  called stack-pointer.
+
+  To finish it off, so we can detect when we're returning from the
+  entry-point procedure instead of simply returning to a previous
+  caller, the caller procedure of the first frame is set to undefined.
+  When a return instruction is asked to go back on a frame where the
+  caller is undefined, this signals the machine to halt.
+
+Activity start:  2013-12-16 13:40
+Activity finish: 2013-12-16 23:07
+
+Target Tasks: 
+  x Create the storage for the stack in the evaluator;
+  x Create the stack pointer member of the evaluator;
+  x Update execution of modules with procedures as entry point to store locals
+    in the stack and set up a halting stack frame;
+  x Update the return instruction to halt when finding a stack frame with
+    Undefined  as callee;
+  x Update the call-sva instruction to allow for calling procedures along
+    with primitives;
+  x Update the return instruction to actually return to a previous
+    procedure when it is executed on a stack frame with a real caller;
+  x Write a sample program that uses the procedure call implemented above;

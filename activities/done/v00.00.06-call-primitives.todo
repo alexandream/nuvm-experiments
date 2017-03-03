@@ -1,0 +1,38 @@
+Target Version:
+  v00.00.06
+
+Target Description:
+  This version adds support for procedures to call on primitives to
+  perform part of the work. For now it's somewhat more limited than
+  the final goal on grounds of the primitives being only able to take
+  a single parameter and returning a single value.
+
+  Nonetheless, with carefully chosen primitives we can start
+  performing meaningful computations. For example, with primitives for
+  integer increment, integer decrement and integer predicate to detect
+  zeroes, we can write a simple program to perform the sum of an
+  integer to a non-negative integer.
+
+  Since we're only calling primitives, without any way to call other
+  procedures we still don't have any need to record a stack of calls,
+  because we'll always be executing either the main procedure of the
+  module or the code of some primitive.
+
+  After this version we add a single instruction to our machine: 
+  call-sva, which stands for call-with-single-value-and-argument,
+  which for now is only capable of calling primitives.
+
+  The instruction call-sva takes three arguments: a local where to
+  store the result of the call, a local where to find the primitive
+  being called and a local storing the argument to be passed to the
+  primitive.
+
+Activity start:  2013-12-16 00:45
+Activity finish: 2013-12-16 01:31
+
+Target Tasks: 
+  x Create instruction encoding for call-sva;
+  x Create instruction behaviour for call-sva;
+  x Add the instruction to fetch-run-loop;
+  x Create sample test program (increment integer);
+

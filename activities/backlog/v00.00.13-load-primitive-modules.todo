@@ -1,0 +1,40 @@
+Target Version:
+  v00.00.12
+
+Target Description:
+  Now we pave the way to have a real loader on the machine, by adding
+  support to loading native modules -- that is, modules implemented by
+  shared objects implemented in the host language.
+
+  This is how we'll add support to the initial core functions of our
+  machine (like printing and reading input from console). This is also
+  where we start adding the biggest chunk of platform dependent code
+  yet. Current implementation will focus on my development machine,
+  running Linux, but the plan is to make this somewhat cross platform
+  later.
+
+  Representation of a native module is simple: We have a shared object
+  that exposes a single function representing its entry point.  This
+  entry point function is supposed to return a value usable by the
+  machine -- usually a bundle mapping symbols to other values.
+
+  Together with the representation of a native module we add a new
+  instruction, load, that takes the index of a local it'll use to
+  store the loaded value and a local having a string naming what
+  entity must be loaded.
+
+  For now, there'll be a simple hard coded implementation of a loader
+  function that'll load shared objects by file name on a predefined
+  folder. Eventually we'll generalize this to handle more cases and be
+  pluggable for different hosts.
+
+Activity start:  2014-01-30 00:11
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  - Create loader function for loading shared objects from libs
+    folder;
+  - Create version checker function for modules to check
+    compatibility;
+  - Create dynamic mapper to fill the pointers to host functions;
+
