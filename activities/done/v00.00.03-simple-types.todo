@@ -1,0 +1,42 @@
+Target Version:
+  v00.00.03
+
+Target Description:
+  With this version we start having more types to our machine, so we
+  can start perform some actual calculations with it. Those
+  calculations are still very primitive since we have no way to pass
+  more than one argument to a procedure and we don't have any way to
+  perform conditional processing.
+
+  Nonetheless, this version adds support for 32bit signed integers,
+  64bits double precision floating point numbers, characters and
+  booleans. We also throw in some functions to act on those in
+  order to test the machine, but those are crude and not meant for
+  real usage thu far.
+
+  After this, we have:
+  1) a representation for 32bit (fixnum) signed integers;
+  2) a representation for boolean values;
+  3) a representation for 64bits double precision floating point
+     numbers (flonum);
+  4) successor and predecessor primtives for fixnums and flonums;
+  5) negate primitive for fixnums and flonums;
+  6) is_positive, is_zero and is_negative primitives for fixnums and
+     flonums;
+  7) logical not function for booleans;
+
+
+Activity start:  2013-09-15 23:08
+Activity finish: 2013-09-17 01:40
+
+Target Tasks: 
+  x Fields and tags for fixnums on nuvm_value_t;
+  x Create the two singleton pointer values for boolean (true and false);
+  x Fields and tags for flonums on nuvm_value_t;
+  x Primitive "successor", flonum and fixnum;
+  x Primitive "predecessor", flonum and fixnum;
+  x Primitive "negate", flonum and fixnum;
+  x Primitive "is_positive" for fixnums and flonums;
+  x Primitive "is_negative" for fixnums and flonums;
+  x Primitive "is_zero" for fixnums and flonums;
+  x Primitive "not" for booleans; 

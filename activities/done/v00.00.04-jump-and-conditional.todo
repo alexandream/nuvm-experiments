@@ -1,0 +1,75 @@
+Target Version:
+  v00.00.04
+
+Target Description:
+  This version finally makes the machine able to compute things that
+  are non-trivial, by adding support to conditional statements and
+  jumps. Although our capabilities are still very limited, now we can,
+  for instance, write a simple number adder by using the primitives we
+  already had on the previous version.
+  
+  The first instruction introduced is the _jump_. It's a simple
+  instruction: It receives an offset relative to the current code
+  pointer indicating where the computation should continue. After its
+  execution and change of code pointer, no extra increment is added to
+  the code pointer.
+
+  The way it is encoded is as follows: 
+  1) it is a single-word instruction;
+  2) it takes a single 24bits unsigned int argument encoded with the
+     last 3 bytes of the instruction (other than the opcode);
+  
+  And it works by following the strategy below: 
+  1) decode the real offset. This is a signed integer obtained by
+     decoding the 24 bits signed integer and extending signal bit
+     to the left as necessary;
+  2) the real offset computed in (1) is then added to the current code
+     pointer.
+  
+  The second and third instructions introduced are _jump-if_ and
+  _jump-unless_. Those receive a local and a 16bits signed integer as 
+  arguments and use the integer as an offset just like _jump_, but
+  jumping only in case the value stored in the local is, respectively,
+  different from boolean false or equal to boolean false.
+  
+  Note that, while _jump_ uses a biased signed integer that has to be
+  decoded, _jump-if_ and _jump-unless_ both receive its argument already
+  signed, so there's no need for further decoding.
+
+  For now the machine has no instruction able to jump the entirety of
+  the available code segment for the module (which can use address of
+  up to 32bits), but that's not really a problem since we're not
+  supposed to be jumping in and out of procedures. For its current
+  purposes I doubt we'll ever have functions spanning more than 80
+  million instruction-words. Conditional jumps have an even smaller
+  range, but in case bigger range is needed we can always trampoline a
+  conditional jump right through to an unconditional jump.
+
+  At the end of this version we have three new instructions to our
+  evaluator: 
+  
+  1) jump: takes a 24 bits signed number argument (offset) and adds
+           that offset to the current code pointer;
+  2) jump-if: takes a local (condition) and a 16 bits signed number
+              argument (offset) and adds the offset to the current
+              code pointer if the value stored at condition is
+              different from boolean false;
+  3) jump-unless: takes a local (condition) and a 16 bits signed
+                  number argument (offset) and adds the offset to the
+                  current code pointer if the value stored at
+                  condition is equal to boolean false;
+    
+Activity start:  2013-09-17 01:43
+Activity finish: 2013-09-23 13:26
+
+Target Tasks: 
+  x Adjust Evaluator to be more testable;
+  x Create instruction encoder for jump;
+  x Create instruction encoder for jump-if;
+  x Create instruction encoder for jump-unless;
+  x Create instruction behaviour for jump;
+  x Create instruction behaviour for jump-if;
+  x Create instruction behaviour for jump-unless;
+  x Add instructions to fetch-run-loop;
+  x Create sample test program (integer adder);
+

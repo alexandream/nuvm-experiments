@@ -1,0 +1,60 @@
+Target Version:
+  v00.00.05
+
+Target Description:
+  This version adds support to arity (number of arguments) bigger than
+  one for primitive procedures. For now, this support is quite simple,
+  since we still can't call interpreted procedures on our own
+  (_sva-call_ so far only handles primitives).
+  
+  For that we need a new instruction (_call_), which works pretty much
+  like _sva-call_, but is our first variable-length instruction. That
+  means that, unlike our previous instructions that could always be
+  properly fetched and processed by reading a single 4bytes word from
+  our code segment, _call_ needs to figure out how many instruction
+  words compose its body and load additional parameters fetching from
+  the code segment during execution.
+  
+  To go along with this we add a new batch of simple primitives to handle
+  operations with more than one parameter, these primitives are:
+  1) add2 fixnum, takes two fixnums and returns their sum;
+  2) add4 fixnum, like (1), but it takes 4 fixnums;
+  3) add flonums, takes two flonums and returns their sum
+  4) or, takes two booleans and return the result of logical or
+     operation on them;
+  5) and, takes two booleans and return the result of logical and
+     operation on them;
+  
+  The _call_ instruction is encoded as follows: 
+  1) The first 4 byte word in the instruction are thus: 
+    1) the instruction opcode;
+    2) the local used to store the result of the call;
+    3) the local where the primitive is stored;
+    4) an 8 bit number saying how many arguments we're passing;
+  2) The next 4 byte words used to encode the instruction are divided
+     into four 1-byte arguments that say which local holds the
+     argument we're passing;
+  3) For each group (or portion of a group, for the last one) of 4
+     arguments we need another word such as that in (2) to encode the
+     arguments;
+  
+  After running the _call_ instruction, the code pointer is
+  incremented by the total number of words used to encode the
+  instruction.
+
+  This adds the following elements to our virtual machine: 
+  1) a set of primitives that manipulate our basic types, for testing;
+  2) a new instruction that gives us room calling primitives with more
+     than one argument;
+
+Activity start:  2013-09-23 17:33
+Activity finish: 2013-09-24 01:40
+
+Target Tasks:
+  x Create encoder and decoder for op_call header;
+  x Create encoder and decoder for extra_args view;
+  x Update primitives to allow for more arguments;
+  x Create instruction behaviour for call;
+  x Add call to fetch-run-loop;
+  x Create variadic primitive (add) for fixnums and flonums;
+  x Create variadic primitives (and, or) for booleans;

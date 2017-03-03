@@ -1,0 +1,55 @@
+Target Version:
+  v00.00.06
+
+Target Description:
+  With this version now we finally have the capability of representing
+  and using strings and symbols. Those are always encoded as UTF-8, at
+  least for now, but that shouldn't really matter because we won't be
+  having many operations on them for a while.
+
+  Symbols here are just strings that have only one representation for
+  each and every instance containing the same characters and are
+  instantiated, for now, by calling a new instruction called
+  _new-symbol_. This instruction takes a string and returns a symbol
+  which is guaranteed to be unique among other symbols and the same
+  for every execution of the string given the same string as argument.
+
+  Along with those two types we add a few primitives: 
+  1) string_length: takes a string as argument and returns its length
+     in characters (though it's "bugged" for now, since we should
+     really take the utf-8 encoding in consideration, which we do
+     not);
+  2) is_same: takes two values and compares to see if they're the
+     "same" value, that is, if they have the exact same representation
+     on the machine, including memory addresses.
+
+  The encoding of the _new-symbol_ instruction is as follows:
+  1) The first byte, as always, is the opcode;
+  2) The second byte encodes the local where it should store the
+     symbol;
+  3) The third byte encodes the local where the string used to create
+     the symbol is stored; 
+  
+  This adds the following elements to our virtual machine: 
+  1) A new representation for string objects;
+  2) A new representation for symbol objects;
+  3) A new instruction capable of turning strings into symbols;
+  4) A primitive that allows us to compute the size of a string;
+  5) A primitive that allows os to check equality of representation of
+     values;
+
+
+Activity start:  2013-09-28 19:30
+Activity finish: xxxx-xx-xx xx:xx
+
+Target Tasks: 
+  x Create a type and constructor for strings;
+  x Create string equality tester;
+  x Create a type and constructor for symbols;
+  x Create encoder and decoder for new-symbol instruction;
+  x Create behaviour for new-symbol instruction;
+  x Add new-symbol to fetch-run loop.
+  - Create primitive for string equality tester;
+  - Create primitive for string length accessor;
+  - Create primitive for is_same;
+
