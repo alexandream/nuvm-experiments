@@ -288,7 +288,7 @@ TEST(encode_eq_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_eq(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_EQ));
 }
 
 
@@ -327,7 +327,7 @@ TEST(encode_neq_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_neq(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_NEQ));
 }
 
 
@@ -366,7 +366,7 @@ TEST(encode_lt_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_lt(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_LT));
 }
 
 
@@ -405,7 +405,7 @@ TEST(encode_lte_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_lte(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_LTE));
 }
 
 
@@ -445,7 +445,7 @@ TEST(encode_gt_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_gt(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_GT));
 }
 
 
@@ -484,7 +484,7 @@ TEST(encode_gte_has_right_opcode) {
     unsigned char* bytes = (unsigned char*) words;
     n_encode_op_gte(words, 0, 0, 0);
 
-    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+    ASSERT(EQ_UINT(bytes[0], N_OP_GTE));
 }
 
 

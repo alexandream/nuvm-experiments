@@ -522,7 +522,7 @@ FixnumBinopData lte_array[] = {
     { N_FIXNUM_MAX, 0, 0 },
     { N_FIXNUM_MAX, N_FIXNUM_MIN, 0 },
     { 0, 0, 1 },
-    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 1 },
     { N_FIXNUM_MIN, 0, 1 },
     { N_FIXNUM_MIN, N_FIXNUM_MAX, 1 }
 };
@@ -605,7 +605,7 @@ FixnumBinopData gte_array[] = {
     { N_FIXNUM_MAX, 0, 1 },
     { N_FIXNUM_MAX, N_FIXNUM_MIN, 1 },
     { 0, 0, 1 },
-    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 1 },
     { N_FIXNUM_MIN, 0, 0 },
     { N_FIXNUM_MIN, N_FIXNUM_MAX, 0 }
 };
@@ -653,23 +653,23 @@ AtTest* tests[] = {
     &op_div_detects_overflow,
     &op_div_detects_div_by_zero,
 
-	&op_eq_increments_pc_by_2,
-	&op_eq_respects_relations,
+    &op_eq_increments_pc_by_2,
+    &op_eq_respects_relations,
 
-	&op_neq_increments_pc_by_2,
-	&op_neq_respects_relations,
+    &op_neq_increments_pc_by_2,
+    &op_neq_respects_relations,
 
-	&op_lt_increments_pc_by_2,
-	&op_lt_respects_relations,
+    &op_lt_increments_pc_by_2,
+    &op_lt_respects_relations,
 
-	&op_lte_increments_pc_by_2,
-	&op_lte_respects_relations,
+    &op_lte_increments_pc_by_2,
+    &op_lte_respects_relations,
 
-	&op_gt_increments_pc_by_2,
-	&op_gt_respects_relations,
+    &op_gt_increments_pc_by_2,
+    &op_gt_respects_relations,
 
-	&op_gte_increments_pc_by_2,
-	&op_gte_respects_relations,
+    &op_gte_increments_pc_by_2,
+    &op_gte_respects_relations,
     NULL
 };
 

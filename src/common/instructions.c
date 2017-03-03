@@ -61,42 +61,42 @@ n_encode_op_div(NInstructionWord* words, uint8_t dest,
 int
 n_encode_op_eq(NInstructionWord* words, uint8_t dest,
                uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_EQ, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_neq(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_NEQ, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_lt(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_LT, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_lte(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_LTE, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_gt(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_GT, dest, arg1, arg2);
 }
 
 
 int
 n_encode_op_gte(NInstructionWord* words, uint8_t dest,
                 uint8_t arg1, uint8_t arg2) {
-    return 0;
+    return n_encode_instruction_8_8_8(words, N_OP_GTE, dest, arg1, arg2);
 }
 
 

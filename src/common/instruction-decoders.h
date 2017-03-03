@@ -61,42 +61,48 @@ n_decode_op_div(NInstructionWord* words, uint8_t *dest,
 static int
 n_decode_op_eq(NInstructionWord* words, uint8_t *dest,
                uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 
 static int
 n_decode_op_neq(NInstructionWord* words, uint8_t *dest,
                 uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 
 static int
 n_decode_op_lt(NInstructionWord* words, uint8_t *dest,
                 uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 
 static int
 n_decode_op_lte(NInstructionWord* words, uint8_t *dest,
                 uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 
 static int
 n_decode_op_gt(NInstructionWord* words, uint8_t *dest,
                 uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 
 static int
 n_decode_op_gte(NInstructionWord* words, uint8_t *dest,
                 uint8_t *arg1, uint8_t *arg2) {
-    return 0;
+    uint8_t opcode;
+    return n_decode_instruction_8_8_8(words, &opcode, dest, arg1, arg2);
 }
 
 

@@ -27,6 +27,24 @@ static int
 do_op_div(NEvaluator *self, NInstructionWord *code, NError *error);
 
 static int
+do_op_eq(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_neq(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_lt(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_lte(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_gt(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
+do_op_gte(NEvaluator *self, NInstructionWord *code, NError *error);
+
+static int
 do_op_load4(NEvaluator *self, NInstructionWord *code, NError *error);
 
 static int
@@ -104,6 +122,24 @@ void n_evaluator_step(NEvaluator *self, NError *error) {
             break;
         case N_OP_DIV:
             self->pc += do_op_div(self, words, error);
+            break;
+        case N_OP_EQ:
+            self->pc += do_op_eq(self, words, error);
+            break;
+        case N_OP_NEQ:
+            self->pc += do_op_neq(self, words, error);
+            break;
+        case N_OP_LT:
+            self->pc += do_op_lt(self, words, error);
+            break;
+        case N_OP_LTE:
+            self->pc += do_op_lte(self, words, error);
+            break;
+        case N_OP_GT:
+            self->pc += do_op_gt(self, words, error);
+            break;
+        case N_OP_GTE:
+            self->pc += do_op_gte(self, words, error);
             break;
         case N_OP_LOAD_INT4:
             self->pc += do_op_load4(self, words, error);
@@ -347,6 +383,150 @@ do_op_div(NEvaluator *self, NInstructionWord *code, NError *error) {
         return 0;
     }
     set_register(self, dest, n_wrap_fixnum(num1 / num2), error);
+    return increment;
+}
+
+
+static int
+do_op_eq(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    result = n_wrap_boolean(n_eq_values(val1, val2));
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_neq(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    result = n_wrap_boolean(!n_eq_values(val1, val2));
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_lt(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    NFixnum num1, num2;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+    result = n_wrap_boolean(num1 < num2);
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_lte(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    NFixnum num1, num2;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+    result = n_wrap_boolean(num1 <= num2);
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_gt(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    NFixnum num1, num2;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+    result = n_wrap_boolean(num1 > num2);
+    set_register(self, dest, result, error);
+    return increment;
+}
+
+
+static int
+do_op_gte(NEvaluator *self, NInstructionWord *code, NError *error) {
+    uint8_t dest, arg1, arg2;
+    NValue val1, val2, result;
+    NFixnum num1, num2;
+    int increment = n_decode_op_eq(code, &dest, &arg1, &arg2);
+
+    val1 = n_evaluator_get_register(self, arg1, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    val2 = n_evaluator_get_register(self, arg2, error);
+    if (!n_is_ok(error)) {
+        return 0;
+    }
+
+    num1 = n_unwrap_fixnum(val1);
+    num2 = n_unwrap_fixnum(val2);
+    result = n_wrap_boolean(num1 >= num2);
+    set_register(self, dest, result, error);
     return increment;
 }
 
