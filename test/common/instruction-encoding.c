@@ -283,6 +283,241 @@ TEST(decode_div_reverts_encode) {
 }
 
 
+TEST(encode_eq_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_eq(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_eq_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_eq(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_eq_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_eq(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_eq_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_eq(words, arg1, arg2, arg3);
+    n_decode_op_eq(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
+TEST(encode_neq_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_neq(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_neq_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_neq(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_neq_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_neq(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_neq_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_neq(words, arg1, arg2, arg3);
+    n_decode_op_neq(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
+TEST(encode_lt_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_lt(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_lt_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_lt(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_lt_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_lt(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_lt_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_lt(words, arg1, arg2, arg3);
+    n_decode_op_lt(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
+TEST(encode_lte_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_lte(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_lte_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_lte(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_lte_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_lte(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_lte_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_lte(words, arg1, arg2, arg3);
+    n_decode_op_lte(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
+
+TEST(encode_gt_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_gt(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_gt_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_gt(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_gt_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_gt(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_gt_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_gt(words, arg1, arg2, arg3);
+    n_decode_op_gt(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
+TEST(encode_gte_has_right_opcode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    unsigned char* bytes = (unsigned char*) words;
+    n_encode_op_gte(words, 0, 0, 0);
+
+    ASSERT(EQ_UINT(bytes[0], N_OP_DIV));
+}
+
+
+TEST(encode_gte_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    int used_words = n_encode_op_gte(words, 0, 0, 0);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_gte_uses_two_words) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1, arg2, arg3;
+    uint8_t used_words = n_decode_op_gte(words, &arg1, &arg2, &arg3);
+
+    ASSERT(EQ_INT(used_words, 2));
+}
+
+
+TEST(decode_gte_reverts_encode) {
+    NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
+    uint8_t arg1 =123, arg2 = 213, arg3 = 11;
+    uint8_t d_arg1, d_arg2, d_arg3;
+    n_encode_op_gte(words, arg1, arg2, arg3);
+    n_decode_op_gte(words, &d_arg1, &d_arg2, &d_arg3);
+
+    ASSERT(EQ_UINT(d_arg1, arg1));
+    ASSERT(EQ_UINT(d_arg2, arg2));
+    ASSERT(EQ_UINT(d_arg3, arg3));
+}
+
+
 TEST(encode_load_bool_has_right_opcode) {
     NInstructionWord words[N_MAX_INSTRUCTION_WORDS];
     unsigned char* bytes = (unsigned char*) words;
@@ -512,6 +747,36 @@ AtTest* tests[] = {
     &encode_div_uses_two_words,
     &decode_div_uses_two_words,
     &decode_div_reverts_encode,
+
+    &encode_eq_has_right_opcode,
+    &encode_eq_uses_two_words,
+    &decode_eq_uses_two_words,
+    &decode_eq_reverts_encode,
+
+    &encode_neq_has_right_opcode,
+    &encode_neq_uses_two_words,
+    &decode_neq_uses_two_words,
+    &decode_neq_reverts_encode,
+
+    &encode_lt_has_right_opcode,
+    &encode_lt_uses_two_words,
+    &decode_lt_uses_two_words,
+    &decode_lt_reverts_encode,
+
+    &encode_lte_has_right_opcode,
+    &encode_lte_uses_two_words,
+    &decode_lte_uses_two_words,
+    &decode_lte_reverts_encode,
+
+    &encode_gt_has_right_opcode,
+    &encode_gt_uses_two_words,
+    &decode_gt_uses_two_words,
+    &decode_gt_reverts_encode,
+
+    &encode_gte_has_right_opcode,
+    &encode_gte_uses_two_words,
+    &decode_gte_uses_two_words,
+    &decode_gte_reverts_encode,
 
     &encode_load_bool_has_right_opcode,
     &encode_load_bool_uses_one_word,

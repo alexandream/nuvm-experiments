@@ -385,6 +385,251 @@ TEST(op_div_detects_div_by_zero) {
 }
 
 
+TEST(op_eq_increments_pc_by_2) {
+    n_encode_op_eq(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData eq_array[] = {
+    { 123, 123, 1 },
+    { N_FIXNUM_MAX, 0, 0 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 0 },
+    { 0, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 1 },
+    { N_FIXNUM_MIN, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 0 }
+};
+AtArrayIterator eq_iter = at_static_array_iterator(eq_array);
+DD_TEST(op_eq_respects_relations, eq_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_eq(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
+
+
+TEST(op_neq_increments_pc_by_2) {
+    n_encode_op_neq(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData neq_array[] = {
+    { 123, 123, 0 },
+    { N_FIXNUM_MAX, 0, 1 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 1 },
+    { 0, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 1 }
+};
+AtArrayIterator neq_iter = at_static_array_iterator(neq_array);
+DD_TEST(op_neq_respects_relations, neq_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_neq(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
+
+
+TEST(op_lt_increments_pc_by_2) {
+    n_encode_op_lt(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData lt_array[] = {
+    { 123, 123, 0 },
+    { N_FIXNUM_MAX, 0, 0 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 0 },
+    { 0, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 1 }
+};
+AtArrayIterator lt_iter = at_static_array_iterator(lt_array);
+DD_TEST(op_lt_respects_relations, lt_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_lt(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
+
+
+TEST(op_lte_increments_pc_by_2) {
+    n_encode_op_lte(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData lte_array[] = {
+    { 123, 123, 1 },
+    { N_FIXNUM_MAX, 0, 0 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 0 },
+    { 0, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 1 }
+};
+AtArrayIterator lte_iter = at_static_array_iterator(lte_array);
+DD_TEST(op_lte_respects_relations, lte_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_lte(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
+
+
+TEST(op_gt_increments_pc_by_2) {
+    n_encode_op_gt(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData gt_array[] = {
+    { 123, 123, 0 },
+    { N_FIXNUM_MAX, 0, 1 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 1 },
+    { 0, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 0 }
+};
+AtArrayIterator gt_iter = at_static_array_iterator(gt_array);
+DD_TEST(op_gt_respects_relations, gt_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_gt(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
+
+
+
+TEST(op_gte_increments_pc_by_2) {
+    n_encode_op_gte(CODE, 0, 0, 0);
+    n_evaluator_step(&EVAL, &ERROR);
+
+    ASSERT(IS_OK(ERROR));
+    ASSERT(EQ_INT(EVAL.pc, 2));
+}
+
+
+FixnumBinopData gte_array[] = {
+    { 123, 123, 1 },
+    { N_FIXNUM_MAX, 0, 1 },
+    { N_FIXNUM_MAX, N_FIXNUM_MIN, 1 },
+    { 0, 0, 1 },
+    { N_FIXNUM_MIN, N_FIXNUM_MIN, 0 },
+    { N_FIXNUM_MIN, 0, 0 },
+    { N_FIXNUM_MIN, N_FIXNUM_MAX, 0 }
+};
+AtArrayIterator gte_iter = at_static_array_iterator(gte_array);
+DD_TEST(op_gte_respects_relations, gte_iter, FixnumBinopData, binop) {
+    uint8_t dest = 0;
+    uint8_t arg1 = 1;
+    uint8_t arg2 = 2;
+    NFixnum val1 = binop->val1;
+    NFixnum val2 = binop->val2;
+    NValue expected = n_wrap_boolean(binop->expected);
+    NValue result;
+
+    REGISTERS[arg1] = n_wrap_fixnum(val1);
+    REGISTERS[arg2] = n_wrap_fixnum(val2);
+
+    n_encode_op_gte(CODE, dest, arg1, arg2);
+    n_evaluator_step(&EVAL, &ERROR);
+    ASSERT(IS_OK(ERROR));
+
+    result = n_evaluator_get_register(&EVAL, dest, &ERROR);
+
+    ASSERT(IS_TRUE(n_eq_values(result, expected)));
+}
 AtTest* tests[] = {
     &op_load_int4_increments_pc_by_1,
     &op_load4_loads_correct_value,
@@ -407,6 +652,24 @@ AtTest* tests[] = {
     &op_div_correctly_divides,
     &op_div_detects_overflow,
     &op_div_detects_div_by_zero,
+
+	&op_eq_increments_pc_by_2,
+	&op_eq_respects_relations,
+
+	&op_neq_increments_pc_by_2,
+	&op_neq_respects_relations,
+
+	&op_lt_increments_pc_by_2,
+	&op_lt_respects_relations,
+
+	&op_lte_increments_pc_by_2,
+	&op_lte_respects_relations,
+
+	&op_gt_increments_pc_by_2,
+	&op_gt_respects_relations,
+
+	&op_gte_increments_pc_by_2,
+	&op_gte_respects_relations,
     NULL
 };
 
